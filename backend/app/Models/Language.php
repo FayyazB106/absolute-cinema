@@ -14,11 +14,11 @@ class Language extends Model
     ];
 
     /**
-     * Relationship: An Actor can appear in many Movies.
+     * Relationship: An Language can be in many Movies.
      */
     public function movies(): BelongsToMany
     {
-        // Laravel looks for actor_movie table by default
+        // Laravel looks for language_movie table by default
         return $this->belongsToMany(Movie::class);
     }
 }

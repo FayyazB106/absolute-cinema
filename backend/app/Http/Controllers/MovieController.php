@@ -5,14 +5,14 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Movie;
 
-class MovieManagementController extends Controller
+class MovieController extends Controller
 {
     // Get all movies with relationships
     public function index()
     {
         try {
             $movies = Movie::with(['audioLanguages', 'genres', 'actors', 'directors'])
-                ->orderBy('created_at', 'desc')
+                ->orderBy('name_en', 'asc')
                 ->get();
 
             return response()->json($movies);
@@ -34,7 +34,7 @@ class MovieManagementController extends Controller
                 'directors',
                 'audioLanguages',
                 'subtitles',
-                'maturity',
+                'maturity_ratings',
                 'status'
             ])->findOrFail($id);
 
@@ -60,7 +60,7 @@ class MovieManagementController extends Controller
                 'actors' => \App\Models\Actor::all(),
                 'directors' => \App\Models\Director::all(),
                 'languages' => \App\Models\Language::all(),
-                'maturities' => \App\Models\Maturity::all(),
+                'maturity_ratings' => \App\Models\MaturityRating::all(),
                 'statuses' => \App\Models\Status::all(),
             ]);
         } catch (\Exception $e) {
@@ -83,7 +83,7 @@ class MovieManagementController extends Controller
                 'desc_ar' => 'required|string',
                 'release_date' => 'required|date',
                 'duration' => 'nullable|integer|min:0',
-                'maturity_id' => 'required|exists:maturities,id',
+                'maturity_id' => 'required|exists:maturity_ratings,id',
                 'status_id' => 'required|exists:statuses,id',
                 'imdb_url' => 'nullable|url',
                 // Pivot IDs
@@ -166,7 +166,7 @@ class MovieManagementController extends Controller
                 'desc_ar' => 'required|string',
                 'release_date' => 'required|date',
                 'duration' => 'nullable|integer|min:0',
-                'maturity_id' => 'required|exists:maturities,id',
+                'maturity_id' => 'required|exists:maturity_ratings,id',
                 'status_id' => 'required|exists:statuses,id',
                 'imdb_url' => 'nullable|url',
                 'genres' => 'nullable|array',

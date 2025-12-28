@@ -2,61 +2,61 @@ import { useEffect, useState } from 'react';
 import { Pencil, Trash2, Plus, X, Check } from 'lucide-react';
 import { API_BASE_URL } from '../constants/api';
 
-interface Maturities {
+interface Ratings {
     id: number;
-    maturity: string;
+    maturity_rating: string;
 }
 
-export default function Maturities() {
-    const [maturities, setMaturities] = useState<Maturities[]>([]);
+export default function Ratings() {
+    const [ratings, setRatings] = useState<Ratings[]>([]);
     const [loading, setLoading] = useState(true);
-    const [newMaturities, setNewMaturities] = useState({ maturity: '' });
+    const [newRatings, setNewRatings] = useState({ maturity_rating: '' });
     const [editingId, setEditingId] = useState<number | null>(null);
-    const [editForm, setEditForm] = useState({ maturity: '' });
+    const [editForm, setEditForm] = useState({ maturity_rating: '' });
 
-    const fetchMaturities = async () => {
+    const fetchRatings = async () => {
         try {
-            const res = await fetch(`${API_BASE_URL}/maturity`);
+            const res = await fetch(`${API_BASE_URL}/ratings`);
             const data = await res.json();
-            setMaturities(data);
+            setRatings(data);
         } catch (err) {
-            console.error("Failed to fetch maturities", err);
+            console.error("Failed to fetch maturity ratings", err);
         } finally {
             setLoading(false);
         }
     };
 
-    useEffect(() => { fetchMaturities(); }, []);
+    useEffect(() => { fetchRatings(); }, []);
 
     const handleAdd = async () => {
-        if (!newMaturities.maturity) return alert("Fill the field");
-        const res = await fetch(`${API_BASE_URL}/maturity`, {
+        if (!newRatings.maturity_rating) return alert("Fill the field");
+        const res = await fetch(`${API_BASE_URL}/ratings`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(newMaturities),
+            body: JSON.stringify(newRatings),
         });
         if (res.ok) {
-            setNewMaturities({ maturity: '' });
-            fetchMaturities();
+            setNewRatings({ maturity_rating: '' });
+            fetchRatings();
         }
     };
 
     const handleUpdate = async (id: number) => {
-        const res = await fetch(`${API_BASE_URL}/maturity/${id}`, {
+        const res = await fetch(`${API_BASE_URL}/ratings/${id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(editForm),
         });
         if (res.ok) {
             setEditingId(null);
-            fetchMaturities();
+            fetchRatings();
         }
     };
 
     const handleDelete = async (id: number, name: string) => {
         if (window.confirm(`Delete "${name}"?`)) {
-            await fetch(`${API_BASE_URL}/maturity/${id}`, { method: 'DELETE' });
-            fetchMaturities();
+            await fetch(`${API_BASE_URL}/ratings/${id}`, { method: 'DELETE' });
+            fetchRatings();
         }
     };
 
@@ -71,8 +71,8 @@ export default function Maturities() {
                     <input
                         placeholder="Maturity Rating"
                         className="flex-1 p-2 border rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"
-                        value={newMaturities.maturity}
-                        onChange={(e) => setNewMaturities({ ...newMaturities, maturity: e.target.value })}
+                        value={newRatings.maturity_rating}
+                        onChange={(e) => setNewRatings({ ...newRatings, maturity_rating: e.target.value })}
                     />
                     <button onClick={handleAdd} className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2 transition">
                         <Plus size={18} /> Add
@@ -91,37 +91,37 @@ export default function Maturities() {
                         <tbody className="divide-y">
                             {loading ? (
                                 <tr><td colSpan={3} className="text-center py-10 animate-pulse text-gray-400">Loading maturities...</td></tr>
-                            ) : maturities.map(maturities => (
-                                <tr key={maturities.id} className="hover:bg-gray-50 transition">
+                            ) : ratings.map(ratings => (
+                                <tr key={ratings.id} className="hover:bg-gray-50 transition">
                                     <td className="px-6 py-4 text-gray-900">
-                                        {editingId === maturities.id ? (
+                                        {editingId === ratings.id ? (
                                             <input
-                                                value={editForm.maturity}
-                                                onChange={(e) => setEditForm({ ...editForm, maturity: e.target.value })}
+                                                value={editForm.maturity_rating}
+                                                onChange={(e) => setEditForm({ ...editForm, maturity_rating: e.target.value })}
                                                 className="border rounded px-2 py-1 w-full"
                                             />
-                                        ) : maturities.maturity}
+                                        ) : ratings.maturity_rating}
                                     </td>
                                     <td className="px-6 py-4">
                                         <div className="flex justify-center gap-2">
-                                            {editingId === maturities.id ? (
+                                            {editingId === ratings.id ? (
                                                 <>
-                                                    <button onClick={() => handleUpdate(maturities.id)} className="text-green-600 hover:bg-green-50 p-2 rounded-full"><Check size={18} /></button>
+                                                    <button onClick={() => handleUpdate(ratings.id)} className="text-green-600 hover:bg-green-50 p-2 rounded-full"><Check size={18} /></button>
                                                     <button onClick={() => setEditingId(null)} className="text-gray-600 hover:bg-gray-50 p-2 rounded-full"><X size={18} /></button>
                                                 </>
                                             ) : (
                                                 <>
                                                     <button
                                                         onClick={() => {
-                                                            setEditingId(maturities.id);
-                                                            setEditForm({ maturity: maturities.maturity });
+                                                            setEditingId(ratings.id);
+                                                            setEditForm({ maturity_rating: ratings.maturity_rating });
                                                         }}
                                                         className="text-amber-500 hover:bg-amber-50 p-2 rounded-full transition"
                                                     >
                                                         <Pencil size={18} />
                                                     </button>
                                                     <button
-                                                        onClick={() => handleDelete(maturities.id, maturities.maturity)}
+                                                        onClick={() => handleDelete(ratings.id, ratings.maturity_rating)}
                                                         className="text-red-500 hover:bg-red-50 p-2 rounded-full transition"
                                                     >
                                                         <Trash2 size={18} />

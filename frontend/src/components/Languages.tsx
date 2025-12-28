@@ -17,7 +17,7 @@ export default function Languages() {
 
     const fetchLanguages = async () => {
         try {
-            const res = await fetch(`${API_BASE_URL}/lang`);
+            const res = await fetch(`${API_BASE_URL}/languages`);
             const data = await res.json();
             setLanguages(data);
         } catch (err) {
@@ -31,7 +31,7 @@ export default function Languages() {
 
     const handleAdd = async () => {
         if (!newLanguage.name_en || !newLanguage.name_ar) return alert("Fill both names");
-        const res = await fetch(`${API_BASE_URL}/lang`, {
+        const res = await fetch(`${API_BASE_URL}/languages`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(newLanguage),

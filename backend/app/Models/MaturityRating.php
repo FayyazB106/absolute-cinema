@@ -5,10 +5,10 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class Maturity extends Model
+class MaturityRating extends Model
 {
     protected $fillable = [
-        'maturity',
+        'maturity_rating',
     ];
 
     public function movies(): HasMany

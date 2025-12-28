@@ -2,42 +2,42 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Actor;
+use App\Models\Director;
 use Illuminate\Http\Request;
 
-class ActorManagementController extends Controller
+class DirectorController extends Controller
 {
-    // 1. Get all actors (with movie count for the table)
+    // 1. Get all directors (with movie count for the table)
     public function index()
     {
         try {
-            $actors = Actor::withCount('movies')
-                ->orderBy('created_at', 'desc')
+            $directors = Director::withCount('movies')
+                ->orderBy('name_en', 'asc')
                 ->get();
 
-            return response()->json($actors);
+            return response()->json($directors);
         } catch (\Exception $e) {
             return response()->json([
-                'error' => 'Failed to fetch actors',
+                'error' => 'Failed to fetch directors',
                 'message' => $e->getMessage()
             ], 500);
         }
     }
 
-    // 2. Get single actor with their movie list
-    public function show($id)
+    // 2. Get single director with their movie list
+    public function show($director)
     {
         try {
-            $actor = Actor::with('movies')->findOrFail($id);
-            return response()->json($actor);
+            $director = Director::with('movies')->findOrFail($director);
+            return response()->json($director);
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            return response()->json(['error' => 'Actor not found'], 404);
+            return response()->json(['error' => 'Director not found'], 404);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Server error', 'message' => $e->getMessage()], 500);
         }
     }
 
-    // 3. Store new actor
+    // 3. Store new director
     public function store(Request $request)
     {
         try {
@@ -46,11 +46,11 @@ class ActorManagementController extends Controller
                 'name_ar' => 'required|string|max:255',
             ]);
 
-            $actor = Actor::create($validated);
+            $director = Director::create($validated);
 
             return response()->json([
-                'message' => 'Actor created successfully',
-                'data' => $actor
+                'message' => 'Director created successfully',
+                'data' => $director
             ], 201);
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json(['error' => 'Validation failed', 'errors' => $e->errors()], 422);
@@ -59,39 +59,39 @@ class ActorManagementController extends Controller
         }
     }
 
-    // 4. Update actor
-    public function update(Request $request, $id)
+    // 4. Update director
+    public function update(Request $request, $director)
     {
         try {
-            $actor = Actor::findOrFail($id);
+            $director = Director::findOrFail($director);
 
             $validated = $request->validate([
                 'name_en' => 'required|string|max:255',
                 'name_ar' => 'required|string|max:255',
             ]);
 
-            $actor->update($validated);
+            $director->update($validated);
 
             return response()->json([
-                'message' => 'Actor updated successfully',
-                'data' => $actor
+                'message' => 'Director updated successfully',
+                'data' => $director
             ]);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Update failed', 'message' => $e->getMessage()], 500);
         }
     }
 
-    // 5. Delete actor
-    public function destroy($id)
+    // 5. Delete director
+    public function destroy($director)
     {
         try {
-            $actor = Actor::findOrFail($id);
+            $director = Director::findOrFail($director);
 
             // Detach from all movies first so we don't have orphan records in the pivot table
-            $actor->movies()->detach();
-            $actor->delete();
+            $director->movies()->detach();
+            $director->delete();
 
-            return response()->json(['message' => 'Actor deleted successfully']);
+            return response()->json(['message' => 'Director deleted successfully']);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Delete failed', 'message' => $e->getMessage()], 500);
         }

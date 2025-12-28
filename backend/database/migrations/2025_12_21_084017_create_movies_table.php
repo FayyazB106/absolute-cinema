@@ -22,7 +22,7 @@ return new class extends Migration
             $table->integer('duration');
 
             // Foreign Keys for 1-to-Many relationships
-            $table->foreignId('maturity_id')->constrained('maturities');
+            $table->foreignId('maturity_id')->constrained('maturity_ratings');
             $table->foreignId('status_id')->constrained('statuses');
 
             $table->timestamps();

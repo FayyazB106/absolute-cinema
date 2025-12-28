@@ -8,7 +8,7 @@ interface Options {
     actors: any[];
     directors: any[];
     languages: any[];
-    maturities: any[];
+    maturity_ratings: any[];
     statuses: any[];
 }
 
@@ -133,7 +133,7 @@ export default function MoviesEdit({ isOpen, onClose, onSuccess, movie }: Movies
                                         <label className="text-sm font-bold">Maturity</label>
                                         <select name="maturity_id" className="border rounded p-2" value={formData.maturity_id} onChange={handleChange} required>
                                             <option value="">Select...</option>
-                                            {options.maturities.map(m => <option key={m.id} value={m.id}>{m.maturity}</option>)}
+                                            {options.maturity_ratings.map(m => <option key={m.id} value={m.id}>{m.maturity_rating}</option>)}
                                         </select>
                                     </div>
                                     <div className="flex flex-col">

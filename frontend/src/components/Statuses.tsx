@@ -16,7 +16,7 @@ export default function Statuses() {
 
     const fetchStatuses = async () => {
         try {
-            const res = await fetch(`${API_BASE_URL}/status`);
+            const res = await fetch(`${API_BASE_URL}/statuses`);
             const data = await res.json();
             setStatuses(data);
         } catch (err) {
@@ -30,7 +30,7 @@ export default function Statuses() {
 
     const handleAdd = async () => {
         if (!newStatuses.status) return alert("Fill the field");
-        const res = await fetch(`${API_BASE_URL}/status`, {
+        const res = await fetch(`${API_BASE_URL}/statuses`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(newStatuses),
@@ -42,7 +42,7 @@ export default function Statuses() {
     };
 
     const handleUpdate = async (id: number) => {
-        const res = await fetch(`${API_BASE_URL}/status/${id}`, {
+        const res = await fetch(`${API_BASE_URL}/statuses/${id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(editForm),
@@ -55,7 +55,7 @@ export default function Statuses() {
 
     const handleDelete = async (id: number, name: string) => {
         if (window.confirm(`Delete "${name}"?`)) {
-            await fetch(`${API_BASE_URL}/status/${id}`, { method: 'DELETE' });
+            await fetch(`${API_BASE_URL}/statuses/${id}`, { method: 'DELETE' });
             fetchStatuses();
         }
     };

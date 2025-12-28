@@ -30,10 +30,10 @@ class DatabaseSeeder extends Seeder
         ]);
 
         // 2. Maturity Ratings
-        \App\Models\Maturity::insert([
-            ['maturity' => 'G'],
-            ['maturity' => 'PG-13'],
-            ['maturity' => 'R']
+        \App\Models\MaturityRating::insert([
+            ['maturity_rating' => 'G'],
+            ['maturity_rating' => 'PG-13'],
+            ['maturity_rating' => 'R']
         ]);
 
         // 3. Some Genres

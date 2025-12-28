@@ -4,8 +4,8 @@ import Actors from '../components/Actors';
 import Directors from '../components/Directors';
 import Genres from '../components/Genres';
 import Languages from '../components/Languages';
-import Maturities from '../components/Maturities';
 import Statuses from '../components/Statuses';
+import Ratings from '../components/Ratings';
 
 export default function Dashboard() {
     const [activeModule, setActiveModule] = useState('movies');
@@ -47,8 +47,8 @@ export default function Dashboard() {
                             Languages
                         </button>
                         <button
-                            onClick={() => setActiveModule('maturities')}
-                            className={`px-4 py-2 rounded ${activeModule === 'maturities' ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}
+                            onClick={() => setActiveModule('ratings')}
+                            className={`px-4 py-2 rounded ${activeModule === 'ratings' ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}
                         >
                             Maturity Ratings
                         </button>
@@ -69,7 +69,7 @@ export default function Dashboard() {
                 {activeModule === 'directors' && <Directors />}
                 {activeModule === 'genres' && <Genres />}
                 {activeModule === 'languages' && <Languages />}
-                {activeModule === 'maturities' && <Maturities />}
+                {activeModule === 'ratings' && <Ratings />}
                 {activeModule === 'statuses' && <Statuses />}
             </div>
         </div>

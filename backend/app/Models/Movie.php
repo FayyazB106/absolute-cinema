@@ -47,9 +47,9 @@ class Movie extends Model
         return $this->belongsToMany(Language::class, 'movie_subtitle', 'movie_id', 'language_id');
     }
 
-    public function maturity(): BelongsTo
+    public function maturity_ratings(): BelongsTo
     {
-        return $this->belongsTo(Maturity::class, 'maturity_id');
+        return $this->belongsTo(MaturityRating::class, 'maturity_id');
     }
 
     public function status(): BelongsTo

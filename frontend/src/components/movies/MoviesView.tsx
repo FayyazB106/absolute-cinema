@@ -13,7 +13,7 @@ interface MovieDetails {
     release_date: string;
     duration: number;
     imdb_url: string;
-    maturity: { id: number; maturity: string };
+    maturity_rating: { id: number; maturity_rating: string };
     status: { id: number; status: string };
     genres: Array<{ id: number; name_en: string; name_ar: string }>;
     actors: Array<{ id: number; name_en: string; name_ar: string }>;
@@ -167,7 +167,7 @@ export default function MoviesView({ isOpen, onClose, movieId, onMovieDeleted }:
                                         <span className="text-xs font-semibold uppercase">Maturity</span>
                                     </div>
                                     <p className="text-lg font-bold">
-                                        {movie.maturity?.maturity || 'N/A'}
+                                        {movie.maturity_rating?.maturity_rating || 'N/A'}
                                     </p>
                                 </div>
 

@@ -2,56 +2,55 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Language;
+use App\Models\Genre;
 use Illuminate\Http\Request;
 
-class LanguageManagementController extends Controller
+class GenreController extends Controller
 {
-    // 1. Get all languages (with movie count for the table)
+    // 1. Get all genres (with movie count for the table)
     public function index()
     {
         try {
-            $languages = Language::withCount('movies')
-                ->orderBy('created_at', 'desc')
+            $genres = Genre::withCount('movies')
+                ->orderBy('name_en', 'asc')
                 ->get();
 
-            return response()->json($languages);
+            return response()->json($genres);
         } catch (\Exception $e) {
             return response()->json([
-                'error' => 'Failed to fetch languages',
+                'error' => 'Failed to fetch genres',
                 'message' => $e->getMessage()
             ], 500);
         }
     }
 
-    // 2. Get single language with their movie list
-    public function show($id)
+    // 2. Get single genre with its movie list
+    public function show($genre)
     {
         try {
-            $language = Language::with('movies')->findOrFail($id);
-            return response()->json($language);
+            $genre = Genre::with('movies')->findOrFail($genre);
+            return response()->json($genre);
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            return response()->json(['error' => 'Language not found'], 404);
+            return response()->json(['error' => 'Genre not found'], 404);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Server error', 'message' => $e->getMessage()], 500);
         }
     }
 
-    // 3. Store new language
+    // 3. Store new genre
     public function store(Request $request)
     {
         try {
             $validated = $request->validate([
                 'name_en' => 'required|string|max:255',
                 'name_ar' => 'required|string|max:255',
-                'code'    => 'nullable|string|max:5',
             ]);
 
-            $language = Language::create($validated);
+            $genre = Genre::create($validated);
 
             return response()->json([
-                'message' => 'Language created successfully',
-                'data' => $language
+                'message' => 'Genre created successfully',
+                'data' => $genre
             ], 201);
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json(['error' => 'Validation failed', 'errors' => $e->errors()], 422);
@@ -60,39 +59,39 @@ class LanguageManagementController extends Controller
         }
     }
 
-    // 4. Update language
-    public function update(Request $request, $id)
+    // 4. Update genre
+    public function update(Request $request, $genre)
     {
         try {
-            $language = Language::findOrFail($id);
+            $genre = Genre::findOrFail($genre);
 
             $validated = $request->validate([
                 'name_en' => 'required|string|max:255',
                 'name_ar' => 'required|string|max:255',
             ]);
 
-            $language->update($validated);
+            $genre->update($validated);
 
             return response()->json([
-                'message' => 'Language updated successfully',
-                'data' => $language
+                'message' => 'Genre updated successfully',
+                'data' => $genre
             ]);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Update failed', 'message' => $e->getMessage()], 500);
         }
     }
 
-    // 5. Delete language
-    public function destroy($id)
+    // 5. Delete genre
+    public function destroy($genre)
     {
         try {
-            $language = Language::findOrFail($id);
+            $genre = Genre::findOrFail($genre);
 
             // Detach from all movies first so we don't have orphan records in the pivot table
-            $language->movies()->detach();
-            $language->delete();
+            $genre->movies()->detach();
+            $genre->delete();
 
-            return response()->json(['message' => 'Language deleted successfully']);
+            return response()->json(['message' => 'Genre deleted successfully']);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Delete failed', 'message' => $e->getMessage()], 500);
         }

@@ -13,11 +13,11 @@ class Genre extends Model
     ];
 
     /**
-     * Relationship: An Actor can appear in many Movies.
+     * Relationship: An Genre can define in many Movies.
      */
     public function movies(): BelongsToMany
     {
-        // Laravel looks for actor_movie table by default
+        // Laravel looks for genre_movie table by default
         return $this->belongsToMany(Movie::class);
     }
 }

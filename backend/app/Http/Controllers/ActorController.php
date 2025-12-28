@@ -2,42 +2,42 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Genre;
+use App\Models\Actor;
 use Illuminate\Http\Request;
 
-class GenreManagementController extends Controller
+class ActorController extends Controller
 {
-    // 1. Get all genres (with movie count for the table)
+    // 1. Get all actors (with movie count for the table)
     public function index()
     {
         try {
-            $genres = Genre::withCount('movies')
-                ->orderBy('created_at', 'desc')
+            $actors = Actor::withCount('movies')
+                ->orderBy('name_en', 'asc')
                 ->get();
 
-            return response()->json($genres);
+            return response()->json($actors);
         } catch (\Exception $e) {
             return response()->json([
-                'error' => 'Failed to fetch genres',
+                'error' => 'Failed to fetch actors',
                 'message' => $e->getMessage()
             ], 500);
         }
     }
 
-    // 2. Get single genre with their movie list
-    public function show($id)
+    // 2. Get single actor with their movie list
+    public function show($actor)
     {
         try {
-            $genre = Genre::with('movies')->findOrFail($id);
-            return response()->json($genre);
+            $actor = Actor::with('movies')->findOrFail($actor);
+            return response()->json($actor);
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            return response()->json(['error' => 'Genre not found'], 404);
+            return response()->json(['error' => 'Actor not found'], 404);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Server error', 'message' => $e->getMessage()], 500);
         }
     }
 
-    // 3. Store new genre
+    // 3. Store new actor
     public function store(Request $request)
     {
         try {
@@ -46,11 +46,11 @@ class GenreManagementController extends Controller
                 'name_ar' => 'required|string|max:255',
             ]);
 
-            $genre = Genre::create($validated);
+            $actor = Actor::create($validated);
 
             return response()->json([
-                'message' => 'Genre created successfully',
-                'data' => $genre
+                'message' => 'Actor created successfully',
+                'data' => $actor
             ], 201);
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json(['error' => 'Validation failed', 'errors' => $e->errors()], 422);
@@ -59,39 +59,39 @@ class GenreManagementController extends Controller
         }
     }
 
-    // 4. Update genre
-    public function update(Request $request, $id)
+    // 4. Update actor
+    public function update(Request $request, $actor)
     {
         try {
-            $genre = Genre::findOrFail($id);
+            $actor = Actor::findOrFail($actor);
 
             $validated = $request->validate([
                 'name_en' => 'required|string|max:255',
                 'name_ar' => 'required|string|max:255',
             ]);
 
-            $genre->update($validated);
+            $actor->update($validated);
 
             return response()->json([
-                'message' => 'Genre updated successfully',
-                'data' => $genre
+                'message' => 'Actor updated successfully',
+                'data' => $actor
             ]);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Update failed', 'message' => $e->getMessage()], 500);
         }
     }
 
-    // 5. Delete genre
-    public function destroy($id)
+    // 5. Delete actor
+    public function destroy($actor)
     {
         try {
-            $genre = Genre::findOrFail($id);
+            $actor = Actor::findOrFail($actor);
 
             // Detach from all movies first so we don't have orphan records in the pivot table
-            $genre->movies()->detach();
-            $genre->delete();
+            $actor->movies()->detach();
+            $actor->delete();
 
-            return response()->json(['message' => 'Genre deleted successfully']);
+            return response()->json(['message' => 'Actor deleted successfully']);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Delete failed', 'message' => $e->getMessage()], 500);
         }
