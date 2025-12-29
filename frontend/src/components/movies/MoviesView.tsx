@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { X, Calendar, Clock, Globe, Star, Users, Video, Film, Subtitles, Trash2 } from 'lucide-react';
+import { X, Calendar, Clock, Globe, Star, Users, Video, Film, Subtitles, Trash2, ImageIcon } from 'lucide-react';
 import { Pencil } from 'lucide-react';
 import MoviesEdit from './MoviesEdit';
 import { API_BASE_URL } from '../../constants/api';
@@ -20,6 +20,8 @@ interface MovieDetails {
     directors: Array<{ id: number; name_en: string; name_ar: string }>;
     audio_languages: Array<{ id: number; name_en: string; code: string }>;
     subtitles: Array<{ id: number; name_en: string; code: string }>;
+    poster_full_url: string | null;
+    featured_full_url: string | null;
     created_at: string;
     updated_at: string;
 }
@@ -36,6 +38,7 @@ export default function MoviesView({ isOpen, onClose, movieId, onMovieDeleted }:
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [isEditOpen, setIsEditOpen] = useState(false);
+    const [previewImage, setPreviewImage] = useState<{ url: string; title: string } | null>(null);
 
     useEffect(() => {
         if (isOpen && movieId) {
@@ -86,6 +89,26 @@ export default function MoviesView({ isOpen, onClose, movieId, onMovieDeleted }:
     return (
         <div className="fixed inset-0 flex items-center justify-center z-50 p-4 overflow-y-auto no-scrollbar">
             <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full my-8 max-h-[90vh] overflow-y-auto no-scrollbar">
+                {/* 3. The Image Preview Popup (Overlay) */}
+                {previewImage && (
+                    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/90 p-10">
+                        <button
+                            onClick={() => setPreviewImage(null)}
+                            className="absolute top-5 right-5 text-white bg-white/20 p-2 rounded-full hover:bg-white/40"
+                        >
+                            <X size={32} />
+                        </button>
+                        <div className="text-center">
+                            <h3 className="text-white text-xl font-bold mb-4">{previewImage.title}</h3>
+                            <img
+                                src={previewImage.url}
+                                alt="Preview"
+                                className="max-w-full max-h-[70vh] rounded-lg shadow-2xl border-4 border-white/10"
+                            />
+                        </div>
+                    </div>
+                )}
+
                 {/* Header */}
                 <div className="sticky top-0 bg-gradient-to-r from-blue-600 to-blue-800 text-white px-8 py-6 flex flex-col gap-5 rounded-t-xl">
                     <div className="flex flex-row justify-between gap-2">
@@ -299,6 +322,34 @@ export default function MoviesView({ isOpen, onClose, movieId, onMovieDeleted }:
                                         </div>
                                     </div>
                                 )}
+                            </div>
+
+                            {/* Images */}
+                            <div className="border-t pt-6 flex flex-col md:flex-row justify-between items-end gap-6">
+                                <div className="text-xs text-gray-500 space-y-1">
+                                    <p><strong>Created:</strong> {new Date(movie.created_at).toLocaleString()}</p>
+                                    <p><strong>Last Updated:</strong> {new Date(movie.updated_at).toLocaleString()}</p>
+
+                                    {/* Clickable Image Links */}
+                                    <div className="flex gap-4 mt-3">
+                                        {movie.poster_full_url && (
+                                            <button
+                                                onClick={() => setPreviewImage({ url: movie.poster_full_url!, title: 'Main Poster' })}
+                                                className="flex items-center gap-1 text-blue-600 hover:text-blue-800 font-bold text-sm underline decoration-dotted"
+                                            >
+                                                <ImageIcon size={14} /> View Poster
+                                            </button>
+                                        )}
+                                        {movie.featured_full_url && (
+                                            <button
+                                                onClick={() => setPreviewImage({ url: movie.featured_full_url!, title: 'Featured Banner' })}
+                                                className="flex items-center gap-1 text-blue-600 hover:text-blue-800 font-bold text-sm underline decoration-dotted"
+                                            >
+                                                <ImageIcon size={14} /> View Featured Poster
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
                             </div>
 
                             {/* IMDB Link + Metadata */}

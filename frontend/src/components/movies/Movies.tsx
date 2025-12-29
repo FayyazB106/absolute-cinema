@@ -10,6 +10,7 @@ interface Movie {
     name_ar: string;
     release_date: string;
     audio_languages: Array<{ id: number, name_en: string, code: string; }>;
+    poster_full_url: string | null;
 }
 
 // Main Movies Component
@@ -64,23 +65,26 @@ export default function Movies() {
                     <div
                         key={movie.id}
                         onClick={() => handleViewMovie(movie.id)}
-                        className="bg-white rounded-lg transition-all duration-200 p-6 border border-gray-200 cursor-pointer hover:scale-105 hover:border-blue-400 text-center flex flex-col gap-2"
+                        className="transition-all duration-200 rounded-lg border border-gray-200 cursor-pointer hover:scale-105 hover:border-blue-400"
                     >
-                        <h3 className="text-lg font-bold line-clamp-2">{movie.name_en}</h3>
-                        <p className="text-sm">
-                            <span className="font-semibold">Release: </span>
-                            {new Date(movie.release_date).toLocaleDateString("en-GB", {
-                                day: 'numeric',
-                                month: 'short',
-                                year: 'numeric'
-                            })}
-                        </p>
-                        <div className='flex flex-wrap gap-2 justify-center'>
-                            {movie.audio_languages.map(lang => (
-                                <p key={lang.id} className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-semibold">
-                                    {lang.name_en}
-                                </p>
-                            ))}
+                        {movie.poster_full_url && (<img src={movie.poster_full_url} alt={movie.name_en} className="w-full rounded-t-lg" />)}
+                        <div className='bg-white p-6 flex flex-col gap-2 text-center rounded-b-lg'>
+                            <h3 className="text-lg font-bold line-clamp-2">{movie.name_en}</h3>
+                            <p className="text-sm">
+                                <span className="font-semibold">Release: </span>
+                                {new Date(movie.release_date).toLocaleDateString("en-GB", {
+                                    day: 'numeric',
+                                    month: 'short',
+                                    year: 'numeric'
+                                })}
+                            </p>
+                            <div className='flex flex-wrap gap-2 justify-center'>
+                                {movie.audio_languages.map(lang => (
+                                    <p key={lang.id} className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-semibold">
+                                        {lang.name_en}
+                                    </p>
+                                ))}
+                            </div>
                         </div>
                     </div>
                 ))}

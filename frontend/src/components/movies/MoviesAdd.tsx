@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { X } from 'lucide-react';
+import { X, Upload } from 'lucide-react';
 import MultiSelect from '../shared/MultiSelect';
 import { API_BASE_URL } from '../../constants/api';
 
@@ -14,6 +14,8 @@ interface Options {
 
 export default function MoviesAdd({ isOpen, onClose, onSuccess }: { isOpen: boolean; onClose: () => void; onSuccess: () => void }) {
     const [options, setOptions] = useState<Options | null>(null);
+    const [posterFile, setPosterFile] = useState<File | null>(null);
+    const [featuredFile, setFeaturedFile] = useState<File | null>(null);
     const [formData, setFormData] = useState({
         name_en: '', name_ar: '',
         desc_en: '', desc_ar: '',
@@ -40,25 +42,44 @@ export default function MoviesAdd({ isOpen, onClose, onSuccess }: { isOpen: bool
 
     const handleSubmit = async () => {
         try {
+            // Create FormData object instead of JSON
+            const data = new FormData();
+
+            // Append text fields
+            Object.entries(formData).forEach(([key, value]) => {
+                if (Array.isArray(value)) {
+                    // Laravel expects array fields to be appended multiple times with []
+                    value.forEach(item => data.append(`${key}[]`, item));
+                } else {
+                    data.append(key, value.toString());
+                }
+            });
+
+            // Append the physical files
+            if (posterFile) data.append('poster_url', posterFile);
+            if (featuredFile) data.append('featured_poster_url', featuredFile);
+
             const response = await fetch(`${API_BASE_URL}/movies`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(formData)
+                // NOTE: Do NOT set Content-Type header manually when sending FormData
+                // The browser will automatically set it to 'multipart/form-data' with the correct boundary
+                body: data
             });
+
             if (response.ok) {
                 alert("Movie Created Successfully!");
+                // Reset files
+                setPosterFile(null);
+                setFeaturedFile(null);
                 onSuccess();
                 onClose();
-                // Reset form
-                setFormData({
-                    name_en: '', name_ar: '', desc_en: '', desc_ar: '',
-                    release_date: '', imdb_url: '', duration: 0,
-                    maturity_id: '', status_id: '',
-                    genres: [], actors: [], directors: [], languages: [], subtitles: []
-                });
+            } else {
+                const errorData = await response.json();
+                console.error("Backend Validation Error:", errorData);
+                alert("Error: " + (errorData.error || "Check console for details"));
             }
         } catch (err: any) {
-            console.error("Validation Error:", err);
+            console.error("Submission Error:", err);
             alert("Error creating movie");
         }
     };
@@ -180,6 +201,41 @@ export default function MoviesAdd({ isOpen, onClose, onSuccess }: { isOpen: bool
                                         onChange={(selected) => setFormData({ ...formData, subtitles: selected })}
                                         placeholder="Select subtitle languages..."
                                     />
+                                </div>
+                            </section>
+
+                            <section className="space-y-4 border-t pt-6">
+                                <h2 className="text-xl font-bold text-blue-700 text-center">Media Assets</h2>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                    {/* Main Poster Upload */}
+                                    <div className="flex flex-col items-center p-4 border-2 border-dashed rounded-xl hover:bg-gray-50">
+                                        <label className="cursor-pointer text-center w-full">
+                                            <Upload className="mx-auto mb-2 text-gray-400" size={32} />
+                                            <span className="block font-bold">Main Poster</span>
+                                            <span className="text-xs text-gray-500">JPG, PNG (Max 2MB)</span>
+                                            <input
+                                                type="file"
+                                                className="hidden"
+                                                onChange={e => setPosterFile(e.target.files?.[0] || null)}
+                                            />
+                                        </label>
+                                        {posterFile && <p className="mt-2 text-sm text-green-600 font-medium">{posterFile.name}</p>}
+                                    </div>
+
+                                    {/* Featured Poster Upload */}
+                                    <div className="flex flex-col items-center p-4 border-2 border-dashed rounded-xl hover:bg-gray-50">
+                                        <label className="cursor-pointer text-center w-full">
+                                            <Upload className="mx-auto mb-2 text-gray-400" size={32} />
+                                            <span className="block font-bold">Featured Banner</span>
+                                            <span className="text-xs text-gray-500">Wide format recommended</span>
+                                            <input
+                                                type="file"
+                                                className="hidden"
+                                                onChange={e => setFeaturedFile(e.target.files?.[0] || null)}
+                                            />
+                                        </label>
+                                        {featuredFile && <p className="mt-2 text-sm text-green-600 font-medium">{featuredFile.name}</p>}
+                                    </div>
                                 </div>
                             </section>
 

@@ -49,5 +49,21 @@ class DatabaseSeeder extends Seeder
             ['name_en' => 'Arabic', 'name_ar' => 'العربية', 'code' => 'ar'],
             ['name_en' => 'French', 'name_ar' => 'الفرنسية', 'code' => 'fr']
         ]);
+
+        // 4. Some Actors
+        \App\Models\Actor::insert([
+            ['name_en' => 'Cillian Murphy', 'name_ar' => 'كيليان مورفي'],
+            ['name_en' => 'Emily Blunt', 'name_ar' => 'إيميلي بلانت'],
+            ['name_en' => 'Matt Damon', 'name_ar' => 'مات ديمون'],
+            ['name_en' => 'Robert Downey Jr.', 'name_ar' => 'روبرت داوني جونيور']
+        ]);
+
+        // 5. Some Directos
+        \App\Models\Director::insert([
+            ['name_en' => 'Christopher Nolan', 'name_ar' => 'كريستوفر نولان'],
+            ['name_en' => 'Anthony Russo', 'name_ar' => 'أنتوني روسو'],
+            ['name_en' => 'Joe Russo', 'name_ar' => 'جو روسو'],
+            ['name_en' => 'Joseph Kosinski', 'name_ar' => 'جوزيف كوزينسكي']
+        ]);
     }
 }

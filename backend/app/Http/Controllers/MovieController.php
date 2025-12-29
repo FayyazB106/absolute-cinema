@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use App\Models\Movie;
 
 class MovieController extends Controller
@@ -97,9 +98,25 @@ class MovieController extends Controller
                 'languages.*' => 'exists:languages,id',
                 'subtitles' => 'nullable|array',
                 'subtitles.*' => 'exists:languages,id',
+                // Image related data
+                'poster_url' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+                'featured_poster_url' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+                'is_featured' => 'nullable|boolean'
             ]);
 
-            // 2. Create the Movie record
+            // 2. Upload files
+            $posterPath = null;
+            if ($request->hasFile('poster_url')) {
+                // This saves the file and returns a string like "posters/abc.jpg"
+                $posterPath = $request->file('poster_url')->store('posters', 'public');
+            }
+
+            $featuredPath = null;
+            if ($request->hasFile('featured_poster_url')) {
+                $featuredPath = $request->file('featured_poster_url')->store('featured', 'public');
+            }
+
+            // 3. Create the Movie record
             $movie = Movie::create([
                 'name_en' => $validated['name_en'],
                 'name_ar' => $validated['name_ar'],
@@ -110,9 +127,12 @@ class MovieController extends Controller
                 'maturity_id' => $validated['maturity_id'],
                 'status_id' => $validated['status_id'],
                 'imdb_url' => $validated['imdb_url'] ?? null,
+                'poster_url' => $posterPath,
+                'featured_poster_url' => $featuredPath,
+                'is_featured' => $request->boolean('is_featured'),
             ]);
 
-            // 3. Attach Many-to-Many relationships
+            // 4. Attach Many-to-Many relationships
             if (!empty($validated['genres'])) {
                 $movie->genres()->sync($validated['genres']);
             }
@@ -169,6 +189,7 @@ class MovieController extends Controller
                 'maturity_id' => 'required|exists:maturity_ratings,id',
                 'status_id' => 'required|exists:statuses,id',
                 'imdb_url' => 'nullable|url',
+                // Pivot IDs
                 'genres' => 'nullable|array',
                 'genres.*' => 'exists:genres,id',
                 'actors' => 'nullable|array',
@@ -179,6 +200,10 @@ class MovieController extends Controller
                 'languages.*' => 'exists:languages,id',
                 'subtitles' => 'nullable|array',
                 'subtitles.*' => 'exists:languages,id',
+                // Image related data
+                'poster_url' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+                'featured_poster_url' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+                'is_featured' => 'nullable|boolean'
             ]);
 
             // Update the main movie record
@@ -193,6 +218,25 @@ class MovieController extends Controller
                 'status_id' => $validated['status_id'],
                 'imdb_url' => $validated['imdb_url'] ?? null,
             ]);
+
+            // Handle New Poster
+            if ($request->hasFile('poster_url')) {
+                // Delete old file if it exists
+                if ($movie->poster_url) {
+                    Storage::disk('public')->delete($movie->poster_url);
+                }
+                $movie->poster_url = $request->file('poster_url')->store('posters', 'public');
+            }
+
+            // Handle New Featured Poster
+            if ($request->hasFile('featured_poster_url')) {
+                if ($movie->featured_poster_url) {
+                    Storage::disk('public')->delete($movie->featured_poster_url);
+                }
+                $movie->featured_poster_url = $request->file('featured_poster_url')->store('featured', 'public');
+            }
+
+            $movie->save();
 
             // Sync Many-to-Many relationships
             $movie->genres()->sync($validated['genres'] ?? []);
@@ -226,6 +270,14 @@ class MovieController extends Controller
             $movie->directors()->detach();
             $movie->audioLanguages()->detach();
             $movie->subtitles()->detach();
+
+            // Delete the files from the physical storage
+            if ($movie->poster_url) {
+                Storage::disk('public')->delete($movie->poster_url);
+            }
+            if ($movie->featured_poster_url) {
+                Storage::disk('public')->delete($movie->featured_poster_url);
+            }
 
             $movie->delete();
 

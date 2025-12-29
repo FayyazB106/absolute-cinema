@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { X, Loader2 } from 'lucide-react';
+import { X, Loader2, Upload } from 'lucide-react';
 import MultiSelect from '../shared/MultiSelect';
 import { API_BASE_URL } from '../../constants/api';
 
@@ -22,6 +22,8 @@ interface MoviesEditProps {
 export default function MoviesEdit({ isOpen, onClose, onSuccess, movie }: MoviesEditProps) {
     const [options, setOptions] = useState<Options | null>(null);
     const [saving, setSaving] = useState(false);
+    const [posterFile, setPosterFile] = useState<File | null>(null);
+    const [featuredFile, setFeaturedFile] = useState<File | null>(null);
     const [formData, setFormData] = useState({
         name_en: '', name_ar: '', desc_en: '', desc_ar: '',
         release_date: '', duration: 0, maturity_id: '', status_id: '', imdb_url: '',
@@ -63,15 +65,36 @@ export default function MoviesEdit({ isOpen, onClose, onSuccess, movie }: Movies
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setSaving(true);
+
         try {
-            const res = await fetch(`${API_BASE_URL}/movies/${movie.id}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(formData)
+            const data = new FormData();
+
+            Object.keys(formData).forEach(key => {
+                const value = (formData as any)[key];
+                if (Array.isArray(value)) {
+                    // For arrays (genres, actors, etc.), append each item
+                    value.forEach(item => data.append(`${key}[]`, item));
+                } else {
+                    data.append(key, value);
+                }
             });
+
+            if (posterFile) data.append('poster', posterFile);
+            if (featuredFile) data.append('featured', featuredFile);
+
+            data.append('_method', 'PUT');
+
+            const res = await fetch(`${API_BASE_URL}/movies/${movie.id}`, {
+                method: 'POST',
+                body: data,
+            });
+
             if (res.ok) {
                 onSuccess();
                 onClose();
+            } else {
+                const errorData = await res.json();
+                console.error("Server validation error:", errorData);
             }
         } catch (err) {
             console.error("Update failed", err);
@@ -190,6 +213,41 @@ export default function MoviesEdit({ isOpen, onClose, onSuccess, movie }: Movies
                                         onChange={(selected) => setFormData({ ...formData, subtitles: selected })}
                                         placeholder="Select subtitle languages..."
                                     />
+                                </div>
+                            </section>
+
+                            <section className="space-y-4 border-t pt-6">
+                                <h2 className="text-xl font-bold text-blue-700 text-center">Media Assets</h2>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                    {/* Main Poster Upload */}
+                                    <div className="flex flex-col items-center p-4 border-2 border-dashed rounded-xl hover:bg-gray-50">
+                                        <label className="cursor-pointer text-center w-full">
+                                            <Upload className="mx-auto mb-2 text-gray-400" size={32} />
+                                            <span className="block font-bold">Main Poster</span>
+                                            <span className="text-xs text-gray-500">JPG, PNG (Max 2MB)</span>
+                                            <input
+                                                type="file"
+                                                className="hidden"
+                                                onChange={e => setPosterFile(e.target.files?.[0] || null)}
+                                            />
+                                        </label>
+                                        {posterFile && <p className="mt-2 text-sm text-green-600 font-medium">{posterFile.name}</p>}
+                                    </div>
+
+                                    {/* Featured Poster Upload */}
+                                    <div className="flex flex-col items-center p-4 border-2 border-dashed rounded-xl hover:bg-gray-50">
+                                        <label className="cursor-pointer text-center w-full">
+                                            <Upload className="mx-auto mb-2 text-gray-400" size={32} />
+                                            <span className="block font-bold">Featured Banner</span>
+                                            <span className="text-xs text-gray-500">Wide format recommended</span>
+                                            <input
+                                                type="file"
+                                                className="hidden"
+                                                onChange={e => setFeaturedFile(e.target.files?.[0] || null)}
+                                            />
+                                        </label>
+                                        {featuredFile && <p className="mt-2 text-sm text-green-600 font-medium">{featuredFile.name}</p>}
+                                    </div>
                                 </div>
                             </section>
 
