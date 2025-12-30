@@ -116,6 +116,12 @@ class MovieController extends Controller
                 $featuredPath = $request->file('featured_poster_url')->store('featured', 'public');
             }
 
+            // ENFORCE RULE: Can't be featured without a featured poster
+            $isFeatured = $request->boolean('is_featured');
+            if ($isFeatured && !$featuredPath) {
+                $isFeatured = false;
+            }
+
             // 3. Create the Movie record
             $movie = Movie::create([
                 'name_en' => $validated['name_en'],
@@ -129,7 +135,7 @@ class MovieController extends Controller
                 'imdb_url' => $validated['imdb_url'] ?? null,
                 'poster_url' => $posterPath,
                 'featured_poster_url' => $featuredPath,
-                'is_featured' => $request->boolean('is_featured'),
+                'is_featured' => $isFeatured
             ]);
 
             // 4. Attach Many-to-Many relationships
@@ -206,19 +212,6 @@ class MovieController extends Controller
                 'is_featured' => 'nullable|boolean'
             ]);
 
-            // Update the main movie record
-            $movie->update([
-                'name_en' => $validated['name_en'],
-                'name_ar' => $validated['name_ar'],
-                'desc_en' => $validated['desc_en'],
-                'desc_ar' => $validated['desc_ar'],
-                'release_date' => $validated['release_date'],
-                'duration' => $validated['duration'] ?? 0,
-                'maturity_id' => $validated['maturity_id'],
-                'status_id' => $validated['status_id'],
-                'imdb_url' => $validated['imdb_url'] ?? null,
-            ]);
-
             // Handle New Poster
             if ($request->hasFile('poster_url')) {
                 // Delete old file if it exists
@@ -235,6 +228,26 @@ class MovieController extends Controller
                 }
                 $movie->featured_poster_url = $request->file('featured_poster_url')->store('featured', 'public');
             }
+
+            // ENFORCE RULE: If trying to mark as featured but no featured poster exists
+            $isFeatured = $request->boolean('is_featured');
+            if ($isFeatured && !$movie->featured_poster_url) {
+                $isFeatured = false;
+            }
+
+            // Update the main movie record
+            $movie->update([
+                'name_en' => $validated['name_en'],
+                'name_ar' => $validated['name_ar'],
+                'desc_en' => $validated['desc_en'],
+                'desc_ar' => $validated['desc_ar'],
+                'release_date' => $validated['release_date'],
+                'duration' => $validated['duration'] ?? 0,
+                'maturity_id' => $validated['maturity_id'],
+                'status_id' => $validated['status_id'],
+                'imdb_url' => $validated['imdb_url'] ?? null,
+                'is_featured' => $isFeatured,
+            ]);
 
             $movie->save();
 

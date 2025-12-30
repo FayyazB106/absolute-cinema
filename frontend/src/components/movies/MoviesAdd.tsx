@@ -28,7 +28,8 @@ export default function MoviesAdd({ isOpen, onClose, onSuccess }: { isOpen: bool
         actors: [] as string[],
         directors: [] as string[],
         languages: [] as string[],
-        subtitles: [] as string[]
+        subtitles: [] as string[],
+        is_featured: false
     });
 
     useEffect(() => {
@@ -48,8 +49,10 @@ export default function MoviesAdd({ isOpen, onClose, onSuccess }: { isOpen: bool
             // Append text fields
             Object.entries(formData).forEach(([key, value]) => {
                 if (Array.isArray(value)) {
-                    // Laravel expects array fields to be appended multiple times with []
                     value.forEach(item => data.append(`${key}[]`, item));
+                } else if (typeof value === 'boolean') {
+                    // Convert true/false to 1/0 for the backend
+                    data.append(key, value ? '1' : '0');
                 } else {
                     data.append(key, value.toString());
                 }
@@ -239,11 +242,27 @@ export default function MoviesAdd({ isOpen, onClose, onSuccess }: { isOpen: bool
                                 </div>
                             </section>
 
-                            <div className="flex gap-4">
-                                <button onClick={onClose} className="flex-1 bg-gray-500 text-white font-bold py-3 rounded-xl hover:bg-gray-600">
-                                    Cancel
-                                </button>
-                                <button onClick={handleSubmit} className="flex-1 bg-green-600 text-white font-bold py-3 rounded-xl hover:bg-green-700">
+                            <div className="flex flex-row justify-between gap-4">
+                                <div className='flex flex-row gap-2 items-center'>
+                                    <label className="text-lg font-bold">Featured</label>
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            if (featuredFile || formData.is_featured) {
+                                                setFormData({ ...formData, is_featured: !formData.is_featured });
+                                            }
+                                        }}
+                                        disabled={!featuredFile && !formData.is_featured}
+                                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${formData.is_featured ? 'bg-blue-600' : 'bg-gray-300'} ${!featuredFile && !formData.is_featured ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                    >
+                                        <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition ${formData.is_featured ? 'translate-x-6' : 'translate-x-1'
+                                            }`} />
+                                    </button>
+                                    {!featuredFile && !formData.is_featured && (
+                                        <span className="text-xs text-gray-500 ml-2">Upload featured banner first</span>
+                                    )}
+                                </div>
+                                <button onClick={handleSubmit} className="flex-1 bg-green-600 text-white font-bold py-3 rounded-xl hover:bg-green-700 max-w-50">
                                     Save Movie
                                 </button>
                             </div>

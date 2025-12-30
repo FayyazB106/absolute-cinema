@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import MoviesAdd from './MoviesAdd';
 import MoviesView from './MoviesView';
 import { API_BASE_URL } from '../../constants/api';
-import { Plus } from 'lucide-react';
+import { Film, Plus } from 'lucide-react';
 
 interface Movie {
     id: number;
@@ -11,6 +11,7 @@ interface Movie {
     release_date: string;
     audio_languages: Array<{ id: number, name_en: string, code: string; }>;
     poster_full_url: string | null;
+    is_featured: boolean;
 }
 
 // Main Movies Component
@@ -60,15 +61,26 @@ export default function Movies() {
                 </button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
+            <div className="grid grid-cols-6 gap-6">
                 {movies.map(movie => (
                     <div
                         key={movie.id}
                         onClick={() => handleViewMovie(movie.id)}
-                        className="transition-all duration-200 rounded-lg border border-gray-200 cursor-pointer hover:scale-105 hover:border-blue-400"
+                        className={`flex flex-col h-full transition-all duration-200 rounded-xl border ${movie.is_featured ? "border-amber-400 border-2 hover:border-amber-400" : "border-gray-200 hover:border-blue-400"} cursor-pointer hover:scale-105`}
                     >
-                        {movie.poster_full_url && (<img src={movie.poster_full_url} alt={movie.name_en} className="w-full rounded-t-lg" />)}
-                        <div className='bg-white p-6 flex flex-col gap-2 text-center rounded-b-lg'>
+                        {movie.poster_full_url ? (
+                            <img
+                                src={movie.poster_full_url}
+                                alt={movie.name_en}
+                                className="aspect-[2/3] w-full rounded-t-lg object-cover"
+                            />
+                        ) : (
+                            <div className="aspect-[2/3] w-full rounded-t-xl bg-gray-200 flex flex-col items-center justify-center border-b border-gray-300">
+                                <Film className="text-gray-400 mb-2" size={40} />
+                                <span className="text-gray-500 font-bold text-lg">N/A</span>
+                            </div>
+                        )}
+                        <div className='bg-white p-6 flex flex-col gap-2 text-center rounded-b-xl'>
                             <h3 className="text-lg font-bold line-clamp-2">{movie.name_en}</h3>
                             <p className="text-sm">
                                 <span className="font-semibold">Release: </span>

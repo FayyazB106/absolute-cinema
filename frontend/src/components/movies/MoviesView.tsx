@@ -13,7 +13,7 @@ interface MovieDetails {
     release_date: string;
     duration: number;
     imdb_url: string;
-    maturity_rating: { id: number; maturity_rating: string };
+    maturity_ratings: { id: number; maturity_rating: string };
     status: { id: number; status: string };
     genres: Array<{ id: number; name_en: string; name_ar: string }>;
     actors: Array<{ id: number; name_en: string; name_ar: string }>;
@@ -22,6 +22,7 @@ interface MovieDetails {
     subtitles: Array<{ id: number; name_en: string; code: string }>;
     poster_full_url: string | null;
     featured_full_url: string | null;
+    is_featured: boolean;
     created_at: string;
     updated_at: string;
 }
@@ -138,6 +139,11 @@ export default function MoviesView({ isOpen, onClose, movieId, onMovieDeleted }:
                                 <div className='text-center'>
                                     <h1 className="text-3xl font-extrabold mb-2">{movie.name_en}</h1>
                                     <h2 className="text-xl opacity-90">{movie.name_ar}</h2>
+                                    {Boolean(movie.is_featured) && (
+                                        <span className="text-md text-amber-400 font-bold py-2 flex items-center justify-center gap-1">
+                                            <Star size={16} /> FEATURED
+                                        </span>
+                                    )}
                                 </div>
                             ) : null}
                         </div>
@@ -190,7 +196,7 @@ export default function MoviesView({ isOpen, onClose, movieId, onMovieDeleted }:
                                         <span className="text-xs font-semibold uppercase">Maturity</span>
                                     </div>
                                     <p className="text-lg font-bold">
-                                        {movie.maturity_rating?.maturity_rating || 'N/A'}
+                                        {movie.maturity_ratings?.maturity_rating || 'N/A'}
                                     </p>
                                 </div>
 
@@ -324,7 +330,7 @@ export default function MoviesView({ isOpen, onClose, movieId, onMovieDeleted }:
                                 )}
                             </div>
 
-                            {/* Images */}
+                            {/* Posters */}
                             <div className="border-t pt-6 flex flex-col md:flex-row justify-between items-end gap-6">
                                 <div className="text-xs text-gray-500 space-y-1">
                                     <p><strong>Created:</strong> {new Date(movie.created_at).toLocaleString()}</p>

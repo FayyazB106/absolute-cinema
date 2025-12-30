@@ -28,7 +28,7 @@ export default function MoviesEdit({ isOpen, onClose, onSuccess, movie }: Movies
         name_en: '', name_ar: '', desc_en: '', desc_ar: '',
         release_date: '', duration: 0, maturity_id: '', status_id: '', imdb_url: '',
         genres: [] as string[], actors: [] as string[], directors: [] as string[],
-        languages: [] as string[], subtitles: [] as string[]
+        languages: [] as string[], subtitles: [] as string[], is_featured: false
     });
 
     useEffect(() => {
@@ -52,7 +52,8 @@ export default function MoviesEdit({ isOpen, onClose, onSuccess, movie }: Movies
                 actors: movie.actors?.map((a: any) => a.id.toString()) || [],
                 directors: movie.directors?.map((d: any) => d.id.toString()) || [],
                 languages: movie.audio_languages?.map((l: any) => l.id.toString()) || [],
-                subtitles: movie.subtitles?.map((s: any) => s.id.toString()) || []
+                subtitles: movie.subtitles?.map((s: any) => s.id.toString()) || [],
+                is_featured: movie.is_featured === 1 || movie.is_featured === true,
             });
         }
     }, [isOpen, movie]);
@@ -72,8 +73,10 @@ export default function MoviesEdit({ isOpen, onClose, onSuccess, movie }: Movies
             Object.keys(formData).forEach(key => {
                 const value = (formData as any)[key];
                 if (Array.isArray(value)) {
-                    // For arrays (genres, actors, etc.), append each item
                     value.forEach(item => data.append(`${key}[]`, item));
+                } else if (key === 'is_featured') {
+                    // Ensure it is sent as '1' or '0' (Strings in FormData)
+                    data.append('is_featured', formData.is_featured ? '1' : '0');
                 } else {
                     data.append(key, value);
                 }
@@ -251,11 +254,27 @@ export default function MoviesEdit({ isOpen, onClose, onSuccess, movie }: Movies
                                 </div>
                             </section>
 
-                            <div className="flex gap-4">
-                                <button type="button" onClick={onClose} className="flex-1 bg-gray-500 text-white font-bold py-3 rounded-xl hover:bg-gray-600 transition">
-                                    Cancel
-                                </button>
-                                <button onClick={handleSubmit} disabled={saving} className="flex-1 bg-green-600 text-white font-bold py-3 rounded-xl hover:bg-green-700 transition flex items-center justify-center gap-2">
+                            <div className="flex flex-row justify-between gap-4">
+                                <div className='flex flex-row gap-2 items-center'>
+                                    <label className="text-lg font-bold">Featured</label>
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            const hasFeaturedPoster = movie.featured_poster_url || featuredFile;
+                                            if (hasFeaturedPoster || formData.is_featured) {
+                                                setFormData({ ...formData, is_featured: !formData.is_featured });
+                                            }
+                                        }}
+                                        disabled={!movie.featured_poster_url && !featuredFile && !formData.is_featured}
+                                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${formData.is_featured ? 'bg-blue-600' : 'bg-gray-300'} ${!movie.featured_poster_url && !featuredFile && !formData.is_featured ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                    >
+                                        <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition ${formData.is_featured ? 'translate-x-6' : 'translate-x-1'}`} />
+                                    </button>
+                                    {!movie.featured_poster_url && !featuredFile && !formData.is_featured && (
+                                        <span className="text-xs text-gray-500 ml-2">Upload featured banner first</span>
+                                    )}
+                                </div>
+                                <button onClick={handleSubmit} disabled={saving} className="flex-1 bg-green-600 text-white font-bold py-3 rounded-xl hover:bg-green-700 max-w-50">
                                     {saving ? <Loader2 className="animate-spin" /> : "Update Movie"}
                                 </button>
                             </div>
