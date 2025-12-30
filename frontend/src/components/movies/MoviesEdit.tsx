@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
-import { X, Loader2, Upload } from 'lucide-react';
+import { X, Upload } from 'lucide-react';
 import MultiSelect from '../shared/MultiSelect';
 import { API_BASE_URL } from '../../constants/api';
 
@@ -86,7 +86,7 @@ export default function MoviesEdit({ isOpen, onClose, onSuccess, movie }: Movies
     };
 
     const validateForm = () => {
-        const newErrors: Record<string, string> = {};
+        const newErrors: Record<string, string> = { ...errors };
         const imdbRegex = /^https?:\/\/(www\.)?imdb\.com\/title\/tt\d+/i;
 
         if (!formData.name_en.trim()) newErrors.name_en = 'Required';
@@ -105,17 +105,56 @@ export default function MoviesEdit({ isOpen, onClose, onSuccess, movie }: Movies
         }
 
         setErrors(newErrors);
-        return Object.keys(newErrors).length === 0;
+        const hasErrors = Object.values(newErrors).some(error => error !== '' && error !== null);
+        return !hasErrors;
+    };
+
+    const validateImage = (file: File, config: { width?: number, minH?: number, maxH?: number, exactH?: number }): Promise<string | null> => {
+        return new Promise((resolve) => {
+            // 1. Check File Size (2MB)
+            if (file.size > 2048 * 1024) {
+                resolve("File is too large (Max 2MB)");
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = (e) => {
+                const img = new Image();
+                img.src = e.target?.result as string;
+                img.onload = () => {
+                    // Validate Width
+                    if (config.width && img.width !== config.width) {
+                        resolve(`Width must be exactly ${config.width}px (Current: ${img.width}px)`);
+                        return;
+                    }
+                    // Validate Height range
+                    if (config.minH && img.height < config.minH) {
+                        resolve(`Height must be at least ${config.minH}px`);
+                        return;
+                    }
+                    if (config.maxH && img.height > config.maxH) {
+                        resolve(`Height cannot exceed ${config.maxH}px`);
+                        return;
+                    }
+                    // Validate Exact Height
+                    if (config.exactH && img.height !== config.exactH) {
+                        resolve(`Height must be exactly ${config.exactH}px`);
+                        return;
+                    }
+                    resolve(null); // No errors
+                };
+            };
+        });
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
         setErrors({});
         if (!validateForm()) {
             modalRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
             return;
         };
-
-        e.preventDefault();
         setSaving(true);
 
         try {
@@ -136,8 +175,8 @@ export default function MoviesEdit({ isOpen, onClose, onSuccess, movie }: Movies
                 }
             });
 
-            if (posterFile) data.append('poster', posterFile);
-            if (featuredFile) data.append('featured', featuredFile);
+            if (posterFile) data.append('poster_url', posterFile);
+            if (featuredFile) data.append('featured_poster_url', featuredFile);
 
             data.append('_method', 'PUT');
 
@@ -372,14 +411,29 @@ export default function MoviesEdit({ isOpen, onClose, onSuccess, movie }: Movies
                                         <label className="cursor-pointer text-center w-full">
                                             <Upload className="mx-auto mb-2 text-gray-400" size={32} />
                                             <span className="block font-bold">Main Poster</span>
-                                            <span className="text-xs text-gray-500">JPG, PNG (Max 2MB)</span>
+                                            <span className="block text-xs text-gray-500">JPG, JPEG, PNG (Max 2MB)</span>
+                                            <span className="text-xs text-gray-500">Must be 1000 x 1500</span>
                                             <input
                                                 type="file"
                                                 className="hidden"
-                                                onChange={e => setPosterFile(e.target.files?.[0] || null)}
+                                                accept="image/jpeg,image/png,image/jpg"
+                                                onChange={async (e) => {
+                                                    const file = e.target.files?.[0] || null;
+                                                    if (file) {
+                                                        const error = await validateImage(file, { width: 1000, minH: 1400, maxH: 1600 });
+                                                        if (error) {
+                                                            setErrors(prev => ({ ...prev, poster_url: error }));
+                                                            setPosterFile(null);
+                                                        } else {
+                                                            setPosterFile(file);
+                                                            setErrors(prev => ({ ...prev, poster_url: '' }));
+                                                        }
+                                                    }
+                                                }}
                                             />
                                         </label>
-                                        {posterFile && <p className="mt-2 text-sm text-green-600 font-medium">{posterFile.name}</p>}
+                                        {errors.poster_url && <span className="text-red-500 text-xs mt-2">{errors.poster_url}</span>}
+                                        {posterFile && <p className="mt-2 text-sm text-green-600 font-medium truncate max-w-[200px]">{posterFile.name}</p>}
                                     </div>
 
                                     {/* Featured Poster Upload */}
@@ -387,14 +441,29 @@ export default function MoviesEdit({ isOpen, onClose, onSuccess, movie }: Movies
                                         <label className="cursor-pointer text-center w-full">
                                             <Upload className="mx-auto mb-2 text-gray-400" size={32} />
                                             <span className="block font-bold">Featured Banner</span>
-                                            <span className="text-xs text-gray-500">Wide format recommended</span>
+                                            <span className="block text-xs text-gray-500">JPG, JPEG, PNG (Max 2MB)</span>
+                                            <span className="text-xs text-gray-500">Must be 1920 x 1080</span>
                                             <input
                                                 type="file"
                                                 className="hidden"
-                                                onChange={e => setFeaturedFile(e.target.files?.[0] || null)}
+                                                accept="image/jpeg,image/png,image/jpg"
+                                                onChange={async (e) => {
+                                                    const file = e.target.files?.[0] || null;
+                                                    if (file) {
+                                                        const error = await validateImage(file, { width: 1920, exactH: 1080 });
+                                                        if (error) {
+                                                            setErrors(prev => ({ ...prev, featured_poster_url: error }));
+                                                            setFeaturedFile(null);
+                                                        } else {
+                                                            setFeaturedFile(file);
+                                                            setErrors(prev => ({ ...prev, featured_poster_url: '' }));
+                                                        }
+                                                    }
+                                                }}
                                             />
                                         </label>
-                                        {featuredFile && <p className="mt-2 text-sm text-green-600 font-medium">{featuredFile.name}</p>}
+                                        {errors.featured_poster_url && <span className="text-red-500 text-xs mt-2">{errors.featured_poster_url}</span>}
+                                        {featuredFile && <p className="mt-2 text-sm text-green-600 font-medium truncate max-w-[200px]">{featuredFile.name}</p>}
                                     </div>
                                 </div>
                             </section>
@@ -420,7 +489,7 @@ export default function MoviesEdit({ isOpen, onClose, onSuccess, movie }: Movies
                                     )}
                                 </div>
                                 <button onClick={handleSubmit} disabled={saving} className="flex-1 bg-green-600 text-white font-bold py-3 rounded-xl hover:bg-green-700 max-w-50">
-                                    {saving ? <Loader2 className="animate-spin" /> : "Update Movie"}
+                                    Update Movie
                                 </button>
                             </div>
                         </div>

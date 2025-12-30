@@ -103,8 +103,8 @@ class MovieController extends Controller
                 'subtitles' => 'nullable|array',
                 'subtitles.*' => 'exists:languages,id',
                 // Image related data
-                'poster_url' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
-                'featured_poster_url' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+                'poster_url' => 'nullable|image|mimes:jpeg,png,jpg|max:2048|dimensions:width=1000,min_height=1400,max_height=1600',
+                'featured_poster_url' => 'nullable|image|mimes:jpeg,png,jpg|max:2048|dimensions:width=1920,max_height=1080',
                 'is_featured' => 'nullable|boolean'
             ]);
 
@@ -215,8 +215,8 @@ class MovieController extends Controller
                 'subtitles' => 'nullable|array',
                 'subtitles.*' => 'exists:languages,id',
                 // Image related data
-                'poster_url' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
-                'featured_poster_url' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+                'poster_url' => 'nullable|image|mimes:jpeg,png,jpg|max:2048|dimensions:width=1000,min_height=1400,max_height=1600',
+                'featured_poster_url' => 'nullable|image|mimes:jpeg,png,jpg|max:2048|dimensions:width=1920,max_height=1080',
                 'is_featured' => 'nullable|boolean'
             ]);
 

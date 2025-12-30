@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { X, Calendar, Clock, Globe, Star, Users, Video, Film, Subtitles, Trash2, ImageIcon } from 'lucide-react';
+import { X, Calendar, Clock, Globe, Star, Users, Video, Film, Subtitles, Trash2, ImageIcon, UserRound } from 'lucide-react';
 import { Pencil } from 'lucide-react';
 import MoviesEdit from './MoviesEdit';
 import { API_BASE_URL } from '../../constants/api';
@@ -74,8 +74,8 @@ export default function MoviesView({ isOpen, onClose, movieId, onMovieDeleted }:
 
                 if (res.ok) {
                     alert("Movie deleted successfully");
-                    onMovieDeleted(); // 2. Call the prop here
-                    onClose();        // 3. Close the modal since the movie is gone
+                    onMovieDeleted();
+                    onClose();
                 } else {
                     alert("Failed to delete the movie");
                 }
@@ -90,16 +90,16 @@ export default function MoviesView({ isOpen, onClose, movieId, onMovieDeleted }:
     return (
         <div className="fixed inset-0 flex items-center justify-center z-50 p-4 overflow-y-auto no-scrollbar">
             <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full my-8 max-h-[90vh] overflow-y-auto no-scrollbar">
-                {/* 3. The Image Preview Popup (Overlay) */}
+                {/* The Image Preview Popup (Overlay) */}
                 {previewImage && (
-                    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/90 p-10">
+                    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/90 p-10" onClick={() => setPreviewImage(null)}>
                         <button
                             onClick={() => setPreviewImage(null)}
                             className="absolute top-5 right-5 text-white bg-white/20 p-2 rounded-full hover:bg-white/40"
                         >
                             <X size={32} />
                         </button>
-                        <div className="text-center">
+                        <div className="text-center" onClick={(e) => e.stopPropagation()}>
                             <h3 className="text-white text-xl font-bold mb-4">{previewImage.title}</h3>
                             <img
                                 src={previewImage.url}
@@ -192,8 +192,8 @@ export default function MoviesView({ isOpen, onClose, movieId, onMovieDeleted }:
 
                                 <div className="bg-green-50 p-4 rounded-lg border border-green-200 text-center">
                                     <div className="flex justify-center items-center gap-2 text-green-700 mb-1">
-                                        <Star size={18} />
-                                        <span className="text-xs font-semibold uppercase">Maturity</span>
+                                        <UserRound  size={18} />
+                                        <span className="text-xs font-semibold uppercase">Rated</span>
                                     </div>
                                     <p className="text-lg font-bold">
                                         {movie.maturity_ratings?.maturity_rating || 'N/A'}
@@ -365,14 +365,17 @@ export default function MoviesView({ isOpen, onClose, movieId, onMovieDeleted }:
                                     <p><strong>Last Updated:</strong> {new Date(movie.updated_at).toLocaleString()}</p>
                                     <p><strong>Movie ID:</strong> {movie.id}</p>
                                 </div>
-                                <div>
-                                    <a href={movie.imdb_url} target="_blank" rel="noopener noreferrer"
-                                        className="inline-flex items-center gap-2 bg-yellow-500 hover:bg-yellow-600 text-white font-bold px-6 py-3 rounded-lg transition"
-                                    >
-                                        <Star size={20} />
-                                        View on IMDB
-                                    </a>
-                                </div>
+                                {movie.imdb_url && (
+                                    <div>
+                                        <a href={movie.imdb_url} target="_blank" rel="noopener noreferrer"
+                                            className="inline-flex items-center gap-2 bg-yellow-500 hover:bg-yellow-600 text-white font-bold px-6 py-3 rounded-lg transition"
+                                        >
+                                            <Star size={20} />
+                                            View on IMDB
+                                        </a>
+                                    </div>
+                                )}
+
                             </div>
                         </div>
                     ) : null}
