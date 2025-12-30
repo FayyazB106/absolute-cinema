@@ -108,11 +108,13 @@ export default function Movies() {
                 </div>
             )}
 
+            {isAddModalOpen && (
             <MoviesAdd
                 isOpen={isAddModalOpen}
                 onClose={() => setIsAddModalOpen(false)}
                 onSuccess={fetchMovies}
             />
+            )}
 
             <MoviesView
                 isOpen={isViewModalOpen}

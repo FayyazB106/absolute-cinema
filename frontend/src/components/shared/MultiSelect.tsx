@@ -14,9 +14,10 @@ interface MultiSelectProps {
     selected: string[];
     onChange: (selected: string[]) => void;
     placeholder?: string;
+    error?: string;
 }
 
-export default function MultiSelect({ label, options, selected, onChange, placeholder }: MultiSelectProps) {
+export default function MultiSelect({ label, options, selected, onChange, placeholder, error }: MultiSelectProps) {
     const [isOpen, setIsOpen] = useState(false);
     const [search, setSearch] = useState('');
 
@@ -57,11 +58,9 @@ export default function MultiSelect({ label, options, selected, onChange, placeh
             <button
                 type="button"
                 onClick={() => setIsOpen(!isOpen)}
-                className="border rounded p-3 flex justify-between items-center bg-white hover:bg-gray-50 transition"
+                className={`border ${error ? 'border-red-500' : ''} rounded p-3 flex justify-between items-center bg-white hover:bg-gray-50 transition`}
             >
-                <span className={selected.length === 0 ? 'text-gray-400' : 'text-gray-900'}>
-                    {getDisplayText()}
-                </span>
+                <span>{getDisplayText()}</span>
                 {isOpen ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
             </button>
 

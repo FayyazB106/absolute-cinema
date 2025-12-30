@@ -86,7 +86,11 @@ class MovieController extends Controller
                 'duration' => 'nullable|integer|min:0',
                 'maturity_id' => 'required|exists:maturity_ratings,id',
                 'status_id' => 'required|exists:statuses,id',
-                'imdb_url' => 'nullable|url',
+                'imdb_url' => [
+                    'nullable',
+                    'url',
+                    'regex:/^https?:\/\/(www\.)?imdb\.com\/title\/tt\d+/i'
+                ],
                 // Pivot IDs
                 'genres' => 'nullable|array',
                 'genres.*' => 'exists:genres,id',
@@ -94,7 +98,7 @@ class MovieController extends Controller
                 'actors.*' => 'exists:actors,id',
                 'directors' => 'nullable|array',
                 'directors.*' => 'exists:directors,id',
-                'languages' => 'nullable|array',
+                'languages' => 'required|array|min:1',
                 'languages.*' => 'exists:languages,id',
                 'subtitles' => 'nullable|array',
                 'subtitles.*' => 'exists:languages,id',
@@ -194,7 +198,11 @@ class MovieController extends Controller
                 'duration' => 'nullable|integer|min:0',
                 'maturity_id' => 'required|exists:maturity_ratings,id',
                 'status_id' => 'required|exists:statuses,id',
-                'imdb_url' => 'nullable|url',
+                'imdb_url' => [
+                    'nullable',
+                    'url',
+                    'regex:/^https?:\/\/(www\.)?imdb\.com\/title\/tt\d+/i'
+                ],
                 // Pivot IDs
                 'genres' => 'nullable|array',
                 'genres.*' => 'exists:genres,id',
