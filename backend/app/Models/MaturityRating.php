@@ -9,6 +9,11 @@ class MaturityRating extends Model
 {
     protected $fillable = [
         'maturity_rating',
+        'name_en',
+        'name_ar',
+        'desc_en',
+        'desc_ar',
+        'ranking',
     ];
 
     public function movies(): HasMany

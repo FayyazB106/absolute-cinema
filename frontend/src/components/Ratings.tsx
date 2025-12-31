@@ -4,15 +4,28 @@ import { API_BASE_URL } from '../constants/api';
 
 interface Ratings {
     id: number;
+    ranking: number,
     maturity_rating: string;
+    name_en: string;
+    name_ar: string;
 }
 
 export default function Ratings() {
     const [ratings, setRatings] = useState<Ratings[]>([]);
     const [loading, setLoading] = useState(true);
-    const [newRatings, setNewRatings] = useState({ maturity_rating: '' });
+    const [newRatings, setNewRatings] = useState({
+        maturity_rating: '',
+        name_en: '',
+        name_ar: '',
+        ranking: 1
+    });
     const [editingId, setEditingId] = useState<number | null>(null);
-    const [editForm, setEditForm] = useState({ maturity_rating: '' });
+    const [editForm, setEditForm] = useState({
+        maturity_rating: '',
+        name_en: '',
+        name_ar: '',
+        ranking: 1
+    });
 
     const fetchRatings = async () => {
         try {
@@ -36,7 +49,7 @@ export default function Ratings() {
             body: JSON.stringify(newRatings),
         });
         if (res.ok) {
-            setNewRatings({ maturity_rating: '' });
+            setNewRatings({ ...newRatings });
             fetchRatings();
         }
     };
@@ -71,8 +84,27 @@ export default function Ratings() {
                     <input
                         placeholder="Maturity Rating"
                         className="flex-1 p-2 border rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"
+                        value={newRatings.ranking}
+                        onChange={(e) => setNewRatings({ ...newRatings, ranking: Number(e.target.value) })}
+                    />
+                    <input
+                        placeholder="Maturity Rating"
+                        className="flex-1 p-2 border rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"
                         value={newRatings.maturity_rating}
                         onChange={(e) => setNewRatings({ ...newRatings, maturity_rating: e.target.value })}
+                    />
+                    <input
+                        placeholder="Name EN"
+                        className="flex-1 p-2 border rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"
+                        value={newRatings.name_en}
+                        onChange={(e) => setNewRatings({ ...newRatings, name_en: e.target.value })}
+                    />
+                    <input
+                        placeholder="Name AR"
+                        className="flex-1 p-2 border rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"
+                        value={newRatings.name_ar}
+                        dir="rtl"
+                        onChange={(e) => setNewRatings({ ...newRatings, name_ar: e.target.value })}
                     />
                     <button onClick={handleAdd} className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2 transition">
                         <Plus size={18} /> Add
@@ -84,7 +116,10 @@ export default function Ratings() {
                     <table className="w-full text-left">
                         <thead className="bg-gray-50 border-b">
                             <tr>
+                                <th className="px-6 py-4 font-bold text-gray-700">Ranking</th>
                                 <th className="px-6 py-4 font-bold text-gray-700">Maturity Ratings</th>
+                                <th className="px-6 py-4 font-bold text-gray-700">Name EN</th>
+                                <th className="px-6 py-4 font-bold text-gray-700">Name AR</th>
                                 <th className="px-6 py-4 font-bold text-gray-700 text-center w-32">Actions</th>
                             </tr>
                         </thead>
@@ -93,7 +128,16 @@ export default function Ratings() {
                                 <tr><td colSpan={3} className="text-center py-10 animate-pulse text-gray-400">Loading maturities...</td></tr>
                             ) : ratings.map(ratings => (
                                 <tr key={ratings.id} className="hover:bg-gray-50 transition">
-                                    <td className="px-6 py-4 text-gray-900">
+                                    <td className="px-6 py-4 text-gray-900 text-center">
+                                        {editingId === ratings.id ? (
+                                            <input
+                                                value={editForm.ranking}
+                                                onChange={(e) => setEditForm({ ...editForm, ranking: Number(e.target.value) })}
+                                                className="border rounded px-2 py-1 w-full"
+                                            />
+                                        ) : ratings.ranking}
+                                    </td>
+                                    <td className="px-6 py-4 text-gray-900 text-center">
                                         {editingId === ratings.id ? (
                                             <input
                                                 value={editForm.maturity_rating}
@@ -101,6 +145,25 @@ export default function Ratings() {
                                                 className="border rounded px-2 py-1 w-full"
                                             />
                                         ) : ratings.maturity_rating}
+                                    </td>
+                                    <td className="px-6 py-4 text-gray-900">
+                                        {editingId === ratings.id ? (
+                                            <input
+                                                value={editForm.name_en}
+                                                onChange={(e) => setEditForm({ ...editForm, name_en: e.target.value })}
+                                                className="border rounded px-2 py-1 w-full"
+                                            />
+                                        ) : ratings.name_en}
+                                    </td>
+                                    <td className="px-6 py-4 text-gray-900" dir="rtl">
+                                        {editingId === ratings.id ? (
+                                            <input
+                                                value={editForm.name_ar}
+                                                onChange={(e) => setEditForm({ ...editForm, name_ar: e.target.value })}
+                                                className="border rounded px-2 py-1 w-full"
+                                                dir="rtl"
+                                            />
+                                        ) : ratings.name_ar}
                                     </td>
                                     <td className="px-6 py-4">
                                         <div className="flex justify-center gap-2">
@@ -114,7 +177,7 @@ export default function Ratings() {
                                                     <button
                                                         onClick={() => {
                                                             setEditingId(ratings.id);
-                                                            setEditForm({ maturity_rating: ratings.maturity_rating });
+                                                            setEditForm({ ...ratings });
                                                         }}
                                                         className="text-amber-500 hover:bg-amber-50 p-2 rounded-full transition"
                                                     >

@@ -12,15 +12,38 @@ interface Movie {
     audio_languages: Array<{ id: number, name_en: string, code: string; }>;
     poster_full_url: string | null;
     is_featured: boolean;
+    maturity_id: number;
+}
+
+interface Ratings {
+    id: number;
+    ranking: number,
+    maturity_rating: string;
+    name_en: string;
+    name_ar: string;
 }
 
 // Main Movies Component
 export default function Movies() {
     const [movies, setMovies] = useState<Movie[]>([]);
+    const [ratings, setRatings] = useState<Ratings[]>([]);
     const [loading, setLoading] = useState(true);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [isViewModalOpen, setIsViewModalOpen] = useState(false);
     const [selectedMovieId, setSelectedMovieId] = useState<number | null>(null);
+
+    const fetchRatings = async () => {
+        try {
+            const res = await fetch(`${API_BASE_URL}/ratings`);
+            const data = await res.json();
+            setRatings(data);
+        } catch (err) {
+            console.error("Failed to fetch maturity ratings", err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
 
     const fetchMovies = () => {
         setLoading(true);
@@ -38,7 +61,12 @@ export default function Movies() {
 
     useEffect(() => {
         fetchMovies();
+        fetchRatings();
     }, []);
+
+    const getRatingName = (id: number) => {
+        return ratings.find(m => m.id === id)?.maturity_rating || '';
+    };
 
     const handleViewMovie = (movieId: number) => {
         setSelectedMovieId(movieId);
@@ -80,16 +108,21 @@ export default function Movies() {
                                 <span className="text-gray-500 font-bold text-lg">N/A</span>
                             </div>
                         )}
-                        <div className='bg-white p-6 flex flex-col gap-2 text-center rounded-b-xl'>
+                        <div className='h-full bg-white p-6 flex flex-col gap-2 text-center rounded-b-xl'>
                             <h3 className="text-lg font-bold line-clamp-2">{movie.name_en}</h3>
-                            <p className="text-sm">
-                                <span className="font-semibold">Release: </span>
-                                {new Date(movie.release_date).toLocaleDateString("en-GB", {
-                                    day: 'numeric',
-                                    month: 'short',
-                                    year: 'numeric'
-                                })}
-                            </p>
+                            <div className='flex flex-wrap gap-2 justify-center'>
+                                {(() => {
+                                    const ratingLabel = getRatingName(movie.maturity_id);
+                                    if (ratingLabel.toUpperCase().startsWith('R')) {
+                                        return (
+                                            <p className="bg-red-600 text-white px-3 py-1 rounded-full text-xs font-black">
+                                                {ratingLabel}
+                                            </p>
+                                        );
+                                    }
+                                })()}
+                            </ div>
+
                             <div className='flex flex-wrap gap-2 justify-center'>
                                 {movie.audio_languages.map(lang => (
                                     <p key={lang.id} className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-semibold">
@@ -102,18 +135,20 @@ export default function Movies() {
                 ))}
             </div>
 
-            {movies.length === 0 && (
-                <div className="text-center py-12">
-                    <p className="text-xl">No movies found. Add your first movie!</p>
-                </div>
-            )}
+            {
+                movies.length === 0 && (
+                    <div className="text-center py-12">
+                        <p className="text-xl">No movies found. Add your first movie!</p>
+                    </div>
+                )
+            }
 
             {isAddModalOpen && (
-            <MoviesAdd
-                isOpen={isAddModalOpen}
-                onClose={() => setIsAddModalOpen(false)}
-                onSuccess={fetchMovies}
-            />
+                <MoviesAdd
+                    isOpen={isAddModalOpen}
+                    onClose={() => setIsAddModalOpen(false)}
+                    onSuccess={fetchMovies}
+                />
             )}
 
             <MoviesView

@@ -331,7 +331,7 @@ export default function MoviesEdit({ isOpen, onClose, onSuccess, movie }: Movies
                                             required
                                         >
                                             <option value="">Select...</option>
-                                            {options.maturity_ratings.map(m => <option key={m.id} value={m.id}>{m.maturity_rating}</option>)}
+                                            {options.maturity_ratings.sort((a, b) => a.ranking - b.ranking).map(m => <option key={m.id} value={m.id}>{m.maturity_rating}</option>)}
                                         </select>
                                         {errors.maturity_id && <span className="text-red-500 text-sm mt-1">{errors.maturity_id}</span>}
                                     </div>

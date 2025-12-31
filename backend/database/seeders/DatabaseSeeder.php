@@ -31,9 +31,9 @@ class DatabaseSeeder extends Seeder
 
         // 2. Maturity Ratings
         \App\Models\MaturityRating::insert([
-            ['maturity_rating' => 'G'],
-            ['maturity_rating' => 'PG-13'],
-            ['maturity_rating' => 'R']
+            ['maturity_rating' => 'G', 'ranking' => 1],
+            ['maturity_rating' => 'PG-13', 'ranking' => 2],
+            ['maturity_rating' => 'R', 'ranking' => 3]
         ]);
 
         // 3. Some Genres
