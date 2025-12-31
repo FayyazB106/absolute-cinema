@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Movie;
+use App\Http\Requests\MovieRequest;
 
 class MovieController extends Controller
 {
@@ -73,40 +74,11 @@ class MovieController extends Controller
     }
 
     // Create a new movie
-    public function store(Request $request)
+    public function store(MovieRequest $request)
     {
         try {
             // 1. Validate incoming data
-            $validated = $request->validate([
-                'name_en' => 'required|string|max:255',
-                'name_ar' => 'required|string|max:255',
-                'desc_en' => 'required|string',
-                'desc_ar' => 'required|string',
-                'release_date' => 'required|date',
-                'duration' => 'nullable|integer|min:0',
-                'maturity_id' => 'required|exists:maturity_ratings,id',
-                'status_id' => 'required|exists:statuses,id',
-                'imdb_url' => [
-                    'nullable',
-                    'url',
-                    'regex:/^https?:\/\/(www\.)?imdb\.com\/title\/tt\d+/i'
-                ],
-                // Pivot IDs
-                'genres' => 'nullable|array',
-                'genres.*' => 'exists:genres,id',
-                'actors' => 'nullable|array',
-                'actors.*' => 'exists:actors,id',
-                'directors' => 'nullable|array',
-                'directors.*' => 'exists:directors,id',
-                'languages' => 'required|array|min:1',
-                'languages.*' => 'exists:languages,id',
-                'subtitles' => 'nullable|array',
-                'subtitles.*' => 'exists:languages,id',
-                // Image related data
-                'poster_url' => 'nullable|image|mimes:jpeg,png,jpg|max:2048|dimensions:width=1000,min_height=1400,max_height=1600',
-                'featured_poster_url' => 'nullable|image|mimes:jpeg,png,jpg|max:2048|dimensions:width=1920,max_height=1080',
-                'is_featured' => 'nullable|boolean'
-            ]);
+            $validated = $request->validated();
 
             // 2. Upload files
             $posterPath = null;
@@ -170,11 +142,6 @@ class MovieController extends Controller
                 'message' => 'Movie created successfully',
                 'data' => $movie
             ], 201);
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            return response()->json([
-                'error' => 'Validation failed',
-                'errors' => $e->errors()
-            ], 422);
         } catch (\Exception $e) {
             return response()->json([
                 'error' => 'Failed to create movie',
@@ -184,41 +151,11 @@ class MovieController extends Controller
     }
 
     // Edit movie info
-    public function update(Request $request, $id)
+    public function update(MovieRequest $request, $id)
     {
         try {
             $movie = Movie::findOrFail($id);
-
-            $validated = $request->validate([
-                'name_en' => 'required|string|max:255',
-                'name_ar' => 'required|string|max:255',
-                'desc_en' => 'required|string',
-                'desc_ar' => 'required|string',
-                'release_date' => 'required|date',
-                'duration' => 'nullable|integer|min:0',
-                'maturity_id' => 'required|exists:maturity_ratings,id',
-                'status_id' => 'required|exists:statuses,id',
-                'imdb_url' => [
-                    'nullable',
-                    'url',
-                    'regex:/^https?:\/\/(www\.)?imdb\.com\/title\/tt\d+/i'
-                ],
-                // Pivot IDs
-                'genres' => 'nullable|array',
-                'genres.*' => 'exists:genres,id',
-                'actors' => 'nullable|array',
-                'actors.*' => 'exists:actors,id',
-                'directors' => 'nullable|array',
-                'directors.*' => 'exists:directors,id',
-                'languages' => 'nullable|array',
-                'languages.*' => 'exists:languages,id',
-                'subtitles' => 'nullable|array',
-                'subtitles.*' => 'exists:languages,id',
-                // Image related data
-                'poster_url' => 'nullable|image|mimes:jpeg,png,jpg|max:2048|dimensions:width=1000,min_height=1400,max_height=1600',
-                'featured_poster_url' => 'nullable|image|mimes:jpeg,png,jpg|max:2048|dimensions:width=1920,max_height=1080',
-                'is_featured' => 'nullable|boolean'
-            ]);
+            $validated = $request->validated();
 
             // Handle New Poster
             if ($request->hasFile('poster_url')) {
@@ -270,8 +207,6 @@ class MovieController extends Controller
                 'message' => 'Movie updated successfully',
                 'data' => $movie->load(['genres', 'actors', 'directors', 'audioLanguages', 'subtitles'])
             ]);
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            return response()->json(['error' => 'Validation failed', 'errors' => $e->errors()], 422);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Update failed', 'message' => $e->getMessage()], 500);
         }

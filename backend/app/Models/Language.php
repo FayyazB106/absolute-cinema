@@ -2,23 +2,11 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-
-class Language extends Model
+class Language extends BaseModel
 {
     protected $fillable = [
         'name_en',
         'name_ar',
         'code',
     ];
-
-    /**
-     * Relationship: An Language can be in many Movies.
-     */
-    public function movies(): BelongsToMany
-    {
-        // Laravel looks for language_movie table by default
-        return $this->belongsToMany(Movie::class);
-    }
 }
