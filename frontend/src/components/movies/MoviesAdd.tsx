@@ -1,116 +1,44 @@
 import { useEffect, useState, useRef } from 'react';
 import { X, Upload } from 'lucide-react';
 import MultiSelect from '../shared/MultiSelect';
-import { API_BASE_URL } from '../../constants/api';
+import type { Options } from '../../types/movie';
+import { INITIAL_MOVIE_FORM_STATE, type MovieFormData } from '../../types/movieForm';
+import { movieService } from '../../services/movieService';
+import { validateMovie, validateImage } from '../../utils/validation';
 
-interface Options {
-    genres: any[];
-    actors: any[];
-    directors: any[];
-    languages: any[];
-    maturity_ratings: any[];
-    statuses: any[];
+interface MoviesAddProps {
+    isOpen: boolean;
+    onClose: () => void;
+    onSuccess: () => void;
 }
 
-export default function MoviesAdd({ isOpen, onClose, onSuccess }: { isOpen: boolean; onClose: () => void; onSuccess: () => void }) {
+export default function MoviesAdd({ isOpen, onClose, onSuccess }: MoviesAddProps) {
     const modalRef = useRef<HTMLDivElement>(null);
     const [options, setOptions] = useState<Options | null>(null);
+    const [isOptionsLoading, setIsOptionsLoading] = useState(false);
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [posterFile, setPosterFile] = useState<File | null>(null);
     const [featuredFile, setFeaturedFile] = useState<File | null>(null);
-    const [formData, setFormData] = useState({
-        name_en: '',
-        name_ar: '',
-        desc_en: '',
-        desc_ar: '',
-        release_date: '',
-        imdb_url: '',
-        duration: '',
-        maturity_id: '',
-        status_id: '',
-        genres: [] as string[],
-        actors: [] as string[],
-        directors: [] as string[],
-        languages: [] as string[],
-        subtitles: [] as string[],
-        is_featured: false
-    });
+    const [formData, setFormData] = useState<MovieFormData>(INITIAL_MOVIE_FORM_STATE);
 
     useEffect(() => {
         if (isOpen) {
-            fetch(`${API_BASE_URL}/movie-options`)
-                .then(res => res.json())
-                .then(data => setOptions(data))
-                .catch(err => console.error("Could not fetch options", err));
-        }
-    }, [isOpen]);
-
-    const validateForm = () => {
-        const newErrors: Record<string, string> = { ...errors };
-        const imdbRegex = /^https?:\/\/(www\.)?imdb\.com\/title\/tt\d+/i;
-
-        if (!formData.name_en.trim()) newErrors.name_en = 'Required';
-        if (!formData.name_ar.trim()) newErrors.name_ar = 'Required';
-        if (!formData.desc_en.trim()) newErrors.desc_en = 'Required';
-        if (!formData.desc_ar.trim()) newErrors.desc_ar = 'Required';
-        if (!formData.release_date) newErrors.release_date = 'Required';
-        if (!formData.maturity_id) newErrors.maturity_id = 'Required';
-        if (!formData.status_id) newErrors.status_id = 'Required';
-        if (formData.languages.length === 0) newErrors.languages = 'At least one language is required';
-        if (formData.imdb_url && !imdbRegex.test(formData.imdb_url)) { newErrors.imdb_url = 'Invalid IMDb URL'; }
-        if (formData.duration !== '') {
-            const durationNum = Number(formData.duration);
-            if (durationNum < 0) { newErrors.duration = 'Must be a positive number'; }
-            else if (!Number.isInteger(durationNum)) { newErrors.duration = 'Decimals are not allowed'; }
-        }
-
-        setErrors(newErrors);
-        const hasErrors = Object.values(newErrors).some(error => error !== '' && error !== null);
-        return !hasErrors;
-    };
-
-    const validateImage = (file: File, config: { width?: number, minH?: number, maxH?: number, exactH?: number }): Promise<string | null> => {
-        return new Promise((resolve) => {
-            // 1. Check File Size (2MB)
-            if (file.size > 2048 * 1024) {
-                resolve("File is too large (Max 2MB)");
-                return;
+            try {
+                movieService.getOptions()
+                    .then(data => setOptions(data))
+                    .catch(err => console.error("Error fetching options", err));
+            } catch (err) {
+                console.error("Could not fetch options", err);
+                alert("Failed to load form options. Please try again.");
+            } finally {
+                setIsOptionsLoading(false);
             }
-
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = (e) => {
-                const img = new Image();
-                img.src = e.target?.result as string;
-                img.onload = () => {
-                    // Validate Width
-                    if (config.width && img.width !== config.width) {
-                        resolve(`Width must be exactly ${config.width}px (Current: ${img.width}px)`);
-                        return;
-                    }
-                    // Validate Height range
-                    if (config.minH && img.height < config.minH) {
-                        resolve(`Height must be at least ${config.minH}px`);
-                        return;
-                    }
-                    if (config.maxH && img.height > config.maxH) {
-                        resolve(`Height cannot exceed ${config.maxH}px`);
-                        return;
-                    }
-                    // Validate Exact Height
-                    if (config.exactH && img.height !== config.exactH) {
-                        resolve(`Height must be exactly ${config.exactH}px`);
-                        return;
-                    }
-                    resolve(null); // No errors
-                };
-            };
-        });
-    };
+        };
+    }, [isOpen]);
 
     const handleSubmit = async () => {
         setErrors({});
-        if (!validateForm()) {
+        if (!validateMovie(formData)) {
             modalRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
             return;
         };
@@ -137,12 +65,7 @@ export default function MoviesAdd({ isOpen, onClose, onSuccess }: { isOpen: bool
             if (posterFile) data.append('poster_url', posterFile);
             if (featuredFile) data.append('featured_poster_url', featuredFile);
 
-            const response = await fetch(`${API_BASE_URL}/movies`, {
-                method: 'POST',
-                // NOTE: Do NOT set Content-Type header manually when sending FormData
-                // The browser will automatically set it to 'multipart/form-data' with the correct boundary
-                body: data
-            });
+            const response = await movieService.createMovie(data);
 
             if (response.ok) {
                 alert("Movie Created Successfully!");
@@ -184,7 +107,12 @@ export default function MoviesAdd({ isOpen, onClose, onSuccess }: { isOpen: bool
                     </button>
                 </div>
 
-                {!options ? (
+                {isOptionsLoading ? (
+                    <div className="p-20 text-center flex flex-col items-center justify-center">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-700 mb-4" />
+                        <p className="text-gray-500 font-medium">Loading...</p>
+                    </div>
+                ) : !options ? (
                     <div className="p-10 text-center">Loading...</div>
                 ) : (
                     <div className="p-8">
@@ -194,6 +122,7 @@ export default function MoviesAdd({ isOpen, onClose, onSuccess }: { isOpen: bool
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div className="flex flex-col">
                                         <input
+                                            name="name_en"
                                             type="text"
                                             placeholder="Movie Name (EN) *"
                                             className={`border rounded p-3 ${errors.name_en ? 'border-red-500' : ''}`}
@@ -208,6 +137,7 @@ export default function MoviesAdd({ isOpen, onClose, onSuccess }: { isOpen: bool
                                     </div>
                                     <div className="flex flex-col">
                                         <input
+                                            name="name_ar"
                                             type="text"
                                             placeholder="اسم الفيلم (AR) *"
                                             className={`border rounded p-3 text-right ${errors.name_ar ? 'border-red-500' : ''}`}
@@ -223,6 +153,7 @@ export default function MoviesAdd({ isOpen, onClose, onSuccess }: { isOpen: bool
                                     </div>
                                     <div className="flex flex-col">
                                         <textarea
+                                            name="desc_en"
                                             placeholder="Description (EN) *"
                                             className={`border rounded p-3 h-24 ${errors.desc_en ? 'border-red-500' : ''}`}
                                             value={formData.desc_en}
@@ -236,6 +167,7 @@ export default function MoviesAdd({ isOpen, onClose, onSuccess }: { isOpen: bool
                                     </div>
                                     <div className="flex flex-col">
                                         <textarea
+                                            name="desc_ar"
                                             placeholder="الوصف (AR) *"
                                             className={`border rounded p-3 h-24 ${errors.desc_ar ? 'border-red-500' : ''}`}
                                             value={formData.desc_ar}
@@ -257,6 +189,7 @@ export default function MoviesAdd({ isOpen, onClose, onSuccess }: { isOpen: bool
                                     <div className="flex flex-col">
                                         <label className="text-sm font-bold">Release Date *</label>
                                         <input
+                                            name="release_date"
                                             type="date"
                                             className={`border rounded p-2 ${errors.release_date ? 'border-red-500' : ''}`}
                                             value={formData.release_date}
@@ -271,6 +204,7 @@ export default function MoviesAdd({ isOpen, onClose, onSuccess }: { isOpen: bool
                                     <div className="flex flex-col">
                                         <label className="text-sm font-bold">IMDB URL</label>
                                         <input
+                                            name="imdb_url"
                                             type="url"
                                             placeholder="https://imdb.com/..."
                                             className={`border rounded p-2 ${errors.imdb_url ? 'border-red-500' : ''}`}
@@ -282,6 +216,7 @@ export default function MoviesAdd({ isOpen, onClose, onSuccess }: { isOpen: bool
                                     <div className="flex flex-col">
                                         <label className="text-sm font-bold">Duration (minutes)</label>
                                         <input
+                                            name="duration"
                                             type="number"
                                             min="0"
                                             step="1"
@@ -296,6 +231,7 @@ export default function MoviesAdd({ isOpen, onClose, onSuccess }: { isOpen: bool
                                     <div className="flex flex-col">
                                         <label className="text-sm font-bold">Maturity Rating *</label>
                                         <select
+                                            name="maturity_id"
                                             className={`border rounded p-2 hover:bg-gray-50 ${errors.maturity_id ? 'border-red-500' : ''}`}
                                             value={formData.maturity_id}
                                             onChange={e => {
@@ -312,6 +248,7 @@ export default function MoviesAdd({ isOpen, onClose, onSuccess }: { isOpen: bool
                                     <div className="flex flex-col">
                                         <label className="text-sm font-bold">Status *</label>
                                         <select
+                                            name="status_id"
                                             className={`border rounded p-2 hover:bg-gray-50 ${errors.status_id ? 'border-red-500' : ''}`}
                                             value={formData.status_id}
                                             onChange={e => {

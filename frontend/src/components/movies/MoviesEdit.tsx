@@ -1,16 +1,10 @@
 import { useEffect, useState, useRef } from 'react';
-import { X, Upload } from 'lucide-react';
+import { X, Upload, Loader2 } from 'lucide-react';
 import MultiSelect from '../shared/MultiSelect';
-import { API_BASE_URL } from '../../constants/api';
-
-interface Options {
-    genres: any[];
-    actors: any[];
-    directors: any[];
-    languages: any[];
-    maturity_ratings: any[];
-    statuses: any[];
-}
+import type { Options } from '../../types/movie';
+import { INITIAL_MOVIE_FORM_STATE, type MovieFormData } from '../../types/movieForm';
+import { movieService } from '../../services/movieService';
+import { validateMovie, validateImage } from '../../utils/validation';
 
 interface MoviesEditProps {
     isOpen: boolean;
@@ -26,28 +20,11 @@ export default function MoviesEdit({ isOpen, onClose, onSuccess, movie }: Movies
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [posterFile, setPosterFile] = useState<File | null>(null);
     const [featuredFile, setFeaturedFile] = useState<File | null>(null);
-    const [formData, setFormData] = useState({
-        name_en: '',
-        name_ar: '',
-        desc_en: '',
-        desc_ar: '',
-        release_date: '',
-        duration: '',
-        maturity_id: '',
-        status_id: '',
-        imdb_url: '',
-        genres: [] as string[],
-        actors: [] as string[],
-        directors: [] as string[],
-        languages: [] as string[],
-        subtitles: [] as string[],
-        is_featured: false
-    });
+    const [formData, setFormData] = useState<MovieFormData>(INITIAL_MOVIE_FORM_STATE);
 
     useEffect(() => {
         if (isOpen && movie) {
-            fetch(`${API_BASE_URL}/movie-options`)
-                .then(res => res.json())
+            movieService.getOptions()
                 .then(data => setOptions(data))
                 .catch(err => console.error("Error fetching options", err));
 
@@ -85,73 +62,10 @@ export default function MoviesEdit({ isOpen, onClose, onSuccess, movie }: Movies
         }
     };
 
-    const validateForm = () => {
-        const newErrors: Record<string, string> = { ...errors };
-        const imdbRegex = /^https?:\/\/(www\.)?imdb\.com\/title\/tt\d+/i;
-
-        if (!formData.name_en.trim()) newErrors.name_en = 'Required';
-        if (!formData.name_ar.trim()) newErrors.name_ar = 'Required';
-        if (!formData.desc_en.trim()) newErrors.desc_en = 'Required';
-        if (!formData.desc_ar.trim()) newErrors.desc_ar = 'Required';
-        if (!formData.release_date) newErrors.release_date = 'Required';
-        if (!formData.maturity_id) newErrors.maturity_id = 'Required';
-        if (!formData.status_id) newErrors.status_id = 'Required';
-        if (formData.languages.length === 0) newErrors.languages = 'At least one language is required';
-        if (formData.imdb_url && !imdbRegex.test(formData.imdb_url)) { newErrors.imdb_url = 'Invalid IMDb URL'; }
-        if (formData.duration !== '') {
-            const durationNum = Number(formData.duration);
-            if (durationNum < 0) { newErrors.duration = 'Must be a positive number'; }
-            else if (!Number.isInteger(durationNum)) { newErrors.duration = 'Decimals are not allowed'; }
-        }
-
-        setErrors(newErrors);
-        const hasErrors = Object.values(newErrors).some(error => error !== '' && error !== null);
-        return !hasErrors;
-    };
-
-    const validateImage = (file: File, config: { width?: number, minH?: number, maxH?: number, exactH?: number }): Promise<string | null> => {
-        return new Promise((resolve) => {
-            // 1. Check File Size (2MB)
-            if (file.size > 2048 * 1024) {
-                resolve("File is too large (Max 2MB)");
-                return;
-            }
-
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = (e) => {
-                const img = new Image();
-                img.src = e.target?.result as string;
-                img.onload = () => {
-                    // Validate Width
-                    if (config.width && img.width !== config.width) {
-                        resolve(`Width must be exactly ${config.width}px (Current: ${img.width}px)`);
-                        return;
-                    }
-                    // Validate Height range
-                    if (config.minH && img.height < config.minH) {
-                        resolve(`Height must be at least ${config.minH}px`);
-                        return;
-                    }
-                    if (config.maxH && img.height > config.maxH) {
-                        resolve(`Height cannot exceed ${config.maxH}px`);
-                        return;
-                    }
-                    // Validate Exact Height
-                    if (config.exactH && img.height !== config.exactH) {
-                        resolve(`Height must be exactly ${config.exactH}px`);
-                        return;
-                    }
-                    resolve(null); // No errors
-                };
-            };
-        });
-    };
-
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setErrors({});
-        if (!validateForm()) {
+        if (!validateMovie(formData)) {
             modalRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
             return;
         };
@@ -180,10 +94,7 @@ export default function MoviesEdit({ isOpen, onClose, onSuccess, movie }: Movies
 
             data.append('_method', 'PUT');
 
-            const response = await fetch(`${API_BASE_URL}/movies/${movie.id}`, {
-                method: 'POST',
-                body: data,
-            });
+            const response = await movieService.updateMovie(movie.id, data);
 
             if (response.ok) {
                 onSuccess();
@@ -233,6 +144,7 @@ export default function MoviesEdit({ isOpen, onClose, onSuccess, movie }: Movies
                                     <div className="flex flex-col">
                                         <input
                                             name="name_en"
+                                            type="text"
                                             placeholder="Movie Name (EN) *"
                                             className={`border rounded p-3 ${errors.name_en ? 'border-red-500' : ''}`}
                                             value={formData.name_en}
@@ -244,6 +156,7 @@ export default function MoviesEdit({ isOpen, onClose, onSuccess, movie }: Movies
                                     <div className="flex flex-col">
                                         <input
                                             name="name_ar"
+                                            type="text"
                                             placeholder="اسم الفيلم (AR) *"
                                             className={`border rounded p-3 text-right ${errors.name_ar ? 'border-red-500' : ''}`}
                                             value={formData.name_ar}
@@ -285,8 +198,8 @@ export default function MoviesEdit({ isOpen, onClose, onSuccess, movie }: Movies
                                     <div className="flex flex-col">
                                         <label className="text-sm font-bold">Release Date *</label>
                                         <input
-                                            type="date"
                                             name="release_date"
+                                            type="date"
                                             className={`border rounded p-2 ${errors.release_date ? 'border-red-500' : ''}`}
                                             value={formData.release_date}
                                             onChange={handleChange}
@@ -297,8 +210,8 @@ export default function MoviesEdit({ isOpen, onClose, onSuccess, movie }: Movies
                                     <div className="flex flex-col">
                                         <label className="text-sm font-bold">IMDB URL</label>
                                         <input
-                                            type="url"
                                             name="imdb_url"
+                                            type="url"
                                             placeholder="https://imdb.com/title/tt..."
                                             className={`border rounded p-2 ${errors.imdb_url ? 'border-red-500' : ''}`}
                                             value={formData.imdb_url}
@@ -309,11 +222,11 @@ export default function MoviesEdit({ isOpen, onClose, onSuccess, movie }: Movies
                                     <div className="flex flex-col">
                                         <label className="text-sm font-bold">Duration (minutes)</label>
                                         <input
+                                            name="duration"
                                             type="number"
                                             min="0"
                                             step="1"
-                                            onKeyDown={(e) => { if (['-', '.', ',', 'e', 'E'].includes(e.key)) { e.preventDefault(); } }} // Block minus sign, decimal point, and 'e'
-                                            name="duration"
+                                            onKeyDown={(e) => { if (['-', '.', ',', 'e', 'E'].includes(e.key)) { e.preventDefault(); } }} // Block minus sign, decimal point, and 'e'                                           
                                             placeholder="120"
                                             className={`border rounded p-2 ${errors.duration ? 'border-red-500' : ''}`}
                                             value={formData.duration}
@@ -488,8 +401,8 @@ export default function MoviesEdit({ isOpen, onClose, onSuccess, movie }: Movies
                                         <span className="text-xs text-gray-500 ml-2">Upload featured banner first</span>
                                     )}
                                 </div>
-                                <button onClick={handleSubmit} disabled={saving} className="flex-1 bg-green-600 text-white font-bold py-3 rounded-xl hover:bg-green-700 max-w-50">
-                                    Update Movie
+                                <button onClick={handleSubmit} disabled={saving} className="flex-1 flex justify-center items-center bg-green-600 text-white font-bold py-3 rounded-xl hover:bg-green-700 max-w-50">
+                                    {saving ? <Loader2 className="animate-spin" /> : "Update Movie"}
                                 </button>
                             </div>
                         </div>

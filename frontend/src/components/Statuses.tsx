@@ -1,14 +1,12 @@
 import { useEffect, useState } from 'react';
-import { Pencil, Trash2, Plus, X, Check } from 'lucide-react';
+import { Pencil, Trash2, X, Check } from 'lucide-react';
 import { API_BASE_URL } from '../constants/api';
-
-interface Statuses {
-    id: number;
-    status: string;
-}
+import PlusButton from './shared/PlusButton';
+import type { Status } from '../types/movie';
+import Title from './shared/Title';
 
 export default function Statuses() {
-    const [statuses, setStatuses] = useState<Statuses[]>([]);
+    const [statuses, setStatuses] = useState<Status[]>([]);
     const [loading, setLoading] = useState(true);
     const [newStatuses, setNewStatuses] = useState({ status: '' });
     const [editingId, setEditingId] = useState<number | null>(null);
@@ -63,7 +61,7 @@ export default function Statuses() {
     return (
         <div className="p-8">
             <div className="flex justify-between items-center mb-8">
-                <h1 className="text-3xl font-extrabold text-gray-900 flex items-center gap-2">Statuses</h1>
+                <Title text="Statuses" />
             </div>
             <div className='max-w-7xl mx-auto flex flex-col justify-center'>
                 {/* Quick Add Row */}
@@ -74,9 +72,7 @@ export default function Statuses() {
                         value={newStatuses.status}
                         onChange={(e) => setNewStatuses({ ...newStatuses, status: e.target.value })}
                     />
-                    <button onClick={handleAdd} className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2 transition">
-                        <Plus size={18} /> Add
-                    </button>
+                    <PlusButton onClick={handleAdd} />
                 </div>
 
                 {/* Table */}

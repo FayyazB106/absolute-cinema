@@ -1,17 +1,12 @@
 import { useEffect, useState } from 'react';
-import { Pencil, Trash2, Plus, X, Check } from 'lucide-react';
+import { Pencil, Trash2, X, Check } from 'lucide-react';
 import { API_BASE_URL } from '../constants/api';
-
-interface Ratings {
-    id: number;
-    ranking: number,
-    maturity_rating: string;
-    name_en: string;
-    name_ar: string;
-}
+import PlusButton from './shared/PlusButton';
+import type { Rating } from '../types/movie';
+import Title from './shared/Title';
 
 export default function Ratings() {
-    const [ratings, setRatings] = useState<Ratings[]>([]);
+    const [ratings, setRatings] = useState<Rating[]>([]);
     const [loading, setLoading] = useState(true);
     const [newRatings, setNewRatings] = useState({
         maturity_rating: '',
@@ -76,7 +71,7 @@ export default function Ratings() {
     return (
         <div className="p-8">
             <div className="flex justify-between items-center mb-8">
-                <h1 className="text-3xl font-extrabold text-gray-900 flex items-center gap-2">Maturity Ratings</h1>
+                <Title text="Maturity Ratings" />
             </div>
             <div className='max-w-7xl mx-auto flex flex-col justify-center'>
                 {/* Quick Add Row */}
@@ -106,9 +101,7 @@ export default function Ratings() {
                         dir="rtl"
                         onChange={(e) => setNewRatings({ ...newRatings, name_ar: e.target.value })}
                     />
-                    <button onClick={handleAdd} className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2 transition">
-                        <Plus size={18} /> Add
-                    </button>
+                    <PlusButton onClick={handleAdd} />
                 </div>
 
                 {/* Table */}

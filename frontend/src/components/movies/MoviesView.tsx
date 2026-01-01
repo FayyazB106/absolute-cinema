@@ -2,30 +2,8 @@ import { useEffect, useState } from 'react';
 import { X, Calendar, Clock, Globe, Star, Users, Video, Film, Subtitles, Trash2, ImageIcon, UserRound } from 'lucide-react';
 import { Pencil } from 'lucide-react';
 import MoviesEdit from './MoviesEdit';
-import { API_BASE_URL } from '../../constants/api';
-
-interface MovieDetails {
-    id: number;
-    name_en: string;
-    name_ar: string;
-    desc_en: string;
-    desc_ar: string;
-    release_date: string;
-    duration: number;
-    imdb_url: string;
-    maturity_ratings: { id: number; maturity_rating: string };
-    status: { id: number; status: string };
-    genres: Array<{ id: number; name_en: string; name_ar: string }>;
-    actors: Array<{ id: number; name_en: string; name_ar: string }>;
-    directors: Array<{ id: number; name_en: string; name_ar: string }>;
-    audio_languages: Array<{ id: number; name_en: string; code: string }>;
-    subtitles: Array<{ id: number; name_en: string; code: string }>;
-    poster_full_url: string | null;
-    featured_full_url: string | null;
-    is_featured: boolean;
-    created_at: string;
-    updated_at: string;
-}
+import type { MovieDetails } from '../../types/movie';
+import { movieService } from '../../services/movieService';
 
 interface MoviesViewProps {
     isOpen: boolean;
@@ -46,11 +24,7 @@ export default function MoviesView({ isOpen, onClose, movieId, onMovieDeleted }:
             setLoading(true);
             setError(null);
 
-            fetch(`${API_BASE_URL}/movies/${movieId}`)
-                .then(res => {
-                    if (!res.ok) throw new Error('Failed to fetch movie details');
-                    return res.json();
-                })
+            movieService.getMovieById(movieId)
                 .then(data => {
                     setMovie(data);
                     setLoading(false);
@@ -68,9 +42,7 @@ export default function MoviesView({ isOpen, onClose, movieId, onMovieDeleted }:
 
         if (confirmed) {
             try {
-                const res = await fetch(`${API_BASE_URL}/movies/${id}`, {
-                    method: 'DELETE',
-                });
+                const res = await movieService.deleteMovie(id);
 
                 if (res.ok) {
                     alert("Movie deleted successfully");
@@ -192,7 +164,7 @@ export default function MoviesView({ isOpen, onClose, movieId, onMovieDeleted }:
 
                                 <div className="bg-green-50 p-4 rounded-lg border border-green-200 text-center">
                                     <div className="flex justify-center items-center gap-2 text-green-700 mb-1">
-                                        <UserRound  size={18} />
+                                        <UserRound size={18} />
                                         <span className="text-xs font-semibold uppercase">Rated</span>
                                     </div>
                                     <p className="text-lg font-bold">
@@ -398,8 +370,7 @@ export default function MoviesView({ isOpen, onClose, movieId, onMovieDeleted }:
                     setIsEditOpen(false);
                     // Reload the movie details
                     if (movieId) {
-                        fetch(`${API_BASE_URL}/movies/${movieId}`)
-                            .then(res => res.json())
+                        movieService.getMovieById(movieId)
                             .then(data => setMovie(data))
                             .catch(err => console.error("Failed to reload movie", err));
                     }
