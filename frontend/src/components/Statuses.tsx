@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Pencil, Trash2, X, Check } from 'lucide-react';
-import { API_BASE_URL } from '../constants/api';
 import PlusButton from './shared/PlusButton';
 import type { Status } from '../types/movie';
 import Title from './shared/Title';
+import { movieService } from '../services/movieService';
 
 export default function Statuses() {
     const [statuses, setStatuses] = useState<Status[]>([]);
@@ -14,8 +14,7 @@ export default function Statuses() {
 
     const fetchStatuses = async () => {
         try {
-            const res = await fetch(`${API_BASE_URL}/statuses`);
-            const data = await res.json();
+            const data = await movieService.getStatuses();
             setStatuses(data);
         } catch (err) {
             console.error("Failed to fetch statuses", err);
@@ -28,11 +27,7 @@ export default function Statuses() {
 
     const handleAdd = async () => {
         if (!newStatuses.status) return alert("Fill the field");
-        const res = await fetch(`${API_BASE_URL}/statuses`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(newStatuses),
-        });
+        const res = await movieService.createStatus(newStatuses);
         if (res.ok) {
             setNewStatuses({ status: '' });
             fetchStatuses();
@@ -40,11 +35,7 @@ export default function Statuses() {
     };
 
     const handleUpdate = async (id: number) => {
-        const res = await fetch(`${API_BASE_URL}/statuses/${id}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(editForm),
-        });
+        const res = await movieService.updateStatus(id, editForm);
         if (res.ok) {
             setEditingId(null);
             fetchStatuses();
@@ -53,8 +44,8 @@ export default function Statuses() {
 
     const handleDelete = async (id: number, name: string) => {
         if (window.confirm(`Delete "${name}"?`)) {
-            await fetch(`${API_BASE_URL}/statuses/${id}`, { method: 'DELETE' });
-            fetchStatuses();
+            const res = await movieService.deleteStatus(id);
+            if (res.ok) fetchStatuses();
         }
     };
 

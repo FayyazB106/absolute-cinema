@@ -1,3 +1,5 @@
+import type { Options } from '../types/movie';
+
 export interface MovieFormData {
     name_en: string;
     name_ar: string;
@@ -33,3 +35,19 @@ export const INITIAL_MOVIE_FORM_STATE: MovieFormData = {
     subtitles: [],
     is_featured: false
 };
+
+export interface MovieFormProps {
+    formData: MovieFormData;
+    setFormData: (data: MovieFormData) => void;
+    errors: Record<string, string>;
+    setErrors: (errors: Record<string, string>) => void;
+    options: Options;
+    posterFile: File | null;
+    setPosterFile: (file: File | null) => void;
+    featuredFile: File | null;
+    setFeaturedFile: (file: File | null) => void;
+    existingFeaturedPoster?: string | null; // For edit mode
+    onSubmit: () => void;
+    submitLabel?: string;
+    isSubmitting?: boolean;
+}

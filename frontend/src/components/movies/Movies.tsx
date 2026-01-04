@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import MoviesAdd from './MoviesAdd';
-import MoviesView from './MoviesView';
+import AddMovie from './AddMovie';
+import ViewMovie from './ViewMovie';
 import { Film } from 'lucide-react';
 import PlusButton from '../shared/PlusButton';
 import type { Movie, Rating, Status } from '../../types/movie';
@@ -72,55 +72,50 @@ export default function Movies() {
             </div>
 
             <div className="grid grid-cols-6 gap-6">
-                {movies.map(movie => (
-                    <div
-                        key={movie.id}
-                        onClick={() => handleViewMovie(movie.id)}
-                        className={`flex flex-col h-full transition-all duration-200 rounded-xl border ${movie.is_featured ? "border-amber-400 border-2 hover:border-amber-400" : "border-gray-200 hover:border-blue-400"} cursor-pointer hover:scale-105`}
-                    >
-                        {movie.poster_full_url ? (
-                            <img src={movie.poster_full_url} alt={movie.name_en} className="aspect-[2/3] w-full rounded-t-lg object-cover" />
-                        ) : (
-                            <div className="aspect-[2/3] w-full rounded-t-xl bg-gray-200 flex flex-col items-center justify-center border-b border-gray-300">
-                                <Film className="text-gray-400 mb-2" size={40} />
-                                <span className="text-gray-500 font-bold text-lg">N/A</span>
-                            </div>
-                        )}
-                        <div className='h-full bg-white p-6 flex flex-col justify-between gap-2 text-center rounded-b-xl'>
-                            <h3 className="text-lg font-bold line-clamp-2">{movie.name_en}</h3>
-                            <div className='flex flex-wrap gap-2 justify-center'>
-                                {(() => {
-                                    const ratingLabel = getRatingName(movie.maturity_id);
-                                    if (ratingLabel.toUpperCase().startsWith('R')) {
-                                        return (
-                                            <p className="bg-red-600 text-white px-3 py-1 rounded-full text-xs font-black">
-                                                {ratingLabel}
-                                            </p>
-                                        );
-                                    }
-                                })()}
-                            </div>
-                            <div className='flex flex-wrap gap-2 justify-center'>
-                                {(() => {
-                                    const statusLabel = getStatusName(movie.status_id);
-                                    if (!statusLabel) return null;
-                                    return (
+                {movies.map(movie => {
+                    const statusLabel = getStatusName(movie.status_id);
+                    const ratingLabel = getRatingName(movie.maturity_id);
+                    const isRestricted = ratingLabel.toUpperCase().startsWith('R');
+
+                    return (
+                        <div
+                            key={movie.id}
+                            onClick={() => handleViewMovie(movie.id)}
+                            className={`flex flex-col h-full transition-all duration-200 hover:shadow-xl rounded-xl ${movie.is_featured ? "ring-2 ring-amber-400 hover:ring-amber-500" : "hover:ring-2 hover:ring-blue-400"} cursor-pointer hover:scale-105`}
+                        >
+                            {movie.poster_full_url ? (
+                                <img src={movie.poster_full_url} alt={movie.name_en} className="aspect-[2/3] w-full rounded-t-xl object-cover" />
+                            ) : (
+                                <div className="aspect-[2/3] w-full rounded-t-xl bg-gray-200 flex flex-col items-center justify-center border-b border-gray-300">
+                                    <Film className="text-gray-400 mb-2" size={40} />
+                                    <span className="text-gray-500 font-bold text-lg">N/A</span>
+                                </div>
+                            )}
+                            <div className={`h-full bg-white p-6 flex flex-col justify-between gap-2 text-center ${isRestricted ? "" : "rounded-b-xl"}`}>
+                                <h3 className="text-lg font-bold line-clamp-2">{movie.name_en}</h3>
+                                <div className='flex flex-wrap gap-2 justify-center'>
+                                    {statusLabel &&
                                         <p className={`${getStatusStyles(statusLabel)} px-3 py-1 rounded-full text-[10px] font-bold uppercase`}>
                                             {statusLabel}
                                         </p>
-                                    );
-                                })()}
+                                    }
+                                </div>
+                                <div className='flex flex-wrap gap-2 justify-center'>
+                                    {movie.audio_languages.map(lang => (
+                                        <p key={lang.id} className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-semibold">
+                                            {lang.name_en}
+                                        </p>
+                                    ))}
+                                </div>
                             </div>
-                            <div className='flex flex-wrap gap-2 justify-center'>
-                                {movie.audio_languages.map(lang => (
-                                    <p key={lang.id} className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-semibold">
-                                        {lang.name_en}
-                                    </p>
-                                ))}
-                            </div>
+                            {isRestricted &&
+                                <div className='bg-red-600 text-white rounded-b-xl text-md font-bold text-center'>
+                                    <p>{ratingLabel}</p>
+                                </div>
+                            }
                         </div>
-                    </div>
-                ))}
+                    );
+                })}
             </div>
 
             {movies.length === 0 && (
@@ -130,18 +125,18 @@ export default function Movies() {
             )}
 
             {isAddModalOpen && (
-                <MoviesAdd
+                <AddMovie
                     isOpen={isAddModalOpen}
                     onClose={() => setIsAddModalOpen(false)}
-                    onSuccess={movieService.getMovies}
+                    onSuccess={loadData}
                 />
             )}
 
-            <MoviesView
+            <ViewMovie
                 isOpen={isViewModalOpen}
                 onClose={() => setIsViewModalOpen(false)}
                 movieId={selectedMovieId}
-                onMovieDeleted={movieService.getMovies}
+                onMovieDeleted={loadData}
             />
         </div>
     );

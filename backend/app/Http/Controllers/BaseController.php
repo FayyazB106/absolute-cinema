@@ -72,7 +72,20 @@ abstract class BaseController extends Controller
         try {
             $item = $this->modelClass::findOrFail($id);
             if (method_exists($item, 'movies')) {
-                $item->movies()->detach();
+                $relation = $item->movies();
+
+                // Check if it's a Many-to-Many relationship (BelongsToMany)
+                if ($relation instanceof \Illuminate\Database\Eloquent\Relations\BelongsToMany) {
+                    $relation->detach();
+                }
+                // Check if it's a One-to-Many relationship (HasMany)
+                elseif ($relation instanceof \Illuminate\Database\Eloquent\Relations\HasMany) {
+                    // Set the movie's foreign key to null so they aren't deleted
+                    // Note: Ensure your 'movies' table allows 'maturity_id' to be NULL
+                    $relation->update(['maturity_id' => null]);
+                }
+
+                $item->delete();
             }
             $item->delete();
             return response()->json(['message' => "{$this->resourceName} deleted successfully"]);

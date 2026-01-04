@@ -62,7 +62,7 @@ export default function MultiSelect({ label, options, selected, onChange, placeh
 
     return (
         <div className="flex flex-col">
-            <label className="font-bold mb-2">{label}</label>
+            <label className="font-bold text-md mb-2">{label}</label>
 
             <div className='relative' ref={containerRef}>
                 {/* Dropdown Trigger */}

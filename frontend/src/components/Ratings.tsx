@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Pencil, Trash2, X, Check } from 'lucide-react';
-import { API_BASE_URL } from '../constants/api';
 import PlusButton from './shared/PlusButton';
 import type { Rating } from '../types/movie';
 import Title from './shared/Title';
+import { movieService } from '../services/movieService';
 
 export default function Ratings() {
     const [ratings, setRatings] = useState<Rating[]>([]);
@@ -21,11 +21,12 @@ export default function Ratings() {
         name_ar: '',
         ranking: 1
     });
+    const quickInputStyle = "flex-1 p-2 border rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-0 outline-none"
+    const inputStyle = "border rounded px-2 py-1 w-full"
 
     const fetchRatings = async () => {
         try {
-            const res = await fetch(`${API_BASE_URL}/ratings`);
-            const data = await res.json();
+            const data = await movieService.getRatings();
             setRatings(data);
         } catch (err) {
             console.error("Failed to fetch maturity ratings", err);
@@ -38,11 +39,7 @@ export default function Ratings() {
 
     const handleAdd = async () => {
         if (!newRatings.maturity_rating) return alert("Fill the field");
-        const res = await fetch(`${API_BASE_URL}/ratings`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(newRatings),
-        });
+        const res = await movieService.createRating(newRatings);
         if (res.ok) {
             setNewRatings({ ...newRatings });
             fetchRatings();
@@ -50,11 +47,7 @@ export default function Ratings() {
     };
 
     const handleUpdate = async (id: number) => {
-        const res = await fetch(`${API_BASE_URL}/ratings/${id}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(editForm),
-        });
+        const res = await movieService.updateRating(id, editForm);
         if (res.ok) {
             setEditingId(null);
             fetchRatings();
@@ -63,8 +56,8 @@ export default function Ratings() {
 
     const handleDelete = async (id: number, name: string) => {
         if (window.confirm(`Delete "${name}"?`)) {
-            await fetch(`${API_BASE_URL}/ratings/${id}`, { method: 'DELETE' });
-            fetchRatings();
+            const res = await movieService.deleteRating(id);
+            if (res.ok) fetchRatings();
         }
     };
 
@@ -77,26 +70,27 @@ export default function Ratings() {
                 {/* Quick Add Row */}
                 <div className="bg-blue-50 p-4 rounded-xl border border-blue-100 flex gap-4 mb-6 shadow-sm">
                     <input
-                        placeholder="Maturity Rating"
-                        className="flex-1 p-2 border rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"
+                        placeholder="Ranking"
+                        type="number"
+                        className={quickInputStyle}
                         value={newRatings.ranking}
                         onChange={(e) => setNewRatings({ ...newRatings, ranking: Number(e.target.value) })}
                     />
                     <input
                         placeholder="Maturity Rating"
-                        className="flex-1 p-2 border rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"
+                        className={quickInputStyle}
                         value={newRatings.maturity_rating}
                         onChange={(e) => setNewRatings({ ...newRatings, maturity_rating: e.target.value })}
                     />
                     <input
-                        placeholder="Name EN"
-                        className="flex-1 p-2 border rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"
+                        placeholder="Name"
+                        className={quickInputStyle}
                         value={newRatings.name_en}
                         onChange={(e) => setNewRatings({ ...newRatings, name_en: e.target.value })}
                     />
                     <input
-                        placeholder="Name AR"
-                        className="flex-1 p-2 border rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"
+                        placeholder="الاسم"
+                        className={quickInputStyle}
                         value={newRatings.name_ar}
                         dir="rtl"
                         onChange={(e) => setNewRatings({ ...newRatings, name_ar: e.target.value })}
@@ -111,11 +105,12 @@ export default function Ratings() {
                             <tr>
                                 <th className="px-6 py-4 font-bold text-gray-700">Ranking</th>
                                 <th className="px-6 py-4 font-bold text-gray-700">Maturity Ratings</th>
-                                <th className="px-6 py-4 font-bold text-gray-700">Name EN</th>
-                                <th className="px-6 py-4 font-bold text-gray-700">Name AR</th>
+                                <th className="px-6 py-4 font-bold text-gray-700">Name</th>
+                                <th className="px-6 py-4 font-bold text-gray-700 text-right">الاسم</th>
                                 <th className="px-6 py-4 font-bold text-gray-700 text-center w-32">Actions</th>
                             </tr>
                         </thead>
+
                         <tbody className="divide-y">
                             {loading ? (
                                 <tr><td colSpan={3} className="text-center py-10 animate-pulse text-gray-400">Loading maturities...</td></tr>
@@ -125,8 +120,9 @@ export default function Ratings() {
                                         {editingId === ratings.id ? (
                                             <input
                                                 value={editForm.ranking}
+                                                type="number"
                                                 onChange={(e) => setEditForm({ ...editForm, ranking: Number(e.target.value) })}
-                                                className="border rounded px-2 py-1 w-full"
+                                                className={inputStyle}
                                             />
                                         ) : ratings.ranking}
                                     </td>
@@ -135,7 +131,7 @@ export default function Ratings() {
                                             <input
                                                 value={editForm.maturity_rating}
                                                 onChange={(e) => setEditForm({ ...editForm, maturity_rating: e.target.value })}
-                                                className="border rounded px-2 py-1 w-full"
+                                                className={inputStyle}
                                             />
                                         ) : ratings.maturity_rating}
                                     </td>
@@ -144,16 +140,16 @@ export default function Ratings() {
                                             <input
                                                 value={editForm.name_en}
                                                 onChange={(e) => setEditForm({ ...editForm, name_en: e.target.value })}
-                                                className="border rounded px-2 py-1 w-full"
+                                                className={inputStyle}
                                             />
                                         ) : ratings.name_en}
                                     </td>
-                                    <td className="px-6 py-4 text-gray-900" dir="rtl">
+                                    <td className="px-6 py-4 text-gray-900 text-right">
                                         {editingId === ratings.id ? (
                                             <input
                                                 value={editForm.name_ar}
                                                 onChange={(e) => setEditForm({ ...editForm, name_ar: e.target.value })}
-                                                className="border rounded px-2 py-1 w-full"
+                                                className={inputStyle}
                                                 dir="rtl"
                                             />
                                         ) : ratings.name_ar}

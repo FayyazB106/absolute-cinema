@@ -1,18 +1,18 @@
 import { useEffect, useState } from 'react';
 import { X, Calendar, Clock, Globe, Star, Users, Video, Film, Subtitles, Trash2, ImageIcon, UserRound } from 'lucide-react';
 import { Pencil } from 'lucide-react';
-import MoviesEdit from './MoviesEdit';
+import EditMovie from './EditMovie';
 import type { MovieDetails } from '../../types/movie';
 import { movieService } from '../../services/movieService';
 
-interface MoviesViewProps {
+interface ViewMovieProps {
     isOpen: boolean;
     onClose: () => void;
     movieId: number | null;
     onMovieDeleted: () => void;
 }
 
-export default function MoviesView({ isOpen, onClose, movieId, onMovieDeleted }: MoviesViewProps) {
+export default function ViewMovie({ isOpen, onClose, movieId, onMovieDeleted }: ViewMovieProps) {
     const [movie, setMovie] = useState<MovieDetails | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -67,7 +67,7 @@ export default function MoviesView({ isOpen, onClose, movieId, onMovieDeleted }:
                     <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/90 p-10" onClick={() => setPreviewImage(null)}>
                         <button
                             onClick={() => setPreviewImage(null)}
-                            className="absolute top-5 right-5 text-white bg-white/20 p-2 rounded-full hover:bg-white/40"
+                            className="absolute top-5 right-5 text-white p-2 rounded-full hover:bg-white/10"
                         >
                             <X size={32} />
                         </button>
@@ -76,7 +76,7 @@ export default function MoviesView({ isOpen, onClose, movieId, onMovieDeleted }:
                             <img
                                 src={previewImage.url}
                                 alt="Preview"
-                                className="max-w-full max-h-[70vh] rounded-lg shadow-2xl border-4 border-white/10"
+                                className="max-w-full max-h-[70vh] "
                             />
                         </div>
                     </div>
@@ -84,23 +84,23 @@ export default function MoviesView({ isOpen, onClose, movieId, onMovieDeleted }:
 
                 {/* Header */}
                 <div className="sticky top-0 bg-gradient-to-r from-blue-600 to-blue-800 text-white px-8 py-6 flex flex-col gap-5 rounded-t-xl">
-                    <div className="flex flex-row justify-between gap-2">
+                    <div className="flex flex-row justify-end gap-2">
                         <button
                             onClick={() => movie && handleDelete(movie.id, movie.name_en)}
-                            className="text-white bg-red-500 rounded-full p-2 transition flex items-center gap-2 text-sm font-medium px-3 hover:bg-red-600"
+                            className="text-white bg-red-500 rounded-full transition flex items-center gap-2 text-sm font-medium p-3 hover:bg-red-600"
                         >
-                            <Trash2 size={18} />
+                            <Trash2 size={20} />
                         </button>
                         <button
                             onClick={() => setIsEditOpen(true)}
-                            className="text-white bg-amber-500 rounded-full p-2 transition flex items-center gap-2 text-sm font-medium px-3 hover:bg-amber-600"
+                            className="text-white bg-amber-500 rounded-full transition flex items-center gap-2 text-sm font-medium p-3 hover:bg-amber-600"
                         >
-                            <Pencil size={18} />
+                            <Pencil size={20} />
                         </button>
                         <button
                             onClick={onClose}
-                            className="text-white hover:bg-white/20 rounded-full p-2 transition flex items-center gap-2 text-sm font-medium border">
-                            <X size={24} />
+                            className="text-white hover:bg-white/20 rounded-full transition flex items-center gap-2 text-sm font-medium p-3 border">
+                            <X size={20} />
                         </button>
                     </div>
                     <div>
@@ -141,7 +141,7 @@ export default function MoviesView({ isOpen, onClose, movieId, onMovieDeleted }:
                                 <div className="bg-blue-50 p-4 rounded-lg border border-blue-200 text-center">
                                     <div className="flex justify-center items-center gap-2 text-blue-700 mb-1">
                                         <Calendar size={18} />
-                                        <span className="text-xs font-semibold uppercase">Release</span>
+                                        <span className="text-xs font-semibold uppercase">Release Date</span>
                                     </div>
                                     <p className="text-lg font-bold">
                                         {new Date(movie.release_date).toLocaleDateString("en-GB", {
@@ -165,7 +165,7 @@ export default function MoviesView({ isOpen, onClose, movieId, onMovieDeleted }:
                                 <div className="bg-green-50 p-4 rounded-lg border border-green-200 text-center">
                                     <div className="flex justify-center items-center gap-2 text-green-700 mb-1">
                                         <UserRound size={18} />
-                                        <span className="text-xs font-semibold uppercase">Rated</span>
+                                        <span className="text-xs font-semibold uppercase">Maturity Rating</span>
                                     </div>
                                     <p className="text-lg font-bold">
                                         {movie.maturity_ratings?.maturity_rating || 'N/A'}
@@ -223,7 +223,7 @@ export default function MoviesView({ isOpen, onClose, movieId, onMovieDeleted }:
                                     <div>
                                         <h3 className="text-lg font-bold mb-3 flex items-center gap-2">
                                             <Users size={20} />
-                                            Cast
+                                            Starring
                                         </h3>
                                         <ul className="space-y-2">
                                             {movie.actors.map(actor => (
@@ -266,7 +266,7 @@ export default function MoviesView({ isOpen, onClose, movieId, onMovieDeleted }:
                                     <div>
                                         <h3 className="text-lg font-bold mb-3 flex items-center gap-2">
                                             <Globe size={20} />
-                                            Audio Languages
+                                            Languages
                                         </h3>
                                         <div className="flex flex-wrap gap-2">
                                             {movie.audio_languages.map(lang => (
@@ -302,12 +302,12 @@ export default function MoviesView({ isOpen, onClose, movieId, onMovieDeleted }:
                                 )}
                             </div>
 
-                            {/* Posters */}
-                            <div className="border-t pt-6 flex flex-col md:flex-row justify-between items-end gap-6">
-                                <div className="text-xs text-gray-500 space-y-1">
+                            {/* IMDB Link + Posters + Metadata */}
+                            <div className="border-t pt-6 text-xs space-y-1 flex flex-row justify-between items-center">
+                                <div>
                                     <p><strong>Created:</strong> {new Date(movie.created_at).toLocaleString()}</p>
                                     <p><strong>Last Updated:</strong> {new Date(movie.updated_at).toLocaleString()}</p>
-
+                                    <p><strong>Movie ID:</strong> {movie.id}</p>
                                     {/* Clickable Image Links */}
                                     <div className="flex gap-4 mt-3">
                                         {movie.poster_full_url && (
@@ -328,15 +328,6 @@ export default function MoviesView({ isOpen, onClose, movieId, onMovieDeleted }:
                                         )}
                                     </div>
                                 </div>
-                            </div>
-
-                            {/* IMDB Link + Metadata */}
-                            <div className="border-t pt-6 text-xs space-y-1 flex flex-row justify-between">
-                                <div>
-                                    <p><strong>Created:</strong> {new Date(movie.created_at).toLocaleString()}</p>
-                                    <p><strong>Last Updated:</strong> {new Date(movie.updated_at).toLocaleString()}</p>
-                                    <p><strong>Movie ID:</strong> {movie.id}</p>
-                                </div>
                                 {movie.imdb_url && (
                                     <div>
                                         <a href={movie.imdb_url} target="_blank" rel="noopener noreferrer"
@@ -352,18 +343,8 @@ export default function MoviesView({ isOpen, onClose, movieId, onMovieDeleted }:
                         </div>
                     ) : null}
                 </div>
-
-                {/* Footer */}
-                <div className="sticky bottom-0 bg-gray-50 px-8 py-4 border-t rounded-b-xl">
-                    <button
-                        onClick={onClose}
-                        className="w-full bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 rounded-lg transition"
-                    >
-                        Close
-                    </button>
-                </div>
             </div>
-            <MoviesEdit
+            <EditMovie
                 isOpen={isEditOpen}
                 onClose={() => setIsEditOpen(false)}
                 onSuccess={() => {
