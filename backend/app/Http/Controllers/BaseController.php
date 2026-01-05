@@ -81,12 +81,11 @@ abstract class BaseController extends Controller
                 // Check if it's a One-to-Many relationship (HasMany)
                 elseif ($relation instanceof \Illuminate\Database\Eloquent\Relations\HasMany) {
                     // Set the movie's foreign key to null so they aren't deleted
-                    // Note: Ensure your 'movies' table allows 'maturity_id' to be NULL
-                    $relation->update(['maturity_id' => null]);
+                    $foreignKey = $relation->getForeignKeyName();
+                    $relation->update([$foreignKey => null]);
                 }
-
-                $item->delete();
             }
+            
             $item->delete();
             return response()->json(['message' => "{$this->resourceName} deleted successfully"]);
         } catch (\Exception $e) {

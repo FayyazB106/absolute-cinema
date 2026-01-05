@@ -32,7 +32,8 @@ export interface Rating {
 
 export interface Status {
     id: number;
-    status: string;
+    name_en: string;
+    name_ar: string;
 }
 
 export interface Movie {
@@ -57,7 +58,7 @@ export interface MovieDetails {
     duration: number;
     imdb_url: string;
     maturity_ratings: { id: number; maturity_rating: string };
-    status: { id: number; status: string };
+    status: Status; // Unlike genres, actors, directors and languages, movies have one status so it should be single object, not array.
     genres: Genre[];
     actors: Actor[];
     directors: Director[];

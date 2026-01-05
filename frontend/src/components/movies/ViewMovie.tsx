@@ -178,7 +178,7 @@ export default function ViewMovie({ isOpen, onClose, movieId, onMovieDeleted }: 
                                         <span className="text-xs font-semibold uppercase">Status</span>
                                     </div>
                                     <p className="text-lg font-bold">
-                                        {movie.status?.status || 'N/A'}
+                                        {movie.status?.name_en || 'N/A'}
                                     </p>
                                 </div>
                             </div>

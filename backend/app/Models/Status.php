@@ -8,7 +8,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Status extends Model
 {
     protected $fillable = [
-        'status',
+        'name_en',
+        'name_ar',
     ];
 
     public function movies(): HasMany

@@ -43,7 +43,7 @@ export default function Movies() {
     };
 
     const getStatusName = (id: number) => {
-        return statuses.find(m => m.id === id)?.status || '';
+        return statuses.find(m => m.id === id)?.name_en || '';
     };
 
     const getStatusStyles = (status: string) => {
@@ -51,6 +51,14 @@ export default function Movies() {
             case 'released': return 'bg-green-600 text-white';
             case 'coming soon': return 'bg-blue-600 text-white';
             case 'unavailable': return 'bg-amber-500 text-white';
+            default: return 'bg-gray-500 text-white';
+        }
+    };
+
+    const getLanguageStyles = (status: string) => {
+        switch (status.toLowerCase()) {
+            case 'english': return 'bg-white text-red-600 ring-2 ring-blue-800';
+            case 'arabic': return 'bg-green-600 text-white';
             default: return 'bg-gray-500 text-white';
         }
     };
@@ -93,19 +101,21 @@ export default function Movies() {
                             )}
                             <div className={`h-full bg-white p-6 flex flex-col justify-between gap-2 text-center ${isRestricted ? "" : "rounded-b-xl"}`}>
                                 <h3 className="text-lg font-bold line-clamp-2">{movie.name_en}</h3>
-                                <div className='flex flex-wrap gap-2 justify-center'>
+                                <div className='flex justify-center'>
                                     {statusLabel &&
                                         <p className={`${getStatusStyles(statusLabel)} px-3 py-1 rounded-full text-[10px] font-bold uppercase`}>
                                             {statusLabel}
                                         </p>
                                     }
                                 </div>
-                                <div className='flex flex-wrap gap-2 justify-center'>
-                                    {movie.audio_languages.map(lang => (
-                                        <p key={lang.id} className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-semibold">
-                                            {lang.name_en}
-                                        </p>
-                                    ))}
+                                <div className='flex justify-center gap-2'>
+                                    {movie.audio_languages && (
+                                        movie.audio_languages.map(lang => (
+                                            <p key={lang.id} className={`${getLanguageStyles(lang.name_en)} px-3 py-1 rounded-full text-[10px] font-bold uppercase`}>
+                                                {lang.name_en}
+                                            </p>
+                                        ))
+                                    )}
                                 </div>
                             </div>
                             {isRestricted &&

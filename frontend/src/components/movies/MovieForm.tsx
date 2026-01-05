@@ -164,7 +164,7 @@ export default function MovieForm({
                         >
                             <option value="">Select...</option>
                             {options.statuses.map(s =>
-                                <option key={s.id} value={s.id}>{s.status}</option>
+                                <option key={s.id} value={s.id}>{s.name_en}</option>
                             )}
                         </select>
                         {errors.status_id && <span className={errorStyle}>{errors.status_id}</span>}
