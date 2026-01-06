@@ -60,3 +60,17 @@ export const validateImage = (file: File, config: { width?: number, minH?: numbe
         };
     });
 };
+
+export const validateSimpleTableItem = (data: { name_en: string, name_ar: string }) => {
+    const errors: Record<string, string> = {};
+    if (!data.name_en.trim()) errors.name_en = 'Required';
+    if (!data.name_ar.trim()) errors.name_ar = 'Required';
+    return errors;
+};
+
+export const validateRating = (data: any) => {
+    const errors: Record<string, string> = {};
+    if (!data.maturity_rating?.trim()) errors.maturity_rating = 'Required';
+    if (!data.ranking || data.ranking < 1) errors.ranking = 'Invalid ranking';
+    return errors;
+};

@@ -3,6 +3,7 @@ import { Pencil, Trash2, X, Check } from 'lucide-react';
 import { API_BASE_URL } from '../../constants/api';
 import PlusButton from '../shared/PlusButton';
 import Title from '../shared/Title';
+import { validateSimpleTableItem } from '../../utils/validation';
 
 interface TableItem {
     id: number;
@@ -18,6 +19,8 @@ interface SimpleTablePageProps {
 
 export default function SimpleTablePage({ title, endpoint, singularName }: SimpleTablePageProps) {
     const [items, setItems] = useState<TableItem[]>([]);
+    const [addErrors, setAddErrors] = useState<Record<string, string>>({});
+    const [editErrors, setEditErrors] = useState<Record<string, string>>({});
     const [loading, setLoading] = useState(true);
     const [newItem, setNewItem] = useState({ name_en: '', name_ar: '' });
     const [editingId, setEditingId] = useState<number | null>(null);
@@ -26,6 +29,7 @@ export default function SimpleTablePage({ title, endpoint, singularName }: Simpl
     const [itemsPerPage, setItemsPerPage] = useState(10);
     const quickInputStyle = "flex-1 p-2 border rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-0 outline-none"
     const inputStyle = "border rounded px-2 py-1 w-full"
+    const errorStyle = "text-red-500"
 
     const fetchItems = async () => {
         try {
@@ -42,27 +46,66 @@ export default function SimpleTablePage({ title, endpoint, singularName }: Simpl
     useEffect(() => { fetchItems(); }, [endpoint]);
 
     const handleAdd = async () => {
-        if (!newItem.name_en || !newItem.name_ar) return alert("Fill both names");
+        const localErrors = validateSimpleTableItem(newItem);
+        if (Object.keys(localErrors).length > 0) {
+            setAddErrors(localErrors);
+            return;
+        }
+
         const res = await fetch(`${API_BASE_URL}/${endpoint}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(newItem),
         });
+
         if (res.ok) {
             setNewItem({ name_en: '', name_ar: '' });
+            setAddErrors({});
             fetchItems();
+        } else if (res.status === 422) {
+            const data = await res.json();
+            const backendErrors: any = {};
+            Object.keys(data.errors).forEach(key => {
+                let msg = data.errors[key][0];
+                // CUSTOM ERROR MESSAGE LOGIC
+                if (msg === "The name en has already been taken." || msg === "The name ar has already been taken.")  {
+                    msg = "Name must be unique";
+                }
+                backendErrors[key] = msg;
+            });
+            setAddErrors(backendErrors);
         }
     };
 
     const handleUpdate = async (id: number) => {
+        const localErrors = validateSimpleTableItem(editForm);
+        if (Object.keys(localErrors).length > 0) {
+            setEditErrors(localErrors);
+            return;
+        }
+
         const res = await fetch(`${API_BASE_URL}/${endpoint}/${id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(editForm),
         });
+
         if (res.ok) {
-            setEditingId(null);
+            setEditingId(null);;
+            setEditErrors({});
             fetchItems();
+        } else if (res.status === 422) {
+            const data = await res.json();
+            const backendErrors: any = {};
+            Object.keys(data.errors).forEach(key => {
+                let msg = data.errors[key][0];
+                // CUSTOM ERROR MESSAGE LOGIC
+                if (msg === "The name en has already been taken." || msg === "The name ar has already been taken.") {
+                    msg = "Name must be unique";
+                }
+                backendErrors[key] = msg;
+            });
+            setEditErrors(backendErrors);
         }
     };
 
@@ -94,20 +137,34 @@ export default function SimpleTablePage({ title, endpoint, singularName }: Simpl
             <div className='max-w-7xl mx-auto flex flex-col justify-center'>
                 {/* Quick Add Row */}
                 <div className="bg-blue-50 p-4 rounded-xl border border-blue-100 flex gap-4 mb-6 shadow-sm">
-                    <input
-                        placeholder="Name"
-                        className={quickInputStyle}
-                        value={newItem.name_en}
-                        onChange={(e) => setNewItem({ ...newItem, name_en: e.target.value })}
-                    />
-                    <input
-                        placeholder="الاسم"
-                        dir="rtl"
-                        className={quickInputStyle}
-                        value={newItem.name_ar}
-                        onChange={(e) => setNewItem({ ...newItem, name_ar: e.target.value })}
-                    />
-                    <PlusButton onClick={handleAdd} />
+                    <div className="flex flex-col w-full">
+                        <input
+                            placeholder="Name"
+                            className={`${quickInputStyle} ${addErrors.name_en ? 'border-red-500' : ''}`}
+                            value={newItem.name_en}
+                            onChange={(e) => {
+                                setNewItem({ ...newItem, name_en: e.target.value });
+                                if (addErrors.name_en) setAddErrors({ ...addErrors, name_en: '' });
+                            }}
+                        />
+                        {addErrors.name_en && <span className={errorStyle}>{addErrors.name_en}</span>}
+                        {addErrors.name_ar && !addErrors.name_en && <br />} {/* Dummy space to maintain height */}
+                    </div>
+                    <div className="flex flex-col w-full">
+                        <input
+                            placeholder="الاسم"
+                            dir="rtl"
+                            className={`${quickInputStyle} ${addErrors.name_ar ? 'border-red-500' : ''}`}
+                            value={newItem.name_ar}
+                            onChange={(e) => {
+                                setNewItem({ ...newItem, name_ar: e.target.value });
+                                if (addErrors.name_ar) setAddErrors({ ...addErrors, name_ar: '' });
+                            }}
+                        />
+                        {addErrors.name_ar && <span className={errorStyle}>{addErrors.name_ar}</span>}
+                        {addErrors.name_en && !addErrors.name_ar &&<br />} {/* Dummy space to maintain height */}
+                    </div>
+                    <div><PlusButton onClick={handleAdd} /></div>
                 </div>
 
                 {/* Table */}
@@ -128,21 +185,33 @@ export default function SimpleTablePage({ title, endpoint, singularName }: Simpl
                                 <tr key={item.id} className="hover:bg-gray-50 transition">
                                     <td className="px-6 py-4 text-gray-900">
                                         {editingId === item.id ? (
-                                            <input
-                                                value={editForm.name_en}
-                                                onChange={(e) => setEditForm({ ...editForm, name_en: e.target.value })}
-                                                className={inputStyle}
-                                            />
+                                            <div className='flex flex-col'>
+                                                <input
+                                                    value={editForm.name_en}
+                                                    onChange={(e) => {
+                                                        setEditForm({ ...editForm, name_en: e.target.value });
+                                                        if (editErrors.name_en) setEditErrors({ ...editErrors, name_en: '' });
+                                                    }}
+                                                    className={inputStyle}
+                                                />
+                                                {editErrors.name_en && (<span className="text-xs text-red-500 text-left">{editErrors.name_en}</span>)}
+                                            </div>
                                         ) : item.name_en}
                                     </td>
                                     <td className="px-6 py-4 text-gray-900 text-right">
                                         {editingId === item.id ? (
-                                            <input
-                                                value={editForm.name_ar}
-                                                onChange={(e) => setEditForm({ ...editForm, name_ar: e.target.value })}
-                                                className={inputStyle}
-                                                dir="rtl"
-                                            />
+                                            <div className='flex flex-col'>
+                                                <input
+                                                    value={editForm.name_ar}
+                                                    onChange={(e) => {
+                                                        setEditForm({ ...editForm, name_ar: e.target.value });
+                                                        if (editErrors.name_ar) setEditErrors({ ...editErrors, name_ar: '' });
+                                                    }}
+                                                    className={inputStyle}
+                                                    dir="rtl"
+                                                />
+                                                {editErrors.name_ar && (<span className="text-xs text-red-500 text-left">{editErrors.name_ar}</span>)}
+                                            </div>
                                         ) : item.name_ar}
                                     </td>
                                     <td className="px-6 py-4">

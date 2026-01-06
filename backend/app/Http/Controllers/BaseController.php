@@ -13,11 +13,13 @@ abstract class BaseController extends Controller
     /**
      * Define validation rules. Child classes can override this.
      */
-    protected function rules(Request $request): array
+    protected function rules(Request $request, $id = null): array
     {
+        $tableName = (new $this->modelClass)->getTable();
+
         return [
-            'name_en' => 'required|string|max:255',
-            'name_ar' => 'required|string|max:255',
+            'name_en' => "required|string|max:255|unique:{$tableName},name_en," . $id,
+            'name_ar' => "required|string|max:255|unique:{$tableName},name_ar," . $id,
         ];
     }
 
@@ -60,8 +62,13 @@ abstract class BaseController extends Controller
     {
         try {
             $item = $this->modelClass::findOrFail($id);
-            $item->update($request->validate($this->rules($request)));
+            $item->update($request->validate($this->rules($request, $id)));
             return response()->json(['message' => "{$this->resourceName} updated successfully", 'data' => $item]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'error' => 'Validation failed',
+                'errors' => $e->errors()
+            ], 422);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Update failed', 'message' => $e->getMessage()], 500);
         }
@@ -85,7 +92,7 @@ abstract class BaseController extends Controller
                     $relation->update([$foreignKey => null]);
                 }
             }
-            
+
             $item->delete();
             return response()->json(['message' => "{$this->resourceName} deleted successfully"]);
         } catch (\Exception $e) {

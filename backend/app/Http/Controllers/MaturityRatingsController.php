@@ -13,15 +13,17 @@ class MaturityRatingsController extends BaseController
     /**
      * Override rules to include new fields
      */
-    protected function rules(Request $request): array
+    protected function rules(Request $request, $id = null): array
     {
+        $tableName = (new $this->modelClass)->getTable();
+
         return [
-            'maturity_rating' => 'required|string|max:10',
+            'maturity_rating' => "required|string|max:10|unique:{$tableName},maturity_rating" . ($id ? ",{$id}" : ""), // Simply $id prevents updating
             'name_en'         => 'nullable|string|max:255',
             'name_ar'         => 'nullable|string|max:255',
             'ranking'         => 'required|integer|min:1',
-            'desc_en'         => 'nullable|string',
-            'desc_ar'         => 'nullable|string',
+            'desc_en'         => 'nullable|string|max:255',
+            'desc_ar'         => 'nullable|string|max:255',
         ];
     }
 
