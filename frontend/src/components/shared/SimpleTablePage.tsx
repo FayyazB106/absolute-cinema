@@ -28,6 +28,7 @@ export default function SimpleTablePage({ title, endpoint, singularName }: Simpl
     const [editForm, setEditForm] = useState({ name_en: '', name_ar: '' });
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(10);
+    const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set());
     const quickInputStyle = "flex-1 p-2 border rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-0 outline-none"
     const inputStyle = "border rounded px-2 py-1 w-full"
     const errorStyle = "text-red-500"
@@ -261,6 +262,38 @@ export default function SimpleTablePage({ title, endpoint, singularName }: Simpl
         }
     };
 
+    const toggleRowSelection = (id: number) => {
+        const newSelected = new Set(selectedRows);
+        if (newSelected.has(id)) {
+            newSelected.delete(id);
+        } else {
+            newSelected.add(id);
+        }
+        setSelectedRows(newSelected);
+    };
+
+    const toggleSelectAll = () => {
+        if (selectedRows.size === paginatedItems.length && selectedRows.size > 0) {
+            setSelectedRows(new Set());
+        } else {
+            setSelectedRows(new Set(paginatedItems.map(item => item.id)));
+        }
+    };
+
+    const handleDeleteSelected = async () => {
+        const itemType = singularName || endpoint.slice(0, -1);
+        const count = selectedRows.size;
+        if (window.confirm(`Delete ${count} ${itemType}${count > 1 ? 's' : ''}?`)) {
+            await Promise.all(
+                Array.from(selectedRows).map(id =>
+                    fetch(`${API_BASE_URL}/${endpoint}/${id}`, { method: 'DELETE' })
+                )
+            );
+            setSelectedRows(new Set());
+            fetchItems();
+        }
+    };
+
     // Calculate pagination
     const totalItems = items.length;
     const totalPages = Math.ceil(totalItems / itemsPerPage);
@@ -379,9 +412,30 @@ export default function SimpleTablePage({ title, endpoint, singularName }: Simpl
 
                 {/* Table */}
                 <div className="bg-white rounded-xl shadow-md border overflow-hidden">
+                    {selectedRows.size > 0 && (
+                        <div className="bg-blue-50 border-b p-4 flex items-center justify-between">
+                            <span className="text-sm font-medium text-gray-700">
+                                {selectedRows.size} row{selectedRows.size > 1 ? 's' : ''} selected
+                            </span>
+                            <button
+                                onClick={handleDeleteSelected}
+                                className="px-2 py-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition flex items-center gap-2"
+                            >
+                                <Trash2 size={20} />
+                            </button>
+                        </div>
+                    )}
                     <table className="w-full text-left">
                         <thead className="bg-gray-50 border-b">
                             <tr>
+                                <th className="px-4 py-4 w-12">
+                                    <input
+                                        type="checkbox"
+                                        checked={selectedRows.size === paginatedItems.length && paginatedItems.length > 0}
+                                        onChange={toggleSelectAll}
+                                        className="w-4 h-4 cursor-pointer"
+                                    />
+                                </th>
                                 <th className="px-6 py-4 font-bold text-gray-700">Name</th>
                                 <th className="px-6 py-4 font-bold text-gray-700 text-right">الاسم</th>
                                 <th className="px-6 py-4 font-bold text-gray-700 text-center w-32">Actions</th>
@@ -390,9 +444,17 @@ export default function SimpleTablePage({ title, endpoint, singularName }: Simpl
 
                         <tbody className="divide-y">
                             {loading ? (
-                                <tr><td colSpan={3} className="text-center py-10 animate-pulse text-gray-400">Loading {endpoint}...</td></tr>
+                                <tr><td colSpan={4} className="text-center py-10 animate-pulse text-gray-400">Loading {endpoint}...</td></tr>
                             ) : paginatedItems.map(item => (
                                 <tr key={item.id} className="hover:bg-gray-50 transition">
+                                    <td className="px-4 py-4">
+                                        <input
+                                            type="checkbox"
+                                            checked={selectedRows.has(item.id)}
+                                            onChange={() => toggleRowSelection(item.id)}
+                                            className="w-4 h-4 cursor-pointer"
+                                        />
+                                    </td>
                                     <td className="px-6 py-4 text-gray-900">
                                         {editingId === item.id ? (
                                             <div className='flex flex-col'>

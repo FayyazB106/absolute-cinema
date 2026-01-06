@@ -27,6 +27,7 @@ export default function Ratings() {
         name_ar: '',
         ranking: 1
     });
+    const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set());
     const quickInputStyle = "flex-1 p-2 border rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-0 outline-none"
     const inputStyle = "border rounded px-2 py-1 w-full"
     const errorStyle = "text-red-500"
@@ -188,6 +189,37 @@ export default function Ratings() {
         }
     };
 
+    const toggleRowSelection = (id: number) => {
+        const newSelected = new Set(selectedRows);
+        if (newSelected.has(id)) {
+            newSelected.delete(id);
+        } else {
+            newSelected.add(id);
+        }
+        setSelectedRows(newSelected);
+    };
+
+    const toggleSelectAll = () => {
+        if (selectedRows.size === ratings.length && selectedRows.size > 0) {
+            setSelectedRows(new Set());
+        } else {
+            setSelectedRows(new Set(ratings.map(rating => rating.id)));
+        }
+    };
+
+    const handleDeleteSelected = async () => {
+        const count = selectedRows.size;
+        if (window.confirm(`Delete ${count} maturity rating${count > 1 ? 's' : ''}?`)) {
+            await Promise.all(
+                Array.from(selectedRows).map(id =>
+                    movieService.deleteRating(id)
+                )
+            );
+            setSelectedRows(new Set());
+            fetchRatings();
+        }
+    };
+
     return (
         <div className="p-8">
             <div className="flex justify-between items-center mb-8">
@@ -337,9 +369,31 @@ export default function Ratings() {
 
                 {/* Table */}
                 <div className="bg-white rounded-xl shadow-md border overflow-hidden">
+                    {selectedRows.size > 0 && (
+                        <div className="bg-blue-50 border-b p-4 flex items-center justify-between">
+                            <span className="text-sm font-medium text-gray-700">
+                                {selectedRows.size} row{selectedRows.size > 1 ? 's' : ''} selected
+                            </span>
+                            <button
+                                onClick={handleDeleteSelected}
+                                className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition flex items-center gap-2"
+                            >
+                                <Trash2 size={16} />
+                                Delete Selected
+                            </button>
+                        </div>
+                    )}
                     <table className="w-full text-left">
                         <thead className="bg-gray-50 border-b">
                             <tr>
+                                <th className="px-4 py-4 w-12">
+                                    <input
+                                        type="checkbox"
+                                        checked={selectedRows.size === ratings.length && ratings.length > 0}
+                                        onChange={toggleSelectAll}
+                                        className="w-4 h-4 cursor-pointer"
+                                    />
+                                </th>
                                 <th className="px-6 py-4 font-bold text-gray-700">Ranking</th>
                                 <th className="px-6 py-4 font-bold text-gray-700">Maturity Ratings</th>
                                 <th className="px-6 py-4 font-bold text-gray-700">Name</th>
@@ -350,9 +404,17 @@ export default function Ratings() {
 
                         <tbody className="divide-y">
                             {loading ? (
-                                <tr><td colSpan={3} className="text-center py-10 animate-pulse text-gray-400">Loading maturities...</td></tr>
+                                <tr><td colSpan={6} className="text-center py-10 animate-pulse text-gray-400">Loading maturities...</td></tr>
                             ) : ratings.map(ratings => (
                                 <tr key={ratings.id} className="hover:bg-gray-50 transition">
+                                    <td className="px-4 py-4">
+                                        <input
+                                            type="checkbox"
+                                            checked={selectedRows.has(ratings.id)}
+                                            onChange={() => toggleRowSelection(ratings.id)}
+                                            className="w-4 h-4 cursor-pointer"
+                                        />
+                                    </td>
                                     <td className="px-6 py-4 text-gray-900 text-center">
                                         {editingId === ratings.id ? (
                                             <div className='flex flex-col'>
