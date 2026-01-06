@@ -42,7 +42,15 @@ abstract class BaseController extends Controller
             $item = $this->modelClass::create($validated);
             return response()->json(['message' => "{$this->resourceName} created successfully", 'data' => $item], 201);
         } catch (\Illuminate\Validation\ValidationException $e) {
-            return response()->json(['error' => 'Validation failed', 'errors' => $e->errors()], 422);
+            // Filter errors to only include fields that were actually validated
+            $errors = $e->errors();
+            $filteredErrors = [];
+            foreach ($errors as $field => $messages) {
+                if (!empty($messages)) {
+                    $filteredErrors[$field] = $messages;
+                }
+            }
+            return response()->json(['error' => 'Validation failed', 'errors' => $filteredErrors], 422);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Creation failed', 'message' => $e->getMessage()], 500);
         }

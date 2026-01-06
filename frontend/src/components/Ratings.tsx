@@ -8,15 +8,18 @@ import { validateRating } from '../utils/validation';
 
 export default function Ratings() {
     const [ratings, setRatings] = useState<Rating[]>([]);
-    const [addErrors, setAddErrors] = useState<Record<string, string>>({});
+    const [bulkErrors, setBulkErrors] = useState<Record<number, Record<string, string>>>({});
+    const [limitError, setLimitError] = useState("");
     const [editErrors, setEditErrors] = useState<Record<string, string>>({});
     const [loading, setLoading] = useState(true);
-    const [newRatings, setNewRatings] = useState({
-        maturity_rating: '',
-        name_en: '',
-        name_ar: '',
-        ranking: 1
-    });
+    const [newRatings, setNewRatings] = useState([
+        {
+            maturity_rating: '',
+            name_en: '',
+            name_ar: '',
+            ranking: 1
+        }
+    ]);
     const [editingId, setEditingId] = useState<number | null>(null);
     const [editForm, setEditForm] = useState({
         maturity_rating: '',
@@ -41,35 +44,113 @@ export default function Ratings() {
 
     useEffect(() => { fetchRatings(); }, []);
 
-    const handleAdd = async () => {
-        const localErrors = validateRating(newRatings);
-        if (Object.keys(localErrors).length > 0) {
-            setAddErrors(localErrors);
+    const addNewRow = () => {
+        if (newRatings.length >= 5) {
+            setLimitError("Maximum 5 rows allowed for bulk add");
+            setTimeout(() => setLimitError(""), 3000);
+            return;
+        }
+        setNewRatings([...newRatings, { maturity_rating: '', name_en: '', name_ar: '', ranking: 1 }]);
+    };
+
+    const removeNewRow = (indexToRemove: number) => {
+        const updatedItems = newRatings.filter((_, i) => i !== indexToRemove);
+        setNewRatings(updatedItems);
+
+        setBulkErrors(prevErrors => {
+            const updatedErrors: Record<number, Record<string, string>> = {};
+            Object.keys(prevErrors).forEach((key) => {
+                const oldIndex = parseInt(key, 10);
+                if (oldIndex < indexToRemove) {
+                    updatedErrors[oldIndex] = prevErrors[oldIndex];
+                } else if (oldIndex > indexToRemove) {
+                    updatedErrors[oldIndex - 1] = prevErrors[oldIndex];
+                }
+            });
+            return updatedErrors;
+        });
+    };
+
+    const handleBulkSubmit = async () => {
+        let hasLocalErrors = false;
+        const newBulkErrors: Record<number, Record<string, string>> = {};
+
+        newRatings.forEach((item, index) => {
+            const errors = validateRating(item);
+            if (Object.keys(errors).length > 0) {
+                newBulkErrors[index] = errors;
+                hasLocalErrors = true;
+            }
+        });
+
+        if (hasLocalErrors) {
+            setBulkErrors(newBulkErrors);
             return;
         }
 
-        const res = await movieService.createRating(newRatings);
-        if (res.ok) {
-            setNewRatings({
-                maturity_rating: '',
-                name_en: '',
-                name_ar: '',
-                ranking: 1
-            });
-            setAddErrors({});
-            fetchRatings();
-        } else if (res.status === 422) {
-            const data = await res.json();
-            const backendErrors: any = {};
-            Object.keys(data.errors).forEach(key => {
-                let msg = data.errors[key][0];
-                // CUSTOM ERROR MESSAGE LOGIC
-                if (msg === "The maturity rating has already been taken.") {
-                    msg = "Rating must be unique";
+        try {
+            const results = await Promise.all(
+                newRatings.map(async (item, index) => {
+                    const res = await movieService.createRating(item);
+                    if (res.ok) return { success: true, index };
+
+                    if (res.status === 422) {
+                        const data = await res.json();
+                        const backendErrors: Record<string, string> = {};
+                        Object.keys(data.errors).forEach(key => {
+                            if (data.errors[key] && data.errors[key].length > 0) {
+                                let msg = data.errors[key][0];
+                                if (msg === "The maturity rating has already been taken.") {
+                                    msg = "Rating must be unique";
+                                }
+                                backendErrors[key] = msg;
+                            }
+                        });
+                        return { success: false, index, errors: backendErrors };
+                    }
+                    return { success: false, index, errors: { general: "Server error" } };
+                })
+            );
+
+            const backendBulkErrors: Record<number, Record<string, string>> = {};
+            const successfulIndices = new Set<number>();
+            let totalFailed = 0;
+
+            results.forEach(res => {
+                if (res.success) {
+                    successfulIndices.add(res.index);
+                } else if (res.errors) {
+                    if (Object.keys(res.errors).length > 0) {
+                        backendBulkErrors[res.index] = res.errors;
+                        totalFailed++;
+                    }
                 }
-                backendErrors[key] = msg;
             });
-            setAddErrors(backendErrors);
+
+            if (totalFailed > 0) {
+                // Remove successful rows from the form and shift error indices
+                const updatedNewRatings = newRatings.filter((_, i) => !successfulIndices.has(i));
+                setNewRatings(updatedNewRatings);
+
+                // Shift error indices to match the new positions after removing successful rows
+                const shiftedErrors: Record<number, Record<string, string>> = {};
+                Object.keys(backendBulkErrors).forEach(key => {
+                    const oldIndex = parseInt(key, 10);
+                    const removedBefore = Array.from(successfulIndices).filter(i => i < oldIndex).length;
+                    const newIndex = oldIndex - removedBefore;
+                    shiftedErrors[newIndex] = backendBulkErrors[oldIndex];
+                });
+
+                setBulkErrors(shiftedErrors);
+                fetchRatings();
+            } else {
+                // All rows succeeded
+                setNewRatings([{ maturity_rating: '', name_en: '', name_ar: '', ranking: 1 }]);
+                setBulkErrors({});
+                fetchRatings();
+            }
+        } catch (err) {
+            console.error("Bulk add failed", err);
         }
     };
 
@@ -113,51 +194,145 @@ export default function Ratings() {
                 <Title text="Maturity Ratings" />
             </div>
             <div className='max-w-7xl mx-auto flex flex-col justify-center'>
-                {/* Quick Add Row */}
-                <div className="bg-blue-50 p-4 rounded-xl border border-blue-100 flex gap-4 mb-6 shadow-sm">
-                    <div className="flex flex-col w-full">
-                        <input
-                            placeholder="Ranking"
-                            type="number"
-                            className={quickInputStyle}
-                            value={newRatings.ranking}
-                            onChange={(e) => setNewRatings({ ...newRatings, ranking: Number(e.target.value) })}
-                        />
-                        {addErrors.maturity_rating && <br />} {/* Dummy space to maintain height */}
+                {/* Quick Add Section */}
+                <div className="bg-blue-50 p-4 rounded-xl border border-blue-100 mb-6 shadow-sm relative">
+                    <div className="flex flex-col gap-4">
+                        {newRatings.map((item, index) => (
+                            <div key={index} className="flex gap-4 items-start relative pb-4">
+                                <div className="flex flex-col flex-1">
+                                    <input
+                                        placeholder="Ranking"
+                                        type="number"
+                                        className={`${quickInputStyle} ${bulkErrors[index]?.ranking ? 'border-red-500' : ''}`}
+                                        value={item.ranking}
+                                        onChange={(e) => {
+                                            const updated = [...newRatings];
+                                            updated[index].ranking = Number(e.target.value);
+                                            setNewRatings(updated);
+                                            if (bulkErrors[index]) {
+                                                const newErrs = { ...bulkErrors };
+                                                if (newErrs[index]) {
+                                                    delete newErrs[index].ranking;
+                                                    if (Object.keys(newErrs[index]).length === 0) {
+                                                        delete newErrs[index];
+                                                    }
+                                                    setBulkErrors(newErrs);
+                                                }
+                                            }
+                                        }}
+                                    />
+                                    {bulkErrors[index]?.ranking && <span className={errorStyle}>{bulkErrors[index].ranking}</span>}
+                                </div>
+
+                                <div className="flex flex-col flex-1">
+                                    <input
+                                        placeholder="Maturity Rating"
+                                        className={`${quickInputStyle} ${bulkErrors[index]?.maturity_rating ? 'border-red-500' : ''}`}
+                                        value={item.maturity_rating}
+                                        onChange={(e) => {
+                                            const updated = [...newRatings];
+                                            updated[index].maturity_rating = e.target.value;
+                                            setNewRatings(updated);
+                                            if (bulkErrors[index]) {
+                                                const newErrs = { ...bulkErrors };
+                                                if (newErrs[index]) {
+                                                    delete newErrs[index].maturity_rating;
+                                                    if (Object.keys(newErrs[index]).length === 0) {
+                                                        delete newErrs[index];
+                                                    }
+                                                    setBulkErrors(newErrs);
+                                                }
+                                            }
+                                        }}
+                                    />
+                                    {bulkErrors[index]?.maturity_rating && <span className={errorStyle}>{bulkErrors[index].maturity_rating}</span>}
+                                </div>
+
+                                <div className="flex flex-col flex-1">
+                                    <input
+                                        placeholder="Name"
+                                        className={`${quickInputStyle} ${bulkErrors[index]?.name_en ? 'border-red-500' : ''}`}
+                                        value={item.name_en}
+                                        onChange={(e) => {
+                                            const updated = [...newRatings];
+                                            updated[index].name_en = e.target.value;
+                                            setNewRatings(updated);
+                                            if (bulkErrors[index]) {
+                                                const newErrs = { ...bulkErrors };
+                                                if (newErrs[index]) {
+                                                    delete newErrs[index].name_en;
+                                                    if (Object.keys(newErrs[index]).length === 0) {
+                                                        delete newErrs[index];
+                                                    }
+                                                    setBulkErrors(newErrs);
+                                                }
+                                            }
+                                        }}
+                                    />
+                                    {bulkErrors[index]?.name_en && <span className={errorStyle}>{bulkErrors[index].name_en}</span>}
+                                </div>
+
+                                <div className="flex flex-col flex-1">
+                                    <input
+                                        placeholder="الاسم"
+                                        className={`${quickInputStyle} ${bulkErrors[index]?.name_ar ? 'border-red-500' : ''}`}
+                                        value={item.name_ar}
+                                        dir="rtl"
+                                        onChange={(e) => {
+                                            const updated = [...newRatings];
+                                            updated[index].name_ar = e.target.value;
+                                            setNewRatings(updated);
+                                            if (bulkErrors[index]) {
+                                                const newErrs = { ...bulkErrors };
+                                                if (newErrs[index]) {
+                                                    delete newErrs[index].name_ar;
+                                                    if (Object.keys(newErrs[index]).length === 0) {
+                                                        delete newErrs[index];
+                                                    }
+                                                    setBulkErrors(newErrs);
+                                                }
+                                            }
+                                        }}
+                                    />
+                                    {bulkErrors[index]?.name_ar && <span className={errorStyle}>{bulkErrors[index].name_ar}</span>}
+                                </div>
+
+                                {/* Submit All Button */}
+                                {index === 0 && (
+                                    <div title="Submit All">
+                                        <PlusButton onClick={handleBulkSubmit} />
+                                    </div>
+                                )}
+
+                                {/* Remove row button */}
+                                {index > 0 && (
+                                    <button onClick={() => removeNewRow(index)} className="text-red-500 hover:bg-red-50 p-3 rounded-full transition">
+                                        <Trash2 size={24} />
+                                    </button>
+                                )}
+                            </div>
+                        ))}
                     </div>
-                    <div className="flex flex-col w-full">
-                        <input
-                            placeholder="Maturity Rating"
-                            className={`${quickInputStyle} ${(addErrors.maturity_rating) ? 'border-red-500' : ''}`}
-                            value={newRatings.maturity_rating}
-                            onChange={(e) => {
-                                setNewRatings({ ...newRatings, maturity_rating: e.target.value });
-                                // Clear error as user types
-                                if (addErrors.maturity_rating) setAddErrors({ ...addErrors, maturity_rating: '' });
-                            }}
-                        />
-                        {addErrors.maturity_rating && (<span className={errorStyle}>{addErrors.maturity_rating}</span>)}
+
+                    {/* Add New Row Button */}
+                    <div className="absolute left-1/2 -bottom-5 -translate-x-1/2 group">
+                        <div onClick={addNewRow} className="relative cursor-pointer flex items-center justify-center w-10 h-10 transition-all duration-500 ease-in-out">
+                            {/* The Small Blue Dot (Visible when NOT hovered) */}
+                            <div className="absolute w-2 h-2 bg-blue-500 rounded-full shadow-sm transition-all duration-300 ease-in-out group-hover:opacity-0 group-hover:scale-0 opacity-100 scale-100" />
+
+                            {/* The Plus Button (Visible ONLY on hover) */}
+                            <div className="absolute transition-all duration-300 ease-in-out opacity-0 scale-50 rotate-[-90deg] group-hover:opacity-100 group-hover:scale-100 group-hover:rotate-0">
+                                <PlusButton onClick={addNewRow} />
+                            </div>
+                        </div>
+
+                        {/* Limit Error Message */}
+                        {limitError && (
+                            <span className="text-red-600 text-[10px] font-bold mt-1 bg-white px-2 py-0.5 rounded-full shadow-sm border border-red-100 absolute top-full whitespace-nowrap">
+                                {limitError}
+                            </span>
+                        )}
                     </div>
-                    <div className="flex flex-col w-full">
-                        <input
-                            placeholder="Name"
-                            className={quickInputStyle}
-                            value={newRatings.name_en}
-                            onChange={(e) => setNewRatings({ ...newRatings, name_en: e.target.value })}
-                        />
-                        {addErrors.maturity_rating && <br />} {/* Dummy space to maintain height */}
-                    </div>
-                    <div className="flex flex-col w-full">
-                        <input
-                            placeholder="الاسم"
-                            className={quickInputStyle}
-                            value={newRatings.name_ar}
-                            dir="rtl"
-                            onChange={(e) => setNewRatings({ ...newRatings, name_ar: e.target.value })}
-                        />
-                        {addErrors.maturity_rating && <br />} {/* Dummy space to maintain height */}
-                    </div>
-                    <div><PlusButton onClick={handleAdd} /></div>
                 </div>
 
                 {/* Table */}
@@ -184,10 +359,13 @@ export default function Ratings() {
                                                 <input
                                                     value={editForm.ranking}
                                                     type="number"
-                                                    onChange={(e) => setEditForm({ ...editForm, ranking: Number(e.target.value) })}
+                                                    onChange={(e) => {
+                                                        setEditForm({ ...editForm, ranking: Number(e.target.value) });
+                                                        if (editErrors.ranking) setEditErrors({ ...editErrors, ranking: '' });
+                                                    }}
                                                     className={inputStyle}
                                                 />
-                                                {editErrors.maturity_rating && <br />} {/* Dummy space to maintain height */}
+                                                {editErrors.ranking && (<span className="text-xs text-red-500 text-left">{editErrors.ranking}</span>)}
                                             </div>
                                         ) : ratings.ranking}
                                     </td>
@@ -212,10 +390,13 @@ export default function Ratings() {
                                             <div className='flex flex-col'>
                                                 <input
                                                     value={editForm.name_en}
-                                                    onChange={(e) => setEditForm({ ...editForm, name_en: e.target.value })}
+                                                    onChange={(e) => {
+                                                        setEditForm({ ...editForm, name_en: e.target.value });
+                                                        if (editErrors.name_en) setEditErrors({ ...editErrors, name_en: '' });
+                                                    }}
                                                     className={inputStyle}
                                                 />
-                                                {editErrors.maturity_rating && <br />} {/* Dummy space to maintain height */}
+                                                {editErrors.name_en && (<span className="text-xs text-red-500 text-left">{editErrors.name_en}</span>)}
                                             </div>
                                         ) : ratings.name_en}
                                     </td>
@@ -224,11 +405,14 @@ export default function Ratings() {
                                             <div className='flex flex-col'>
                                                 <input
                                                     value={editForm.name_ar}
-                                                    onChange={(e) => setEditForm({ ...editForm, name_ar: e.target.value })}
+                                                    onChange={(e) => {
+                                                        setEditForm({ ...editForm, name_ar: e.target.value });
+                                                        if (editErrors.name_ar) setEditErrors({ ...editErrors, name_ar: '' });
+                                                    }}
                                                     className={inputStyle}
                                                     dir="rtl"
                                                 />
-                                                {editErrors.maturity_rating && <br />} {/* Dummy space to maintain height */}
+                                                {editErrors.name_ar && (<span className="text-xs text-red-500 text-left">{editErrors.name_ar}</span>)}
                                             </div>
                                         ) : ratings.name_ar}
                                     </td>

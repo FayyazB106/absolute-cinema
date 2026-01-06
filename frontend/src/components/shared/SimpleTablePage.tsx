@@ -19,10 +19,11 @@ interface SimpleTablePageProps {
 
 export default function SimpleTablePage({ title, endpoint, singularName }: SimpleTablePageProps) {
     const [items, setItems] = useState<TableItem[]>([]);
-    const [addErrors, setAddErrors] = useState<Record<string, string>>({});
+    const [bulkErrors, setBulkErrors] = useState<Record<number, Record<string, string>>>({});
+    const [limitError, setLimitError] = useState("");
     const [editErrors, setEditErrors] = useState<Record<string, string>>({});
     const [loading, setLoading] = useState(true);
-    const [newItem, setNewItem] = useState({ name_en: '', name_ar: '' });
+    const [newItems, setNewItems] = useState([{ name_en: '', name_ar: '' }]);
     const [editingId, setEditingId] = useState<number | null>(null);
     const [editForm, setEditForm] = useState({ name_en: '', name_ar: '' });
     const [currentPage, setCurrentPage] = useState(1);
@@ -45,37 +46,180 @@ export default function SimpleTablePage({ title, endpoint, singularName }: Simpl
 
     useEffect(() => { fetchItems(); }, [endpoint]);
 
-    const handleAdd = async () => {
-        const localErrors = validateSimpleTableItem(newItem);
-        if (Object.keys(localErrors).length > 0) {
-            setAddErrors(localErrors);
+    const addNewRow = () => {
+        if (newItems.length >= 5) {
+            setLimitError("Maximum 5 rows allowed for bulk add");
+            setTimeout(() => setLimitError(""), 3000); // Auto-clear error
+            return;
+        }
+        setNewItems([...newItems, { name_en: '', name_ar: '' }]);
+    };
+
+    const handleBulkSubmit = async () => {
+        let hasLocalErrors = false;
+        const newBulkErrors: Record<number, Record<string, string>> = {};
+
+        // Track values to detect duplicates
+        const enValues = newItems.map(i => i.name_en.trim().toLowerCase());
+        const arValues = newItems.map(i => i.name_ar.trim().toLowerCase());
+
+        newItems.forEach((item, index) => {
+            const errors = validateSimpleTableItem(item);
+
+            // Check for duplicate in the current list of new items
+            if (item.name_en && enValues.filter(v => v === item.name_en.trim().toLowerCase()).length > 1) {
+                errors.name_en = "Duplicate in list";
+            }
+            if (item.name_ar && arValues.filter(v => v === item.name_ar.trim().toLowerCase()).length > 1) {
+                errors.name_ar = "Duplicate in list";
+            }
+
+            // If there are errors, add them to the bulk errors for this specific row
+            if (Object.keys(errors).length > 0) {
+                newBulkErrors[index] = errors;
+                hasLocalErrors = true;
+            }
+        });
+
+        // If there are local validation errors, update the error state and return early
+        if (hasLocalErrors) {
+            setBulkErrors(newBulkErrors);
             return;
         }
 
-        const res = await fetch(`${API_BASE_URL}/${endpoint}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(newItem),
-        });
+        try {
+            const results = await Promise.all(
+                newItems.map(async (item, index) => {
+                    const res = await fetch(`${API_BASE_URL}/${endpoint}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(item),
+                    });
 
-        if (res.ok) {
-            setNewItem({ name_en: '', name_ar: '' });
-            setAddErrors({});
-            fetchItems();
-        } else if (res.status === 422) {
-            const data = await res.json();
-            const backendErrors: any = {};
-            Object.keys(data.errors).forEach(key => {
-                let msg = data.errors[key][0];
-                // CUSTOM ERROR MESSAGE LOGIC
-                if (msg === "The name en has already been taken." || msg === "The name ar has already been taken.")  {
-                    msg = "Name must be unique";
+                    if (res.ok) return { success: true, index };
+
+                    if (res.status === 422) {
+                        const data = await res.json();
+                        const backendErrors: Record<string, string> = {};
+
+                        // Only include errors for fields that actually have errors
+                        Object.keys(data.errors).forEach(key => {
+                            if (data.errors[key] && data.errors[key].length > 0) {
+                                let msg = data.errors[key][0];
+                                if (msg.includes("already been taken")) {
+                                    msg = "Name must be unique";
+                                }
+                                backendErrors[key] = msg;
+                            }
+                        });
+
+                        return { success: false, index, errors: backendErrors };
+                    }
+                    return { success: false, index, errors: { general: "Server error" } };
+                })
+            );
+
+            const backendBulkErrors: Record<number, Record<string, string>> = {};
+            const successfulIndices = new Set<number>();
+            let totalFailed = 0;
+
+            results.forEach(res => {
+                if (res.success) {
+                    successfulIndices.add(res.index);
+                } else if (res.errors) {
+                    // Only add errors if there are actual errors to show
+                    if (Object.keys(res.errors).length > 0) {
+                        backendBulkErrors[res.index] = res.errors;
+                        totalFailed++;
+                    }
                 }
-                backendErrors[key] = msg;
             });
-            setAddErrors(backendErrors);
+
+            if (totalFailed > 0) {
+                // Remove successful rows from the form and shift error indices
+                const updatedNewItems = newItems.filter((_, i) => !successfulIndices.has(i));
+                setNewItems(updatedNewItems);
+
+                // Shift error indices to match the new positions after removing successful rows
+                const shiftedErrors: Record<number, Record<string, string>> = {};
+                Object.keys(backendBulkErrors).forEach(key => {
+                    const oldIndex = parseInt(key, 10);
+                    const removedBefore = Array.from(successfulIndices).filter(i => i < oldIndex).length;
+                    const newIndex = oldIndex - removedBefore;
+                    shiftedErrors[newIndex] = backendBulkErrors[oldIndex];
+                });
+
+                setBulkErrors(shiftedErrors);
+                fetchItems();
+            } else {
+                // All rows succeeded
+                setNewItems([{ name_en: '', name_ar: '' }]);
+                setBulkErrors({});
+                fetchItems();
+            }
+        } catch (err) {
+            console.error("Bulk add failed", err);
         }
     };
+
+    const removeNewRow = (indexToRemove: number) => {
+        // 1. Remove the item from the inputs
+        const updatedItems = newItems.filter((_, i) => i !== indexToRemove);
+        setNewItems(updatedItems);
+
+        // 2. Clear and shift the errors
+        setBulkErrors(prevErrors => {
+            const updatedErrors: Record<number, Record<string, string>> = {};
+
+            // We iterate through the keys of the previous error state
+            Object.keys(prevErrors).forEach((key) => {
+                const oldIndex = parseInt(key, 10);
+
+                if (oldIndex < indexToRemove) {
+                    // Keep errors for rows before the deleted one
+                    updatedErrors[oldIndex] = prevErrors[oldIndex];
+                } else if (oldIndex > indexToRemove) {
+                    // Shift errors down for rows after the deleted one
+                    updatedErrors[oldIndex - 1] = prevErrors[oldIndex];
+                }
+                // If oldIndex === indexToRemove, it is simply excluded (deleted)
+            });
+
+            return updatedErrors;
+        });
+    };
+
+    // const handleAdd = async () => {
+    //     const localErrors = validateSimpleTableItem(newItem);
+    //     if (Object.keys(localErrors).length > 0) {
+    //         setAddErrors(localErrors);
+    //         return;
+    //     }
+
+    //     const res = await fetch(`${API_BASE_URL}/${endpoint}`, {
+    //         method: 'POST',
+    //         headers: { 'Content-Type': 'application/json' },
+    //         body: JSON.stringify(newItem),
+    //     });
+
+    //     if (res.ok) {
+    //         setNewItem({ name_en: '', name_ar: '' });
+    //         setAddErrors({});
+    //         fetchItems();
+    //     } else if (res.status === 422) {
+    //         const data = await res.json();
+    //         const backendErrors: any = {};
+    //         Object.keys(data.errors).forEach(key => {
+    //             let msg = data.errors[key][0];
+    //             // CUSTOM ERROR MESSAGE LOGIC
+    //             if (msg === "The name en has already been taken." || msg === "The name ar has already been taken.") {
+    //                 msg = "Name must be unique";
+    //             }
+    //             backendErrors[key] = msg;
+    //         });
+    //         setAddErrors(backendErrors);
+    //     }
+    // };
 
     const handleUpdate = async (id: number) => {
         const localErrors = validateSimpleTableItem(editForm);
@@ -135,36 +279,102 @@ export default function SimpleTablePage({ title, endpoint, singularName }: Simpl
                 <Title text={title} />
             </div>
             <div className='max-w-7xl mx-auto flex flex-col justify-center'>
-                {/* Quick Add Row */}
-                <div className="bg-blue-50 p-4 rounded-xl border border-blue-100 flex gap-4 mb-6 shadow-sm">
-                    <div className="flex flex-col w-full">
-                        <input
-                            placeholder="Name"
-                            className={`${quickInputStyle} ${addErrors.name_en ? 'border-red-500' : ''}`}
-                            value={newItem.name_en}
-                            onChange={(e) => {
-                                setNewItem({ ...newItem, name_en: e.target.value });
-                                if (addErrors.name_en) setAddErrors({ ...addErrors, name_en: '' });
-                            }}
-                        />
-                        {addErrors.name_en && <span className={errorStyle}>{addErrors.name_en}</span>}
-                        {addErrors.name_ar && !addErrors.name_en && <br />} {/* Dummy space to maintain height */}
+                {/* Quick Add Section */}
+                <div className="bg-blue-50 p-4 rounded-xl border border-blue-100 mb-6 shadow-sm relative">
+                    <div className="flex flex-col gap-4">
+                        {newItems.map((item, index) => (
+                            <div key={index} className="flex gap-4 items-start relative pb-4">
+                                <div className="flex flex-col w-full relative">
+                                    <input
+                                        placeholder="Name"
+                                        className={`${quickInputStyle} ${bulkErrors[index]?.name_en ? 'border-red-500' : ''}`}
+                                        value={item.name_en}
+                                        onChange={(e) => {
+                                            const updated = [...newItems];
+                                            updated[index].name_en = e.target.value;
+                                            setNewItems(updated);
+                                            // Clear error for this field only when user starts typing
+                                            if (bulkErrors[index]) {
+                                                const newErrs = { ...bulkErrors };
+                                                if (newErrs[index]) {
+                                                    delete newErrs[index].name_en;
+                                                    if (Object.keys(newErrs[index]).length === 0) {
+                                                        delete newErrs[index];
+                                                    }
+                                                    setBulkErrors(newErrs);
+                                                }
+                                            }
+                                        }}
+                                    />
+                                    {bulkErrors[index]?.name_en && (
+                                        <span className={errorStyle}>{bulkErrors[index].name_en}</span>
+                                    )}
+                                </div>
+
+                                <div className="flex flex-col w-full relative">
+                                    <input
+                                        placeholder="الاسم"
+                                        dir="rtl"
+                                        className={`${quickInputStyle} ${bulkErrors[index]?.name_ar ? 'border-red-500' : ''}`}
+                                        value={item.name_ar}
+                                        onChange={(e) => {
+                                            const updated = [...newItems];
+                                            updated[index].name_ar = e.target.value;
+                                            setNewItems(updated);
+                                            // Clear error for this field only when user starts typing
+                                            if (bulkErrors[index]) {
+                                                const newErrs = { ...bulkErrors };
+                                                if (newErrs[index]) {
+                                                    delete newErrs[index].name_ar;
+                                                    if (Object.keys(newErrs[index]).length === 0) {
+                                                        delete newErrs[index];
+                                                    }
+                                                    setBulkErrors(newErrs);
+                                                }
+                                            }
+                                        }}
+                                    />
+                                    {bulkErrors[index]?.name_ar && (
+                                        <span className={errorStyle}>{bulkErrors[index].name_ar}</span>
+                                    )}
+                                </div>
+
+                                {/* Submit All Button */}
+                                {index === 0 && (
+                                    <div title="Submit All">
+                                        <PlusButton onClick={handleBulkSubmit} />
+                                    </div>
+                                )}
+
+                                {/* Remove row button*/}
+                                {index > 0 && (
+                                    <button onClick={() => removeNewRow(index)} className="text-red-500 hover:bg-red-50 p-3 rounded-full transition">
+                                        <Trash2 size={24} />
+                                    </button>
+                                )}
+                            </div>
+                        ))}
                     </div>
-                    <div className="flex flex-col w-full">
-                        <input
-                            placeholder="الاسم"
-                            dir="rtl"
-                            className={`${quickInputStyle} ${addErrors.name_ar ? 'border-red-500' : ''}`}
-                            value={newItem.name_ar}
-                            onChange={(e) => {
-                                setNewItem({ ...newItem, name_ar: e.target.value });
-                                if (addErrors.name_ar) setAddErrors({ ...addErrors, name_ar: '' });
-                            }}
-                        />
-                        {addErrors.name_ar && <span className={errorStyle}>{addErrors.name_ar}</span>}
-                        {addErrors.name_en && !addErrors.name_ar &&<br />} {/* Dummy space to maintain height */}
+
+                    {/* Add New Row Button */}
+                    <div className="absolute left-1/2 -bottom-5 -translate-x-1/2 group">
+                        <div onClick={addNewRow} className="relative cursor-pointer flex items-center justify-center w-10 h-10 transition-all duration-500 ease-in-out">
+                            {/* The Small Blue Dot (Visible when NOT hovered) */}
+                            <div className="absolute w-2 h-2 bg-blue-500 rounded-full shadow-sm transition-all duration-300 ease-in-out group-hover:opacity-0 group-hover:scale-0 opacity-100 scale-100" />
+
+                            {/* The Plus Button (Visible ONLY on hover) */}
+                            <div className="absolute transition-all duration-300 ease-in-out opacity-0 scale-50 rotate-[-90deg] group-hover:opacity-100 group-hover:scale-100 group-hover:rotate-0">
+                                <PlusButton onClick={addNewRow} />
+                            </div>
+                        </div>
+
+                        {/* Limit Error Message */}
+                        {limitError && (
+                            <span className="text-red-600 text-[10px] font-bold mt-1 bg-white px-2 py-0.5 rounded-full shadow-sm border border-red-100 absolute top-full whitespace-nowrap">
+                                {limitError}
+                            </span>
+                        )}
                     </div>
-                    <div><PlusButton onClick={handleAdd} /></div>
                 </div>
 
                 {/* Table */}
