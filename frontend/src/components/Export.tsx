@@ -18,6 +18,19 @@ export default function Export() {
 
     const tableOptions: TableOption[] = [
         {
+            id: 'movies',
+            name: 'Movies',
+            endpoint: 'movies',
+            fetchFn: async () => {
+                const movies = await movieService.getMovies();
+                // Fetch full details for each movie to get related data
+                const movieDetails = await Promise.all(
+                    movies.map(movie => movieService.getMovieById(movie.id))
+                );
+                return movieDetails;
+            }
+        },
+        {
             id: 'actors',
             name: 'Actors',
             endpoint: 'actors',
@@ -67,7 +80,7 @@ export default function Export() {
             name: 'Statuses',
             endpoint: 'statuses',
             fetchFn: async () => {
-                 const data = await movieService.getStatuses();
+                const data = await movieService.getStatuses();
                 return data;
             }
         }
@@ -116,11 +129,46 @@ export default function Export() {
                     const transformedData = sortedData.map((item: any) => {
                         const row: any = {};
                         if (item.id) row['ID'] = item.id;
-                        if (item.ranking) row['Ranking'] = item.ranking;
-                        if (item.maturity_rating) row['Maturity Rating'] = item.maturity_rating;
-                        if (item.name_en) row['Name (English)'] = item.name_en;
-                        if (item.name_ar) row['Name (Arabic)'] = item.name_ar;
-                        if (item.status) row['Status'] = item.status;
+
+                        // For Movies table
+                        if (tableId === 'movies') {
+                            if (item.name_en) row['Title (English)'] = item.name_en;
+                            if (item.name_ar) row['Title (Arabic)'] = item.name_ar;
+                            if (item.desc_en) row['Description (English)'] = item.desc_en;
+                            if (item.desc_ar) row['Description (Arabic)'] = item.desc_ar;
+                            if (item.release_date) row['Release Date'] = new Date(item.release_date).toLocaleDateString("en-GB");
+                            if (item.duration) row['Duration (mins)'] = item.duration;
+                            if (item.imdb_url) row['IMDb URL'] = item.imdb_url;
+                            if (item.maturity_ratings) row['Maturity Rating'] = item.maturity_ratings.maturity_rating;
+                            if (item.status) row['Status'] = item.status.name_en;
+                            if (item.genres && item.genres.length > 0) {
+                                row['Genres'] = item.genres.map((g: any) => g.name_en).join('; ');
+                            }
+                            if (item.actors && item.actors.length > 0) {
+                                row['Actors'] = item.actors.map((a: any) => a.name_en).join('; ');
+                            }
+                            if (item.directors && item.directors.length > 0) {
+                                row['Directors'] = item.directors.map((d: any) => d.name_en).join('; ');
+                            }
+                            if (item.audio_languages && item.audio_languages.length > 0) {
+                                row['Languages'] = item.audio_languages.map((l: any) => l.name_en).join('; ');
+                            }
+                            if (item.subtitles && item.subtitles.length > 0) {
+                                row['Subtitles'] = item.subtitles.map((l: any) => l.name_en).join('; ');
+                            }
+                            if (item.is_featured !== undefined) row['Featured'] = item.is_featured ? 'Yes' : 'No';
+                            if (item.created_at) row['Created'] = new Date(item.created_at).toLocaleDateString("en-GB");
+                            if (item.updated_at) row['Updated'] = new Date(item.updated_at).toLocaleDateString("en-GB");
+                        } else {
+                            // For other tables
+                            if (item.ranking) row['Ranking'] = item.ranking;
+                            if (item.maturity_rating) row['Maturity Rating'] = item.maturity_rating;
+                            if (item.name_en) row['Name (English)'] = item.name_en;
+                            if (item.name_ar) row['Name (Arabic)'] = item.name_ar;
+                            if (item.status) row['Status'] = item.status;
+                            if (item.created_at) row['Created'] = new Date(item.created_at).toLocaleDateString("en-GB");
+                            if (item.updated_at) row['Updated'] = new Date(item.updated_at).toLocaleDateString("en-GB");
+                        }
                         return row;
                     });
 
@@ -131,6 +179,9 @@ export default function Export() {
                         }
                         if (key === 'Ranking') {
                             return { wch: 9 };
+                        }
+                        if (key.includes('Description') || key.includes('Genres') || key.includes('Actors') || key.includes('Directors') || key.includes('Languages')) {
+                            return { wch: 30 };
                         }
                         return { wch: Math.max(key.length, 15) };
                     });
@@ -237,9 +288,9 @@ export default function Export() {
                 {/* Info Section */}
                 <div className="mt-6 bg-blue-50 border border-blue-200 rounded-xl p-4">
                     <h3 className="font-semibold text-blue-900 mb-2">Export Info</h3>
-                    <ul className="text-md text-blue-800 space-y-1">
-                        <li>• Each selected table will be exported as a separate sheet</li>
-                        <li>• All sheets will be in a single Excel file</li>
+                    <ul className="text-md text-blue-800 space-y-1 list-disc px-5">
+                        <li>Each selected table will be exported as a separate sheet</li>
+                        <li>All sheets will be in a single Excel file</li>
                     </ul>
                 </div>
             </div>
