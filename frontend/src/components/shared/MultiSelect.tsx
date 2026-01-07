@@ -98,7 +98,7 @@ export default function MultiSelect({ label, options, selected, onChange, placeh
                             {filteredOptions.length === 0 ? (
                                 <div className="p-4 text-center text-gray-500">No options found</div>
                             ) : (
-                                filteredOptions.map(option => (
+                                filteredOptions.sort((a, b) => a.name_en.localeCompare(b.name_en)).map(option => (
                                     <label key={option.id} className="flex items-center gap-3 p-3 hover:bg-blue-50 cursor-pointer transition">
                                         <input
                                             type="checkbox"

@@ -49,7 +49,7 @@ export default function SimpleTablePage({ title, endpoint, singularName }: Simpl
 
     const addNewRow = () => {
         if (newItems.length >= 5) {
-            setLimitError("Maximum 5 rows allowed for bulk add");
+            setLimitError("Maximum 5 rows allowed");
             setTimeout(() => setLimitError(""), 3000); // Auto-clear error
             return;
         }
@@ -189,38 +189,6 @@ export default function SimpleTablePage({ title, endpoint, singularName }: Simpl
             return updatedErrors;
         });
     };
-
-    // const handleAdd = async () => {
-    //     const localErrors = validateSimpleTableItem(newItem);
-    //     if (Object.keys(localErrors).length > 0) {
-    //         setAddErrors(localErrors);
-    //         return;
-    //     }
-
-    //     const res = await fetch(`${API_BASE_URL}/${endpoint}`, {
-    //         method: 'POST',
-    //         headers: { 'Content-Type': 'application/json' },
-    //         body: JSON.stringify(newItem),
-    //     });
-
-    //     if (res.ok) {
-    //         setNewItem({ name_en: '', name_ar: '' });
-    //         setAddErrors({});
-    //         fetchItems();
-    //     } else if (res.status === 422) {
-    //         const data = await res.json();
-    //         const backendErrors: any = {};
-    //         Object.keys(data.errors).forEach(key => {
-    //             let msg = data.errors[key][0];
-    //             // CUSTOM ERROR MESSAGE LOGIC
-    //             if (msg === "The name en has already been taken." || msg === "The name ar has already been taken.") {
-    //                 msg = "Name must be unique";
-    //             }
-    //             backendErrors[key] = msg;
-    //         });
-    //         setAddErrors(backendErrors);
-    //     }
-    // };
 
     const handleUpdate = async (id: number) => {
         const localErrors = validateSimpleTableItem(editForm);
@@ -403,7 +371,7 @@ export default function SimpleTablePage({ title, endpoint, singularName }: Simpl
 
                         {/* Limit Error Message */}
                         {limitError && (
-                            <span className="text-red-600 text-[10px] font-bold mt-1 bg-white px-2 py-0.5 rounded-full shadow-sm border border-red-100 absolute top-full whitespace-nowrap">
+                            <span className="text-red-600 text-sm font-bold mt-1 bg-white px-2 py-0.5 rounded-full shadow-sm border border-red-100 absolute top-full whitespace-nowrap">
                                 {limitError}
                             </span>
                         )}

@@ -163,7 +163,7 @@ export default function MovieForm({
                             required
                         >
                             <option value="">Select...</option>
-                            {options.statuses.map(s =>
+                            {options.statuses.sort((a, b) => a.name_en.localeCompare(b.name_en)).map(s =>
                                 <option key={s.id} value={s.id}>{s.name_en}</option>
                             )}
                         </select>

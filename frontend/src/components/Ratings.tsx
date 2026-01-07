@@ -47,7 +47,7 @@ export default function Ratings() {
 
     const addNewRow = () => {
         if (newRatings.length >= 5) {
-            setLimitError("Maximum 5 rows allowed for bulk add");
+            setLimitError("Maximum 5 rows allowed");
             setTimeout(() => setLimitError(""), 3000);
             return;
         }
@@ -360,7 +360,7 @@ export default function Ratings() {
 
                         {/* Limit Error Message */}
                         {limitError && (
-                            <span className="text-red-600 text-[10px] font-bold mt-1 bg-white px-2 py-0.5 rounded-full shadow-sm border border-red-100 absolute top-full whitespace-nowrap">
+                            <span className="text-red-600 text-sm font-bold mt-1 bg-white px-2 py-0.5 rounded-full shadow-sm border border-red-100 absolute top-full whitespace-nowrap">
                                 {limitError}
                             </span>
                         )}
@@ -394,8 +394,8 @@ export default function Ratings() {
                                         className="w-4 h-4 cursor-pointer"
                                     />
                                 </th>
-                                <th className="px-6 py-4 font-bold text-gray-700">Ranking</th>
-                                <th className="px-6 py-4 font-bold text-gray-700">Maturity Ratings</th>
+                                <th className="px-6 py-4 font-bold text-gray-700 text-center">Ranking</th>
+                                <th className="px-6 py-4 font-bold text-gray-700 text-center">Maturity Ratings</th>
                                 <th className="px-6 py-4 font-bold text-gray-700">Name</th>
                                 <th className="px-6 py-4 font-bold text-gray-700 text-right">الاسم</th>
                                 <th className="px-6 py-4 font-bold text-gray-700 text-center w-32">Actions</th>

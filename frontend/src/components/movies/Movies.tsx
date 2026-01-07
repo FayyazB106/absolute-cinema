@@ -59,6 +59,8 @@ export default function Movies() {
         switch (status.toLowerCase()) {
             case 'english': return 'bg-white text-red-600 ring-2 ring-blue-800';
             case 'arabic': return 'bg-green-600 text-white';
+            case 'french': return 'bg-blue-800 text-white ring-2 ring-red-600';
+            case 'spanish': return 'bg-[#AD1519] text-[#FABD00] ring-2 ring-[#FABD00]';
             default: return 'bg-gray-500 text-white';
         }
     };
@@ -108,7 +110,7 @@ export default function Movies() {
                                         </p>
                                     }
                                 </div>
-                                <div className='flex justify-center gap-2'>
+                                <div className='flex flex-wrap justify-center gap-2'>
                                     {movie.audio_languages && (
                                         movie.audio_languages.map(lang => (
                                             <p key={lang.id} className={`${getLanguageStyles(lang.name_en)} px-3 py-1 rounded-full text-[10px] font-bold uppercase`}>

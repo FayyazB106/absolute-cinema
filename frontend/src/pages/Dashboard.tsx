@@ -6,6 +6,7 @@ import Genres from '../components/Genres';
 import Languages from '../components/Languages';
 import Statuses from '../components/Statuses';
 import Ratings from '../components/Ratings';
+import Export from '../components/Export';
 
 export default function Dashboard() {
     const [activeModule, setActiveModule] = useState('movies');
@@ -58,6 +59,12 @@ export default function Dashboard() {
                         >
                             Statuses
                         </button>
+                        <button
+                            onClick={() => setActiveModule('export')}
+                            className={`px-4 py-2 rounded ${activeModule === 'export' ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}
+                        >
+                            Export
+                        </button>
                     </div>
                 </div>
             </nav>
@@ -71,6 +78,7 @@ export default function Dashboard() {
                 {activeModule === 'languages' && <Languages />}
                 {activeModule === 'ratings' && <Ratings />}
                 {activeModule === 'statuses' && <Statuses />}
+                {activeModule === 'export' && <Export />}
             </div>
         </div>
     );
