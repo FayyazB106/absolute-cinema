@@ -492,7 +492,7 @@ export default function Ratings() {
                                                 </div>
                                             ) : ratings.ranking}
                                         </td>
-                                        <td className="px-6 py-4 text-gray-900 flex justify-center">
+                                        <td className="px-6 py-4 text-gray-900 text-center align-middle">
                                             {editingId === ratings.id ? (
                                                 <div className='flex flex-col'>
                                                     <input

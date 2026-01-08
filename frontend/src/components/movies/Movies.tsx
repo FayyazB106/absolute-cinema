@@ -78,23 +78,44 @@ export default function Movies() {
         setIsViewModalOpen(true);
     };
 
-    if (loading) {
-        return <div className="p-10 text-center text-xl font-semibold">Loading Movies...</div>;
-    }
+    // Define status priority order (lower number = higher priority)
+    const getStatusPriority = (statusId: number) => {
+        const statusName = getStatusName(statusId).toLowerCase();
+        switch (statusName) {
+            case 'released': return 1;
+            case 'coming soon': return 2;
+            case 'unavailable': return 3;
+            default: return 4;
+        }
+    };
 
+    const filteredItems = movies
+        .filter(item => {
+            // Filter items based on search term (English or Arabic)
+            const matchesSearch = item.name_en.toLowerCase().includes(searchTerm.toLowerCase()) || item.name_ar.toLowerCase().includes(searchTerm.toLowerCase());
 
-    const filteredItems = movies.filter(item => {
-        // Filter items based on search term (English or Arabic)
-        const matchesSearch = item.name_en.toLowerCase().includes(searchTerm.toLowerCase()) || item.name_ar.toLowerCase().includes(searchTerm.toLowerCase());
+            // Filter items with toggle
+            const matchesFeatured = showFeaturedOnly ? item.is_featured : true;
+            const matchesStatus = selectedStatus === "all" ? true : item.status_id === Number(selectedStatus);
+            const matchesLanguage = selectedLanguage === "all" ? true : item.audio_languages?.some(lang => lang.name_en === selectedLanguage);
+            const matchesRestriced = isRestricted ? getRatingName(item.maturity_id).toUpperCase().startsWith('R') : true;
 
-        // Filter items with toggle
-        const matchesFeatured = showFeaturedOnly ? item.is_featured : true;
-        const matchesStatus = selectedStatus === "all" ? true : item.status_id === Number(selectedStatus);
-        const matchesLanguage = selectedLanguage === "all" ? true : item.audio_languages?.some(lang => lang.name_en === selectedLanguage);
-        const matchesRestriced = isRestricted ? getRatingName(item.maturity_id).toUpperCase().startsWith('R') : true;
+            return matchesSearch && matchesFeatured && matchesStatus && matchesLanguage && matchesRestriced;
+        })
+        .sort((a, b) => {
+            // 1. Featured first
+            if (a.is_featured !== b.is_featured) { return b.is_featured ? 1 : -1; }
 
-        return matchesSearch && matchesFeatured && matchesStatus && matchesLanguage && matchesRestriced;
-    });
+            // 2. Status priority
+            const statusDiff = getStatusPriority(a.status_id) - getStatusPriority(b.status_id);
+            if (statusDiff !== 0) { return statusDiff; }
+
+            // 3. Alphabetical by name_en
+            return a.name_en.localeCompare(b.name_en);
+        });
+
+    if (loading) { return <div className="p-10 text-center text-xl font-semibold">Loading Movies...</div>; }
+
     return (
         <div className="p-8">
             <div className="flex justify-between items-center mb-8">
@@ -201,7 +222,7 @@ export default function Movies() {
                         <div
                             key={movie.id}
                             onClick={() => handleViewMovie(movie.id)}
-                            className={`flex flex-col h-full transition-all duration-200 hover:shadow-xl rounded-xl ${movie.is_featured ? "ring-2 ring-amber-400 hover:ring-amber-500" : "hover:ring-2 hover:ring-blue-400"} cursor-pointer hover:scale-105`}
+                            className={`flex flex-col h-full transition-all duration-200 hover:shadow-xl rounded-xl ${movie.is_featured ? "ring-2 ring-amber-400" : "hover:ring-2 hover:ring-blue-400"} cursor-pointer hover:scale-105`}
                         >
                             {movie.poster_full_url ? (
                                 <img src={movie.poster_full_url} alt={movie.name_en} className="aspect-[2/3] w-full rounded-t-xl object-cover" />
@@ -238,7 +259,7 @@ export default function Movies() {
 
             {/* No Results State */}
             {filteredItems.length === 0 && (
-                <div className="flex flex-col items-center justify-center py-20 text-gray-400 bg-gray-50 rounded-xl border-2 border-dashed">
+                <div className="flex flex-col items-center justify-center py-20 text-gray-400 bg-gray-50 rounded-xl">
                     <Search size={48} className="mb-4 opacity-20" />
                     <p className="text-xl font-medium">
                         No {showFeaturedOnly ? "featured " : ""}movies match your criteria

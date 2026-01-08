@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { ChevronDown, ChevronUp, Search } from 'lucide-react';
+import { ChevronDown, ChevronUp, Search, X } from 'lucide-react';
 
 interface Option {
     id: number;
@@ -81,13 +81,25 @@ export default function MultiSelect({ label, options, selected, onChange, placeh
                         {/* Search Bar */}
                         <div className="p-3 border-b sticky top-0 bg-white rounded">
                             <div className="relative">
-                                <Search size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                                <div className="absolute right-3 top-2.5 flex items-center">
+                                    {search ? (
+                                        // Close/Clear Button (Visible when text exists)
+                                        <button onClick={() => { setSearch("") }} className="text-gray-400 hover:text-gray-600 transition-colors">
+                                            <X size={18} />
+                                        </button>
+                                    ) : (
+                                        // Search Icon (Visible when empty)
+                                        <div className="text-gray-400">
+                                            <Search size={18} />
+                                        </div>
+                                    )}
+                                </div>
                                 <input
                                     type="text"
                                     placeholder="Search..."
                                     value={search}
                                     onChange={e => setSearch(e.target.value)}
-                                    className="w-full pl-10 pr-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    className="w-full p-2 border rounded focus:outline-none focus:border-blue-400"
                                     onClick={e => e.stopPropagation()}
                                 />
                             </div>
