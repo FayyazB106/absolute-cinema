@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
-import { Pencil, Trash2, X, Check } from 'lucide-react';
+import { Pencil, Trash2, X, Check, Search } from 'lucide-react';
 import { API_BASE_URL } from '../../constants/api';
 import PlusButton from '../shared/PlusButton';
 import Title from '../shared/Title';
 import { validateSimpleTableItem } from '../../utils/validation';
+import toast, { Toaster } from 'react-hot-toast';
 
 interface TableItem {
     id: number;
@@ -29,6 +30,7 @@ export default function SimpleTablePage({ title, endpoint, singularName }: Simpl
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(10);
     const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set());
+    const [searchTerm, setSearchTerm] = useState("");
     const quickInputStyle = "flex-1 p-2 border rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-0 outline-none"
     const inputStyle = "border rounded px-2 py-1 w-full"
     const errorStyle = "text-red-500"
@@ -135,6 +137,11 @@ export default function SimpleTablePage({ title, endpoint, singularName }: Simpl
                     }
                 }
             });
+
+            if (successfulIndices.size > 0) {
+                const count = successfulIndices.size;
+                toast.success(`${count} new row${count > 1 ? 's' : ''} added`);
+            }
 
             if (totalFailed > 0) {
                 // Remove successful rows from the form and shift error indices
@@ -262,12 +269,18 @@ export default function SimpleTablePage({ title, endpoint, singularName }: Simpl
         }
     };
 
+    // Filter items based on search term (English or Arabic)
+    const filteredItems = items.filter(item =>
+        item.name_en.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.name_ar.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
     // Calculate pagination
-    const totalItems = items.length;
+    const totalItems = filteredItems.length;
     const totalPages = Math.ceil(totalItems / itemsPerPage);
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
-    const paginatedItems = items.slice(startIndex, endIndex);
+    const paginatedItems = filteredItems.slice(startIndex, endIndex);
 
     const handleItemsPerPageChange = (newLimit: number) => {
         setItemsPerPage(newLimit);
@@ -276,6 +289,8 @@ export default function SimpleTablePage({ title, endpoint, singularName }: Simpl
 
     return (
         <div className="p-8">
+            <Toaster position="bottom-right" toastOptions={{ success: { style: { background: 'green', color: 'white' } } }} />
+
             <div className="flex justify-between items-center mb-8">
                 <Title text={title} />
             </div>
@@ -393,6 +408,40 @@ export default function SimpleTablePage({ title, endpoint, singularName }: Simpl
                             </button>
                         </div>
                     )}
+
+                    <div className="relative">
+                        <input
+                            type="text"
+                            placeholder="Search by name..."
+                            value={searchTerm}
+                            onChange={(e) => {
+                                setSearchTerm(e.target.value);
+                                setCurrentPage(1);
+                            }}
+                            className="w-full p-2 pl-4 pr-10 focus:ring-2 focus:ring-blue-400 outline-none shadow-sm"
+                        />
+
+                        <div className="absolute right-3 top-2.5 flex items-center">
+                            {searchTerm ? (
+                                // Close/Clear Button (Visible when text exists)
+                                <button
+                                    onClick={() => {
+                                        setSearchTerm("");
+                                        setCurrentPage(1);
+                                    }}
+                                    className="text-gray-400 hover:text-gray-600 transition-colors"
+                                >
+                                    <X size={18} />
+                                </button>
+                            ) : (
+                                // Search Icon (Visible when empty)
+                                <div className="text-gray-400">
+                                    <Search size={18} />
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
                     <table className="w-full text-left">
                         <thead className="bg-gray-50 border-b">
                             <tr>
@@ -413,77 +462,91 @@ export default function SimpleTablePage({ title, endpoint, singularName }: Simpl
                         <tbody className="divide-y">
                             {loading ? (
                                 <tr><td colSpan={4} className="text-center py-10 animate-pulse text-gray-400">Loading {endpoint}...</td></tr>
-                            ) : paginatedItems.map(item => (
-                                <tr key={item.id} className="hover:bg-gray-50 transition">
-                                    <td className="px-4 py-4">
-                                        <input
-                                            type="checkbox"
-                                            checked={selectedRows.has(item.id)}
-                                            onChange={() => toggleRowSelection(item.id)}
-                                            className="w-4 h-4 cursor-pointer"
-                                        />
-                                    </td>
-                                    <td className="px-6 py-4 text-gray-900">
-                                        {editingId === item.id ? (
-                                            <div className='flex flex-col'>
-                                                <input
-                                                    value={editForm.name_en}
-                                                    onChange={(e) => {
-                                                        setEditForm({ ...editForm, name_en: e.target.value });
-                                                        if (editErrors.name_en) setEditErrors({ ...editErrors, name_en: '' });
-                                                    }}
-                                                    className={inputStyle}
-                                                />
-                                                {editErrors.name_en && (<span className="text-xs text-red-500 text-left">{editErrors.name_en}</span>)}
-                                            </div>
-                                        ) : item.name_en}
-                                    </td>
-                                    <td className="px-6 py-4 text-gray-900 text-right">
-                                        {editingId === item.id ? (
-                                            <div className='flex flex-col'>
-                                                <input
-                                                    value={editForm.name_ar}
-                                                    onChange={(e) => {
-                                                        setEditForm({ ...editForm, name_ar: e.target.value });
-                                                        if (editErrors.name_ar) setEditErrors({ ...editErrors, name_ar: '' });
-                                                    }}
-                                                    className={inputStyle}
-                                                    dir="rtl"
-                                                />
-                                                {editErrors.name_ar && (<span className="text-xs text-red-500 text-left">{editErrors.name_ar}</span>)}
-                                            </div>
-                                        ) : item.name_ar}
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <div className="flex justify-center gap-2">
+                            ) : paginatedItems.length > 0 ? (
+                                paginatedItems.map(item => (
+                                    <tr key={item.id} className="hover:bg-gray-50 transition">
+                                        <td className="px-4 py-4">
+                                            <input
+                                                type="checkbox"
+                                                checked={selectedRows.has(item.id)}
+                                                onChange={() => toggleRowSelection(item.id)}
+                                                className="w-4 h-4 cursor-pointer"
+                                            />
+                                        </td>
+                                        <td className="px-6 py-4 text-gray-900">
                                             {editingId === item.id ? (
-                                                <>
-                                                    <button onClick={() => handleUpdate(item.id)} className="text-green-600 hover:bg-green-50 p-2 rounded-full"><Check size={18} /></button>
-                                                    <button onClick={() => setEditingId(null)} className="text-gray-600 hover:bg-gray-50 p-2 rounded-full"><X size={18} /></button>
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <button
-                                                        onClick={() => {
-                                                            setEditingId(item.id);
-                                                            setEditForm({ name_en: item.name_en, name_ar: item.name_ar });
+                                                <div className='flex flex-col'>
+                                                    <input
+                                                        value={editForm.name_en}
+                                                        onChange={(e) => {
+                                                            setEditForm({ ...editForm, name_en: e.target.value });
+                                                            if (editErrors.name_en) setEditErrors({ ...editErrors, name_en: '' });
                                                         }}
-                                                        className="text-amber-500 hover:bg-amber-50 p-2 rounded-full transition"
-                                                    >
-                                                        <Pencil size={18} />
-                                                    </button>
-                                                    <button
-                                                        onClick={() => handleDelete(item.id, item.name_en)}
-                                                        className="text-red-500 hover:bg-red-50 p-2 rounded-full transition"
-                                                    >
-                                                        <Trash2 size={18} />
-                                                    </button>
-                                                </>
-                                            )}
+                                                        className={inputStyle}
+                                                    />
+                                                    {editErrors.name_en && (<span className="text-xs text-red-500 text-left">{editErrors.name_en}</span>)}
+                                                </div>
+                                            ) : item.name_en}
+                                        </td>
+                                        <td className="px-6 py-4 text-gray-900 text-right">
+                                            {editingId === item.id ? (
+                                                <div className='flex flex-col'>
+                                                    <input
+                                                        value={editForm.name_ar}
+                                                        onChange={(e) => {
+                                                            setEditForm({ ...editForm, name_ar: e.target.value });
+                                                            if (editErrors.name_ar) setEditErrors({ ...editErrors, name_ar: '' });
+                                                        }}
+                                                        className={inputStyle}
+                                                        dir="rtl"
+                                                    />
+                                                    {editErrors.name_ar && (<span className="text-xs text-red-500 text-left">{editErrors.name_ar}</span>)}
+                                                </div>
+                                            ) : item.name_ar}
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <div className="flex justify-center gap-2">
+                                                {editingId === item.id ? (
+                                                    <>
+                                                        <button onClick={() => handleUpdate(item.id)} className="text-green-600 hover:bg-green-50 p-2 rounded-full"><Check size={18} /></button>
+                                                        <button onClick={() => setEditingId(null)} className="text-gray-600 hover:bg-gray-50 p-2 rounded-full"><X size={18} /></button>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <button
+                                                            onClick={() => {
+                                                                setEditingId(item.id);
+                                                                setEditForm({ name_en: item.name_en, name_ar: item.name_ar });
+                                                            }}
+                                                            className="text-amber-500 hover:bg-amber-50 p-2 rounded-full transition"
+                                                        >
+                                                            <Pencil size={18} />
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleDelete(item.id, item.name_en)}
+                                                            className="text-red-500 hover:bg-red-50 p-2 rounded-full transition"
+                                                        >
+                                                            <Trash2 size={18} />
+                                                        </button>
+                                                    </>
+                                                )}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))) : (
+                                <tr>
+                                    <td colSpan={4} className="text-center py-20">
+                                        <div className="flex flex-col items-center justify-center text-gray-400 gap-2">
+                                            <Search size={40} className="opacity-20" />
+                                            <p className="text-lg font-medium">No results found for "{searchTerm}"</p>
+                                            <p className="text-sm">Try checking your spelling or searching for something else.</p>
+                                            <button onClick={() => setSearchTerm("")} className="mt-2 text-blue-500 hover:underline text-sm font-semibold">
+                                                Clear all filters
+                                            </button>
                                         </div>
                                     </td>
                                 </tr>
-                            ))}
+                            )}
                         </tbody>
                     </table>
                 </div>

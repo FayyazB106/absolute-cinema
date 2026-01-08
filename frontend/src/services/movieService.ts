@@ -1,5 +1,5 @@
 import { API_BASE_URL } from '../constants/api';
-import type { Movie, Rating, Status, Options, MovieDetails } from '../types/movie';
+import type { Movie, Rating, Status, Options, MovieDetails, Language } from '../types/movie';
 
 export const movieService = {
     /* Movies */
@@ -112,6 +112,13 @@ export const movieService = {
         return await fetch(`${API_BASE_URL}/statuses/${id}`, {
             method: 'DELETE',
         });
+    },
+
+    // Fetch all statuses
+    getLanguages: async (): Promise<Language[]> => {
+        const res = await fetch(`${API_BASE_URL}/languages`);
+        if (!res.ok) throw new Error('Failed to fetch languages');
+        return res.json();
     },
 
     // Fetch everything needed for dropdowns in one go

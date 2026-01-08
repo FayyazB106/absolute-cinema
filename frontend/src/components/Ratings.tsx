@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
-import { Pencil, Trash2, X, Check } from 'lucide-react';
+import { Pencil, Trash2, X, Check, Search } from 'lucide-react';
 import PlusButton from './shared/PlusButton';
 import type { Rating } from '../types/movie';
 import Title from './shared/Title';
 import { movieService } from '../services/movieService';
 import { validateRating } from '../utils/validation';
+import toast, { Toaster } from 'react-hot-toast';
 
 export default function Ratings() {
     const [ratings, setRatings] = useState<Rating[]>([]);
@@ -28,6 +29,9 @@ export default function Ratings() {
         ranking: 1
     });
     const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set());
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage, setItemsPerPage] = useState(10);
+    const [searchTerm, setSearchTerm] = useState("");
     const quickInputStyle = "flex-1 p-2 border rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-0 outline-none"
     const inputStyle = "border rounded px-2 py-1 w-full"
     const errorStyle = "text-red-500"
@@ -128,6 +132,11 @@ export default function Ratings() {
                 }
             });
 
+            if (successfulIndices.size > 0) {
+                const count = successfulIndices.size;
+                toast.success(`${count} new row${count > 1 ? 's' : ''} added`);
+            }
+
             if (totalFailed > 0) {
                 // Remove successful rows from the form and shift error indices
                 const updatedNewRatings = newRatings.filter((_, i) => !successfulIndices.has(i));
@@ -220,8 +229,25 @@ export default function Ratings() {
         }
     };
 
+    // Filter items based on maturity rating
+    const filteredItems = ratings.filter(item => item.maturity_rating.toLowerCase().includes(searchTerm.toLowerCase()));
+
+    // Calculate pagination
+    const totalItems = filteredItems.length;
+    const totalPages = Math.ceil(totalItems / itemsPerPage);
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
+    const paginatedItems = filteredItems.slice(startIndex, endIndex);
+
+    const handleItemsPerPageChange = (newLimit: number) => {
+        setItemsPerPage(newLimit);
+        setCurrentPage(1);
+    };
+
     return (
         <div className="p-8">
+            <Toaster position="bottom-right" toastOptions={{ success: { style: { background: 'green', color: 'white' } } }} />
+
             <div className="flex justify-between items-center mb-8">
                 <Title text="Maturity Ratings" />
             </div>
@@ -383,13 +409,47 @@ export default function Ratings() {
                             </button>
                         </div>
                     )}
+
+                    <div className="relative">
+                        <input
+                            type="text"
+                            placeholder="Search by name..."
+                            value={searchTerm}
+                            onChange={(e) => {
+                                setSearchTerm(e.target.value);
+                                setCurrentPage(1);
+                            }}
+                            className="w-full p-2 pl-4 pr-10 focus:ring-2 focus:ring-blue-400 outline-none shadow-sm"
+                        />
+
+                        <div className="absolute right-3 top-2.5 flex items-center">
+                            {searchTerm ? (
+                                // Close/Clear Button (Visible when text exists)
+                                <button
+                                    onClick={() => {
+                                        setSearchTerm("");
+                                        setCurrentPage(1);
+                                    }}
+                                    className="text-gray-400 hover:text-gray-600 transition-colors"
+                                >
+                                    <X size={18} />
+                                </button>
+                            ) : (
+                                // Search Icon (Visible when empty)
+                                <div className="text-gray-400">
+                                    <Search size={18} />
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
                     <table className="w-full text-left">
                         <thead className="bg-gray-50 border-b">
                             <tr>
                                 <th className="px-4 py-4 w-12">
                                     <input
                                         type="checkbox"
-                                        checked={selectedRows.size === ratings.length && ratings.length > 0}
+                                        checked={selectedRows.size === paginatedItems.length && paginatedItems.length > 0}
                                         onChange={toggleSelectAll}
                                         className="w-4 h-4 cursor-pointer"
                                     />
@@ -405,113 +465,170 @@ export default function Ratings() {
                         <tbody className="divide-y">
                             {loading ? (
                                 <tr><td colSpan={6} className="text-center py-10 animate-pulse text-gray-400">Loading maturities...</td></tr>
-                            ) : ratings.map(ratings => (
-                                <tr key={ratings.id} className="hover:bg-gray-50 transition">
-                                    <td className="px-4 py-4">
-                                        <input
-                                            type="checkbox"
-                                            checked={selectedRows.has(ratings.id)}
-                                            onChange={() => toggleRowSelection(ratings.id)}
-                                            className="w-4 h-4 cursor-pointer"
-                                        />
-                                    </td>
-                                    <td className="px-6 py-4 text-gray-900 text-center">
-                                        {editingId === ratings.id ? (
-                                            <div className='flex flex-col'>
-                                                <input
-                                                    value={editForm.ranking}
-                                                    type="number"
-                                                    onChange={(e) => {
-                                                        setEditForm({ ...editForm, ranking: Number(e.target.value) });
-                                                        if (editErrors.ranking) setEditErrors({ ...editErrors, ranking: '' });
-                                                    }}
-                                                    className={inputStyle}
-                                                />
-                                                {editErrors.ranking && (<span className="text-xs text-red-500 text-left">{editErrors.ranking}</span>)}
-                                            </div>
-                                        ) : ratings.ranking}
-                                    </td>
-                                    <td className="px-6 py-4 text-gray-900 flex justify-center">
-                                        {editingId === ratings.id ? (
-                                            <div className='flex flex-col'>
-                                                <input
-                                                    value={editForm.maturity_rating}
-                                                    onChange={(e) => {
-                                                        setEditForm({ ...editForm, maturity_rating: e.target.value });
-                                                        // Clear error as user types
-                                                        if (editErrors.maturity_rating) setEditErrors({ ...editErrors, maturity_rating: '' });
-                                                    }}
-                                                    className={inputStyle}
-                                                />
-                                                {editErrors.maturity_rating && (<span className="text-xs text-red-500 text-left">{editErrors.maturity_rating}</span>)}
-                                            </div>
-                                        ) : ratings.maturity_rating}
-                                    </td>
-                                    <td className="px-6 py-4 text-gray-900">
-                                        {editingId === ratings.id ? (
-                                            <div className='flex flex-col'>
-                                                <input
-                                                    value={editForm.name_en}
-                                                    onChange={(e) => {
-                                                        setEditForm({ ...editForm, name_en: e.target.value });
-                                                        if (editErrors.name_en) setEditErrors({ ...editErrors, name_en: '' });
-                                                    }}
-                                                    className={inputStyle}
-                                                />
-                                                {editErrors.name_en && (<span className="text-xs text-red-500 text-left">{editErrors.name_en}</span>)}
-                                            </div>
-                                        ) : ratings.name_en}
-                                    </td>
-                                    <td className="px-6 py-4 text-gray-900 text-right">
-                                        {editingId === ratings.id ? (
-                                            <div className='flex flex-col'>
-                                                <input
-                                                    value={editForm.name_ar}
-                                                    onChange={(e) => {
-                                                        setEditForm({ ...editForm, name_ar: e.target.value });
-                                                        if (editErrors.name_ar) setEditErrors({ ...editErrors, name_ar: '' });
-                                                    }}
-                                                    className={inputStyle}
-                                                    dir="rtl"
-                                                />
-                                                {editErrors.name_ar && (<span className="text-xs text-red-500 text-left">{editErrors.name_ar}</span>)}
-                                            </div>
-                                        ) : ratings.name_ar}
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <div className="flex justify-center gap-2">
+                            ) : paginatedItems.length > 0 ? (
+                                paginatedItems.map(ratings => (
+                                    <tr key={ratings.id} className="hover:bg-gray-50 transition">
+                                        <td className="px-4 py-4">
+                                            <input
+                                                type="checkbox"
+                                                checked={selectedRows.has(ratings.id)}
+                                                onChange={() => toggleRowSelection(ratings.id)}
+                                                className="w-4 h-4 cursor-pointer"
+                                            />
+                                        </td>
+                                        <td className="px-6 py-4 text-gray-900 text-center">
                                             {editingId === ratings.id ? (
-                                                <>
-                                                    <button onClick={() => handleUpdate(ratings.id)} className="text-green-600 hover:bg-green-50 p-2 rounded-full"><Check size={18} /></button>
-                                                    <button onClick={() => setEditingId(null)} className="text-gray-600 hover:bg-gray-50 p-2 rounded-full"><X size={18} /></button>
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <button
-                                                        onClick={() => {
-                                                            setEditingId(ratings.id);
-                                                            setEditForm({ ...ratings });
+                                                <div className='flex flex-col'>
+                                                    <input
+                                                        value={editForm.ranking}
+                                                        type="number"
+                                                        onChange={(e) => {
+                                                            setEditForm({ ...editForm, ranking: Number(e.target.value) });
+                                                            if (editErrors.ranking) setEditErrors({ ...editErrors, ranking: '' });
                                                         }}
-                                                        className="text-amber-500 hover:bg-amber-50 p-2 rounded-full transition"
-                                                    >
-                                                        <Pencil size={18} />
-                                                    </button>
-                                                    <button
-                                                        onClick={() => handleDelete(ratings.id, ratings.maturity_rating)}
-                                                        className="text-red-500 hover:bg-red-50 p-2 rounded-full transition"
-                                                    >
-                                                        <Trash2 size={18} />
-                                                    </button>
-                                                </>
-                                            )}
+                                                        className={inputStyle}
+                                                    />
+                                                    {editErrors.ranking && (<span className="text-xs text-red-500 text-left">{editErrors.ranking}</span>)}
+                                                </div>
+                                            ) : ratings.ranking}
+                                        </td>
+                                        <td className="px-6 py-4 text-gray-900 flex justify-center">
+                                            {editingId === ratings.id ? (
+                                                <div className='flex flex-col'>
+                                                    <input
+                                                        value={editForm.maturity_rating}
+                                                        onChange={(e) => {
+                                                            setEditForm({ ...editForm, maturity_rating: e.target.value });
+                                                            // Clear error as user types
+                                                            if (editErrors.maturity_rating) setEditErrors({ ...editErrors, maturity_rating: '' });
+                                                        }}
+                                                        className={inputStyle}
+                                                    />
+                                                    {editErrors.maturity_rating && (<span className="text-xs text-red-500 text-left">{editErrors.maturity_rating}</span>)}
+                                                </div>
+                                            ) : ratings.maturity_rating}
+                                        </td>
+                                        <td className="px-6 py-4 text-gray-900">
+                                            {editingId === ratings.id ? (
+                                                <div className='flex flex-col'>
+                                                    <input
+                                                        value={editForm.name_en}
+                                                        onChange={(e) => {
+                                                            setEditForm({ ...editForm, name_en: e.target.value });
+                                                            if (editErrors.name_en) setEditErrors({ ...editErrors, name_en: '' });
+                                                        }}
+                                                        className={inputStyle}
+                                                    />
+                                                    {editErrors.name_en && (<span className="text-xs text-red-500 text-left">{editErrors.name_en}</span>)}
+                                                </div>
+                                            ) : ratings.name_en}
+                                        </td>
+                                        <td className="px-6 py-4 text-gray-900 text-right">
+                                            {editingId === ratings.id ? (
+                                                <div className='flex flex-col'>
+                                                    <input
+                                                        value={editForm.name_ar}
+                                                        onChange={(e) => {
+                                                            setEditForm({ ...editForm, name_ar: e.target.value });
+                                                            if (editErrors.name_ar) setEditErrors({ ...editErrors, name_ar: '' });
+                                                        }}
+                                                        className={inputStyle}
+                                                        dir="rtl"
+                                                    />
+                                                    {editErrors.name_ar && (<span className="text-xs text-red-500 text-left">{editErrors.name_ar}</span>)}
+                                                </div>
+                                            ) : ratings.name_ar}
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <div className="flex justify-center gap-2">
+                                                {editingId === ratings.id ? (
+                                                    <>
+                                                        <button onClick={() => handleUpdate(ratings.id)} className="text-green-600 hover:bg-green-50 p-2 rounded-full"><Check size={18} /></button>
+                                                        <button onClick={() => setEditingId(null)} className="text-gray-600 hover:bg-gray-50 p-2 rounded-full"><X size={18} /></button>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <button
+                                                            onClick={() => {
+                                                                setEditingId(ratings.id);
+                                                                setEditForm({ ...ratings });
+                                                            }}
+                                                            className="text-amber-500 hover:bg-amber-50 p-2 rounded-full transition"
+                                                        >
+                                                            <Pencil size={18} />
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleDelete(ratings.id, ratings.maturity_rating)}
+                                                            className="text-red-500 hover:bg-red-50 p-2 rounded-full transition"
+                                                        >
+                                                            <Trash2 size={18} />
+                                                        </button>
+                                                    </>
+                                                )}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))) : (
+                                <tr>
+                                    <td colSpan={6} className="text-center py-20">
+                                        <div className="flex flex-col items-center justify-center text-gray-400 gap-2">
+                                            <Search size={40} className="opacity-20" />
+                                            <p className="text-lg font-medium">No results found for "{searchTerm}"</p>
+                                            <p className="text-sm">Try checking your spelling or searching for something else.</p>
+                                            <button onClick={() => setSearchTerm("")} className="mt-2 text-blue-500 hover:underline text-sm font-semibold">
+                                                Clear all filters
+                                            </button>
                                         </div>
                                     </td>
                                 </tr>
-                            ))}
+                            )}
                         </tbody>
                     </table>
                 </div>
+
+                {/* Pagination */}
+                {!loading && ratings.length > 10 && (
+                    <div className="mt-4 flex items-center justify-between bg-white p-4 rounded-lg border shadow-sm">
+                        <div className="flex items-center gap-2">
+                            <span className="text-sm text-gray-600">Show:</span>
+                            <select
+                                value={itemsPerPage}
+                                onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
+                                className="border rounded px-3 py-1 text-sm focus:ring-2 focus:ring-blue-400 outline-none"
+                            >
+                                <option value={10}>10</option>
+                                <option value={25}>25</option>
+                                <option value={50}>50</option>
+                                <option value={100}>100</option>
+                            </select>
+                        </div>
+
+                        <div className="text-sm text-gray-600">
+                            Showing <span className="font-semibold">{startIndex + 1}</span> - <span className="font-semibold">{endIndex}</span> of <span className="font-semibold">{totalItems}</span>
+                        </div>
+
+                        <div className="flex gap-2">
+                            <button
+                                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                                disabled={currentPage === 1}
+                                className="px-4 py-2 border rounded-lg text-sm font-medium transition hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                Previous
+                            </button>
+                            <div className="flex items-center px-3 text-sm">
+                                Page <span className="font-semibold mx-1">{currentPage}</span> of <span className="font-semibold ml-1">{totalPages}</span>
+                            </div>
+                            <button
+                                onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                                disabled={currentPage === totalPages}
+                                className="px-4 py-2 border rounded-lg text-sm font-medium transition hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                Next
+                            </button>
+                        </div>
+                    </div>
+                )}
             </div>
-        </div >
+        </div>
     );
 }

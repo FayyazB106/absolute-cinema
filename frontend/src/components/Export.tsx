@@ -3,6 +3,7 @@ import * as XLSX from 'xlsx';
 import Title from './shared/Title';
 import { API_BASE_URL } from '../constants/api';
 import { movieService } from '../services/movieService';
+import toast, { Toaster } from 'react-hot-toast';
 
 interface TableOption {
     id: string;
@@ -14,7 +15,6 @@ interface TableOption {
 export default function Export() {
     const [selectedTables, setSelectedTables] = useState<Set<string>>(new Set());
     const [isExporting, setIsExporting] = useState(false);
-    const [exportMessage, setExportMessage] = useState('');
 
     const tableOptions: TableOption[] = [
         {
@@ -106,13 +106,12 @@ export default function Export() {
 
     const handleExport = async () => {
         if (selectedTables.size === 0) {
-            setExportMessage('Please select at least one table to export');
-            setTimeout(() => setExportMessage(''), 3000);
+            toast.error('Please select at least one table to export');
             return;
         }
 
         setIsExporting(true);
-        setExportMessage('');
+        const toastId = toast.loading('Preparing your export...');
 
         try {
             const workbook = XLSX.utils.book_new();
@@ -195,12 +194,10 @@ export default function Export() {
 
             const fileName = `Absolute-Cinema-Data.xlsx`;
             XLSX.writeFile(workbook, fileName);
-            setExportMessage(`Successfully exported ${selectedTables.size} table${selectedTables.size > 1 ? 's' : ''}`);
-            setTimeout(() => setExportMessage(''), 3000);
+            toast.success(`Successfully exported ${selectedTables.size} tables`, { id: toastId });
         } catch (err) {
             console.error('Export failed', err);
-            setExportMessage('Export failed. Please try again.');
-            setTimeout(() => setExportMessage(''), 3000);
+            toast.error('Export failed. Please try again.', { id: toastId });
         } finally {
             setIsExporting(false);
         }
@@ -208,6 +205,8 @@ export default function Export() {
 
     return (
         <div className="p-8">
+            <Toaster position="bottom-right" toastOptions={{ success: { style: { background: 'green', color: 'white' } } }} />
+
             <div className="flex justify-between items-center mb-8">
                 <Title text="Export to Excel" />
             </div>
@@ -273,22 +272,12 @@ export default function Export() {
                     >
                         {isExporting ? 'Exporting...' : `Export Selected Tables (${selectedTables.size})`}
                     </button>
-
-                    {/* Message */}
-                    {exportMessage && (
-                        <div className={`mt-4 p-3 rounded-lg text-sm font-medium ${exportMessage.includes('Successfully')
-                            ? 'bg-green-100 text-green-700'
-                            : 'bg-red-100 text-red-700'
-                            }`}>
-                            {exportMessage}
-                        </div>
-                    )}
                 </div>
 
                 {/* Info Section */}
                 <div className="mt-6 bg-blue-50 border border-blue-200 rounded-xl p-4">
                     <h3 className="font-semibold text-blue-900 mb-2">Export Info</h3>
-                    <ul className="text-md text-blue-800 space-y-1 list-disc px-5">
+                    <ul className="text-md text-blue-800 space-y-1 list-disc list-inside">
                         <li>Each selected table will be exported as a separate sheet</li>
                         <li>All sheets will be in a single Excel file</li>
                     </ul>
