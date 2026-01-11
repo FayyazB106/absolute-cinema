@@ -65,19 +65,12 @@ export default function ViewMovie({ isOpen, onClose, movieId, onMovieDeleted }: 
                 {/* The Image Preview Popup (Overlay) */}
                 {previewImage && (
                     <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/90 p-10" onClick={() => setPreviewImage(null)}>
-                        <button
-                            onClick={() => setPreviewImage(null)}
-                            className="absolute top-5 right-5 text-white p-2 rounded-full hover:bg-white/10"
-                        >
+                        <button onClick={() => setPreviewImage(null)} className="absolute top-5 right-5 text-white p-2 rounded-full hover:bg-white/10">
                             <X size={32} />
                         </button>
                         <div className="text-center" onClick={(e) => e.stopPropagation()}>
                             <h3 className="text-white text-xl font-bold mb-4">{previewImage.title}</h3>
-                            <img
-                                src={previewImage.url}
-                                alt="Preview"
-                                className="max-w-full max-h-[70vh] "
-                            />
+                            <img src={previewImage.url} alt="Preview" className="max-w-full max-h-[70vh]" />
                         </div>
                     </div>
                 )}
@@ -136,6 +129,7 @@ export default function ViewMovie({ isOpen, onClose, movieId, onMovieDeleted }: 
                         </div>
                     ) : movie ? (
                         <div className="space-y-6">
+                            
                             {/* Quick Info Cards */}
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                                 <div className="bg-blue-50 p-4 rounded-lg border border-blue-200 text-center">
@@ -144,11 +138,7 @@ export default function ViewMovie({ isOpen, onClose, movieId, onMovieDeleted }: 
                                         <span className="text-xs font-semibold uppercase">Release Date</span>
                                     </div>
                                     <p className="text-lg font-bold">
-                                        {new Date(movie.release_date).toLocaleDateString("en-GB", {
-                                            day: 'numeric',
-                                            month: 'short',
-                                            year: 'numeric'
-                                        })}
+                                        {new Date(movie.release_date).toLocaleDateString("en-GB", { day: 'numeric', month: 'short', year: 'numeric' })}
                                     </p>
                                 </div>
 
@@ -157,9 +147,7 @@ export default function ViewMovie({ isOpen, onClose, movieId, onMovieDeleted }: 
                                         <Clock size={18} />
                                         <span className="text-xs font-semibold uppercase">Duration</span>
                                     </div>
-                                    <p className="text-lg font-bold">
-                                        {movie.duration} min
-                                    </p>
+                                    <p className="text-lg font-bold">{movie.duration} min</p>
                                 </div>
 
                                 <div className="bg-green-50 p-4 rounded-lg border border-green-200 text-center">
@@ -167,9 +155,7 @@ export default function ViewMovie({ isOpen, onClose, movieId, onMovieDeleted }: 
                                         <UserRound size={18} />
                                         <span className="text-xs font-semibold uppercase">Maturity Rating</span>
                                     </div>
-                                    <p className="text-lg font-bold">
-                                        {movie.maturity_ratings?.maturity_rating || 'N/A'}
-                                    </p>
+                                    <p className="text-lg font-bold">{movie.maturity_ratings?.maturity_rating || 'N/A'}</p>
                                 </div>
 
                                 <div className="bg-orange-50 p-4 rounded-lg border border-orange-200 text-center">
@@ -177,9 +163,7 @@ export default function ViewMovie({ isOpen, onClose, movieId, onMovieDeleted }: 
                                         <Film size={18} />
                                         <span className="text-xs font-semibold uppercase">Status</span>
                                     </div>
-                                    <p className="text-lg font-bold">
-                                        {movie.status?.name_en || 'N/A'}
-                                    </p>
+                                    <p className="text-lg font-bold">{movie.status?.name_en || 'N/A'}</p>
                                 </div>
                             </div>
 
@@ -187,12 +171,8 @@ export default function ViewMovie({ isOpen, onClose, movieId, onMovieDeleted }: 
                             <div className="border-t pt-6">
                                 <h3 className="text-xl font-bold mb-3">Description</h3>
                                 <div className="space-y-4">
-                                    <div className="bg-gray-50 p-4 rounded-lg text-left">
-                                        <p className="leading-relaxed">{movie.desc_en}</p>
-                                    </div>
-                                    <div className="bg-gray-50 p-4 rounded-lg text-right">
-                                        <p className="leading-relaxed">{movie.desc_ar}</p>
-                                    </div>
+                                    <div className="bg-gray-50 p-4 rounded-lg text-left leading-relaxed">{movie.desc_en}</div>
+                                    <div className="bg-gray-50 p-4 rounded-lg text-right leading-relaxed">{movie.desc_ar}</div>
                                 </div>
                             </div>
 
@@ -200,15 +180,11 @@ export default function ViewMovie({ isOpen, onClose, movieId, onMovieDeleted }: 
                             {movie.genres && movie.genres.length > 0 && (
                                 <div className="border-t pt-6">
                                     <h3 className="text-xl font-bold mb-3 flex items-center gap-2">
-                                        <Film size={20} />
-                                        Genres
+                                        <Film size={20} /> Genres
                                     </h3>
                                     <div className="flex flex-wrap gap-2">
                                         {movie.genres.map(genre => (
-                                            <span
-                                                key={genre.id}
-                                                className="bg-blue-100 text-blue-800 px-4 py-2 rounded-full text-sm font-semibold"
-                                            >
+                                            <span key={genre.id} className="bg-blue-100 text-blue-800 px-4 py-2 rounded-full text-sm font-semibold">
                                                 {genre.name_en}
                                             </span>
                                         ))}
@@ -222,17 +198,11 @@ export default function ViewMovie({ isOpen, onClose, movieId, onMovieDeleted }: 
                                 {movie.actors && movie.actors.length > 0 && (
                                     <div>
                                         <h3 className="text-lg font-bold mb-3 flex items-center gap-2">
-                                            <Users size={20} />
-                                            Starring
+                                            <Users size={20} /> Starring
                                         </h3>
                                         <ul className="space-y-2">
                                             {movie.actors.map(actor => (
-                                                <li
-                                                    key={actor.id}
-                                                    className="bg-gray-50 px-4 py-2 rounded-lg"
-                                                >
-                                                    {actor.name_en}
-                                                </li>
+                                                <li key={actor.id} className="bg-gray-50 px-4 py-2 rounded-lg">{actor.name_en}</li>
                                             ))}
                                         </ul>
                                     </div>
@@ -242,17 +212,11 @@ export default function ViewMovie({ isOpen, onClose, movieId, onMovieDeleted }: 
                                 {movie.directors && movie.directors.length > 0 && (
                                     <div>
                                         <h3 className="text-lg font-bold mb-3 flex items-center gap-2">
-                                            <Video size={20} />
-                                            Directed By
+                                            <Video size={20} /> Directed By
                                         </h3>
                                         <ul className="space-y-2">
                                             {movie.directors.map(director => (
-                                                <li
-                                                    key={director.id}
-                                                    className="bg-gray-50 px-4 py-2 rounded-lg"
-                                                >
-                                                    {director.name_en}
-                                                </li>
+                                                <li key={director.id} className="bg-gray-50 px-4 py-2 rounded-lg">{director.name_en}</li>
                                             ))}
                                         </ul>
                                     </div>
@@ -265,17 +229,11 @@ export default function ViewMovie({ isOpen, onClose, movieId, onMovieDeleted }: 
                                 {movie.audio_languages && movie.audio_languages.length > 0 && (
                                     <div>
                                         <h3 className="text-lg font-bold mb-3 flex items-center gap-2">
-                                            <Globe size={20} />
-                                            Languages
+                                            <Globe size={20} /> Languages
                                         </h3>
                                         <div className="flex flex-wrap gap-2">
                                             {movie.audio_languages.map(lang => (
-                                                <span
-                                                    key={lang.id}
-                                                    className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-semibold"
-                                                >
-                                                    {lang.name_en}
-                                                </span>
+                                                <span key={lang.id} className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-semibold">{lang.name_en}</span>
                                             ))}
                                         </div>
                                     </div>
@@ -285,17 +243,11 @@ export default function ViewMovie({ isOpen, onClose, movieId, onMovieDeleted }: 
                                 {movie.subtitles && movie.subtitles.length > 0 && (
                                     <div>
                                         <h3 className="text-lg font-bold mb-3 flex items-center gap-2">
-                                            <Subtitles size={20} />
-                                            Subtitles
+                                            <Subtitles size={20} /> Subtitles
                                         </h3>
                                         <div className="flex flex-wrap gap-2">
                                             {movie.subtitles.map(sub => (
-                                                <span
-                                                    key={sub.id}
-                                                    className="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm font-semibold"
-                                                >
-                                                    {sub.name_en}
-                                                </span>
+                                                <span key={sub.id} className="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm font-semibold">{sub.name_en}</span>
                                             ))}
                                         </div>
                                     </div>
@@ -330,11 +282,13 @@ export default function ViewMovie({ isOpen, onClose, movieId, onMovieDeleted }: 
                                 </div>
                                 {movie.imdb_url && (
                                     <div>
-                                        <a href={movie.imdb_url} target="_blank" rel="noopener noreferrer"
+                                        <a
+                                            href={movie.imdb_url}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
                                             className="inline-flex items-center gap-2 bg-yellow-500 hover:bg-yellow-600 text-white font-bold px-6 py-3 rounded-lg transition"
                                         >
-                                            <Star size={20} />
-                                            View on IMDB
+                                            <Star size={20} /> View on IMDB
                                         </a>
                                     </div>
                                 )}

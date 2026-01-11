@@ -37,7 +37,7 @@ class MovieRequest extends FormRequest
                 'regex:/^https?:\/\/(www\.)?imdb\.com\/title\/tt\d+/i'
             ],
 
-            // Validation for Arrays (IDs must exist in your tables)
+            // Validation for Arrays (IDs must exist in tables)
             'genres' => 'nullable|array',
             'genres.*' => 'exists:genres,id',
             'actors' => 'nullable|array',

@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Movie;
 use App\Http\Requests\MovieRequest;
@@ -77,10 +76,10 @@ class MovieController extends Controller
     public function store(MovieRequest $request)
     {
         try {
-            // 1. Validate incoming data
+            // Validate incoming data
             $validated = $request->validated();
 
-            // 2. Upload files
+            // Upload files
             $posterPath = null;
             if ($request->hasFile('poster_url')) {
                 // This saves the file and returns a string like "posters/abc.jpg"
@@ -92,13 +91,13 @@ class MovieController extends Controller
                 $featuredPath = $request->file('featured_poster_url')->store('featured', 'public');
             }
 
-            // ENFORCE RULE: Can't be featured without a featured poster
+            // Prevent movie being featured without a featured poster
             $isFeatured = $request->boolean('is_featured');
             if ($isFeatured && !$featuredPath) {
                 $isFeatured = false;
             }
 
-            // 3. Create the Movie record
+            // Create the Movie record
             $movie = Movie::create([
                 'name_en' => $validated['name_en'],
                 'name_ar' => $validated['name_ar'],
@@ -114,7 +113,7 @@ class MovieController extends Controller
                 'is_featured' => $isFeatured
             ]);
 
-            // 4. Attach Many-to-Many relationships
+            // Attach Many-to-Many relationships
             if (!empty($validated['genres'])) {
                 $movie->genres()->sync($validated['genres']);
             }
@@ -174,7 +173,7 @@ class MovieController extends Controller
                 $movie->featured_poster_url = $request->file('featured_poster_url')->store('featured', 'public');
             }
 
-            // ENFORCE RULE: If trying to mark as featured but no featured poster exists
+            // Prevent movie being featured without a featured poster
             $isFeatured = $request->boolean('is_featured');
             if ($isFeatured && !$movie->featured_poster_url) {
                 $isFeatured = false;

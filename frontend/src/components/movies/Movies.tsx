@@ -173,23 +173,23 @@ export default function Movies() {
                     </button>
 
                     {/* Status Dropdown */}
-                    <select value={selectedStatus} onChange={(e) => setSelectedStatus(e.target.value)}
+                    <select
+                        value={selectedStatus}
+                        onChange={(e) => setSelectedStatus(e.target.value)}
                         className="text-gray-600 p-2 px-4 rounded-full border border-gray-200 text-sm font-medium focus:ring-2 focus:ring-blue-400 outline-none bg-white cursor-pointer"
                     >
                         <option value="all">All Statuses</option>
-                        {statuses.map(s => (
-                            <option key={s.id} value={s.id}>{s.name_en}</option>
-                        ))}
+                        {statuses.map(s => (<option key={s.id} value={s.id}>{s.name_en}</option>))}
                     </select>
 
                     {/* Language Dropdown */}
-                    <select value={selectedLanguage} onChange={(e) => setSelectedLanguage(e.target.value)}
+                    <select
+                        value={selectedLanguage}
+                        onChange={(e) => setSelectedLanguage(e.target.value)}
                         className="text-gray-600 p-2 px-4 rounded-full border border-gray-200 text-sm font-medium focus:ring-2 focus:ring-blue-400 outline-none bg-white cursor-pointer"
                     >
                         <option value="all">All Languages</option>
-                        {languages.map(s => (
-                            <option key={s.id} value={s.id}>{s.name_en}</option>
-                        ))}
+                        {languages.map(s => (<option key={s.id} value={s.id}>{s.name_en}</option>))}
                     </select>
 
                     {/* Clear All Filters Button (Visible only when filtering) */}
@@ -209,7 +209,7 @@ export default function Movies() {
                     )}
                 </div>
 
-                <PlusButton onClick={() => setIsAddModalOpen(true)} />
+                <PlusButton title="Add new movie" onClick={() => setIsAddModalOpen(true)} />
             </div>
 
             <div className="grid grid-cols-6 gap-6">

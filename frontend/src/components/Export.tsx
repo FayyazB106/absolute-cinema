@@ -3,7 +3,7 @@ import * as XLSX from 'xlsx';
 import Title from './shared/Title';
 import { API_BASE_URL } from '../constants/api';
 import { movieService } from '../services/movieService';
-import toast, { Toaster } from 'react-hot-toast';
+import Toast, { toast } from './shared/Toast';
 
 interface TableOption {
     id: string;
@@ -192,9 +192,9 @@ export default function Export() {
                 }
             }
 
-            const fileName = `Absolute-Cinema-Data.xlsx`;
+            const fileName = `Absolute-Cinema-Dataset.xlsx`;
             XLSX.writeFile(workbook, fileName);
-            toast.success(`Successfully exported ${selectedTables.size} tables`, { id: toastId });
+            toast.success(`Successfully exported ${selectedTables.size} table${selectedTables.size > 1 ? 's' : ''}`, { id: toastId });
         } catch (err) {
             console.error('Export failed', err);
             toast.error('Export failed. Please try again.', { id: toastId });
@@ -205,7 +205,7 @@ export default function Export() {
 
     return (
         <div className="p-8">
-            <Toaster position="bottom-right" toastOptions={{ success: { style: { background: 'green', color: 'white' } } }} />
+            <Toast />
 
             <div className="flex justify-between items-center mb-8">
                 <Title text="Export to Excel" />
@@ -217,10 +217,7 @@ export default function Export() {
 
                     <div className="space-y-4 mb-6">
                         {/* Select All Option */}
-                        <div
-                            onClick={selectAll}
-                            className="flex items-center p-3 bg-gray-50 rounded-lg border border-gray-200 cursor-pointer hover:bg-gray-100 transition shadow-sm"
-                        >
+                        <div onClick={selectAll} className="flex items-center p-3 bg-gray-50 rounded-lg border border-gray-200 cursor-pointer hover:bg-gray-100 transition shadow-sm">
                             <input
                                 type="checkbox"
                                 id="select-all"
@@ -228,11 +225,7 @@ export default function Export() {
                                 onChange={(e) => e.stopPropagation()}
                                 className="w-5 h-5 cursor-pointer"
                             />
-                            <label
-                                htmlFor="select-all"
-                                className="ml-3 cursor-pointer font-semibold text-gray-700 flex-grow"
-                                onClick={(e) => e.preventDefault()}
-                            >
+                            <label htmlFor="select-all" className="ml-3 cursor-pointer font-semibold text-gray-700 flex-grow" onClick={(e) => e.preventDefault()}>
                                 Select All Tables ({selectedTables.size}/{tableOptions.length})
                             </label>
                         </div>
@@ -252,11 +245,7 @@ export default function Export() {
                                         onChange={(e) => e.stopPropagation()}
                                         className="w-4 h-4 cursor-pointer"
                                     />
-                                    <label
-                                        htmlFor={table.id}
-                                        className="ml-3 cursor-pointer text-gray-700 flex-grow"
-                                        onClick={(e) => e.preventDefault()}
-                                    >
+                                    <label htmlFor={table.id} className="ml-3 cursor-pointer text-gray-700 flex-grow" onClick={(e) => e.preventDefault()}>
                                         {table.name}
                                     </label>
                                 </div>
@@ -270,7 +259,7 @@ export default function Export() {
                         disabled={isExporting || selectedTables.size === 0}
                         className="w-full px-6 py-3 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed transition"
                     >
-                        {isExporting ? 'Exporting...' : `Export Selected Tables (${selectedTables.size})`}
+                        {isExporting ? 'Exporting...' : `Export Selected Table${selectedTables.size > 1 ? 's' : ''} (${selectedTables.size})`}
                     </button>
                 </div>
 

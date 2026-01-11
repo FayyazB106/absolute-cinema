@@ -3,6 +3,7 @@ import { Upload } from 'lucide-react';
 import MultiSelect from '../shared/MultiSelect';
 import type { MovieFormProps } from '../../types/movieForm';
 import { validateImage } from '../../utils/validation';
+import Asterisk from '../shared/Asterisk';
 
 export default function MovieForm({
     formData,
@@ -43,7 +44,7 @@ export default function MovieForm({
                 <h2 className={subTitleStyle}>Basic Information</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="flex flex-col">
-                        <label className={labelStyle}>Name *</label>
+                        <label className={labelStyle}>Name <Asterisk /></label>
                         <input
                             name="name_en"
                             type="text"
@@ -56,7 +57,7 @@ export default function MovieForm({
                         {errors.name_en && <span className={errorStyle}>{errors.name_en}</span>}
                     </div>
                     <div dir="rtl" className="flex flex-col">
-                        <label className={labelStyle}>الاسم *</label>
+                        <label className={labelStyle}>الاسم <Asterisk /></label>
                         <input
                             name="name_ar"
                             type="text"
@@ -69,7 +70,7 @@ export default function MovieForm({
                         {errors.name_ar && <span className={errorStyle}>{errors.name_ar}</span>}
                     </div>
                     <div className="flex flex-col">
-                        <label className={labelStyle}>Description *</label>
+                        <label className={labelStyle}>Description <Asterisk /></label>
                         <textarea
                             name="desc_en"
                             placeholder="Description"
@@ -81,7 +82,7 @@ export default function MovieForm({
                         {errors.desc_en && <span className={errorStyle}>{errors.desc_en}</span>}
                     </div>
                     <div dir="rtl" className="flex flex-col">
-                        <label className={labelStyle}>الوصف *</label>
+                        <label className={labelStyle}>الوصف <Asterisk /></label>
                         <textarea
                             name="desc_ar"
                             placeholder="الوصف"
@@ -99,7 +100,7 @@ export default function MovieForm({
                 <h2 className={subTitleStyle}>Metadata</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
                     <div className="flex flex-col">
-                        <label className={labelStyle}>Release Date *</label>
+                        <label className={labelStyle}>Release Date <Asterisk /></label>
                         <input
                             name="release_date"
                             type="date"
@@ -138,7 +139,7 @@ export default function MovieForm({
                         {errors.duration && <span className={errorStyle}>{errors.duration}</span>}
                     </div>
                     <div className="flex flex-col">
-                        <label className={labelStyle}>Maturity Rating *</label>
+                        <label className={labelStyle}>Maturity Rating <Asterisk /></label>
                         <select
                             name="maturity_id"
                             className={`border rounded p-2 hover:bg-gray-50 ${errors.maturity_id ? 'border-red-500' : ''}`}
@@ -154,7 +155,7 @@ export default function MovieForm({
                         {errors.maturity_id && <span className={errorStyle}>{errors.maturity_id}</span>}
                     </div>
                     <div className="flex flex-col">
-                        <label className={labelStyle}>Status *</label>
+                        <label className={labelStyle}>Status <Asterisk /></label>
                         <select
                             name="status_id"
                             className={`border rounded p-2 hover:bg-gray-50 ${errors.status_id ? 'border-red-500' : ''}`}
@@ -204,7 +205,7 @@ export default function MovieForm({
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="flex flex-col">
                         <MultiSelect
-                            label="Languages *"
+                            label="Languages"
                             options={options.languages}
                             selected={formData.languages}
                             onChange={(selected) => {
@@ -213,6 +214,7 @@ export default function MovieForm({
                             }}
                             placeholder="Select..."
                             error={errors.languages}
+                            required
                         />
                         {errors.languages && <span className={errorStyle}>{errors.languages}</span>}
                     </div>
@@ -316,11 +318,7 @@ export default function MovieForm({
                     disabled={isSubmitting}
                     className="flex-1 flex justify-center items-center bg-green-600 text-white font-bold py-3 rounded-xl hover:bg-green-700 max-w-35 disabled:opacity-50"
                 >
-                    {isSubmitting ? (
-                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white" />
-                    ) : (
-                        submitLabel
-                    )}
+                    {isSubmitting ? (<div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white" />) : (submitLabel)}
                 </button>
             </div>
         </div>

@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { ChevronDown, ChevronUp, Search, X } from 'lucide-react';
+import Asterisk from './Asterisk';
 
 interface Option {
     id: number;
@@ -15,9 +16,10 @@ interface MultiSelectProps {
     onChange: (selected: string[]) => void;
     placeholder?: string;
     error?: string;
+    required?: boolean;
 }
 
-export default function MultiSelect({ label, options, selected, onChange, placeholder, error }: MultiSelectProps) {
+export default function MultiSelect({ label, options, selected, onChange, placeholder, error, required }: MultiSelectProps) {
     const [isOpen, setIsOpen] = useState(false);
     const [search, setSearch] = useState('');
     const containerRef = useRef<HTMLDivElement>(null);
@@ -62,7 +64,7 @@ export default function MultiSelect({ label, options, selected, onChange, placeh
 
     return (
         <div className="flex flex-col">
-            <label className="font-bold text-md mb-2">{label}</label>
+            <label className="font-bold text-md mb-2">{label} {required && <Asterisk />}</label>
 
             <div className='relative' ref={containerRef}>
                 {/* Dropdown Trigger */}
@@ -133,18 +135,9 @@ export default function MultiSelect({ label, options, selected, onChange, placeh
                             const item = options.find(o => o.id.toString() === id);
                             if (!item) return null;
                             return (
-                                <span
-                                    key={id}
-                                    className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm flex items-center gap-2"
-                                >
+                                <span key={id} className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm flex items-center gap-2">
                                     {item.name_en}
-                                    <button
-                                        type="button"
-                                        onClick={() => handleToggle(id)}
-                                        className="hover:bg-blue-200 rounded-full"
-                                    >
-                                        ×
-                                    </button>
+                                    <button type="button" onClick={() => handleToggle(id)} className="hover:bg-blue-200 rounded-full"><X size={14} /></button>
                                 </span>
                             );
                         })}

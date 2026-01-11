@@ -10,9 +10,7 @@ abstract class BaseController extends Controller
     protected string $modelClass;
     protected string $resourceName; // e.g., 'Actor' or 'Language'
 
-    /**
-     * Define validation rules. Child classes can override this.
-     */
+    // Define validation rules. Child classes can override this.
     protected function rules(Request $request, $id = null): array
     {
         $tableName = (new $this->modelClass)->getTable();

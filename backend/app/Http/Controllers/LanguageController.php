@@ -17,7 +17,7 @@ class LanguageController extends BaseController
         return [
             'name_en' => "required|string|max:255|unique:{$tableName},name_en," . $id,
             'name_ar' => "required|string|max:255|unique:{$tableName},name_ar," . $id,
-            'code'    => "nullable|string|max:5|unique:{$tableName},code," . $id, // Custom field for Languages
+            'code'    => "nullable|string|max:5|unique:{$tableName},code," . $id, // en, ar, fr etc
         ];
     }
 }

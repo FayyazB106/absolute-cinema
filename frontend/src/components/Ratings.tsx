@@ -5,7 +5,7 @@ import type { Rating } from '../types/movie';
 import Title from './shared/Title';
 import { movieService } from '../services/movieService';
 import { validateRating } from '../utils/validation';
-import toast, { Toaster } from 'react-hot-toast';
+import Toast, { toast } from './shared/Toast';
 
 export default function Ratings() {
     const [ratings, setRatings] = useState<Rating[]>([]);
@@ -28,6 +28,7 @@ export default function Ratings() {
         name_ar: '',
         ranking: 1
     });
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set());
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(10);
@@ -79,6 +80,9 @@ export default function Ratings() {
     const handleBulkSubmit = async () => {
         let hasLocalErrors = false;
         const newBulkErrors: Record<number, Record<string, string>> = {};
+
+        setIsSubmitting(true);
+        const toastId = toast.loading('Submitting');
 
         newRatings.forEach((item, index) => {
             const errors = validateRating(item);
@@ -134,7 +138,7 @@ export default function Ratings() {
 
             if (successfulIndices.size > 0) {
                 const count = successfulIndices.size;
-                toast.success(`${count} new row${count > 1 ? 's' : ''} added`);
+                toast.success(`${count} new row${count > 1 ? 's' : ''} added`, { id: toastId });
             }
 
             if (totalFailed > 0) {
@@ -161,6 +165,8 @@ export default function Ratings() {
             }
         } catch (err) {
             console.error("Bulk add failed", err);
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -171,11 +177,16 @@ export default function Ratings() {
             return;
         }
 
+        setIsSubmitting(true);
+        const toastId = toast.loading('Submitting');
+
         const res = await movieService.updateRating(id, editForm);
         if (res.ok) {
             setEditingId(null);
             setEditErrors({});
             fetchRatings();
+            toast.success("Row updated", { id: toastId });
+            setIsSubmitting(false);
         } else if (res.status === 422) {
             const data = await res.json();
             const backendErrors: any = {};
@@ -188,6 +199,7 @@ export default function Ratings() {
                 backendErrors[key] = msg;
             });
             setEditErrors(backendErrors);
+            setIsSubmitting(false);
         }
     };
 
@@ -246,7 +258,7 @@ export default function Ratings() {
 
     return (
         <div className="p-8">
-            <Toaster position="bottom-right" toastOptions={{ success: { style: { background: 'green', color: 'white' } } }} />
+            <Toast />
 
             <div className="flex justify-between items-center mb-8">
                 <Title text="Maturity Ratings" />
@@ -271,9 +283,7 @@ export default function Ratings() {
                                                 const newErrs = { ...bulkErrors };
                                                 if (newErrs[index]) {
                                                     delete newErrs[index].ranking;
-                                                    if (Object.keys(newErrs[index]).length === 0) {
-                                                        delete newErrs[index];
-                                                    }
+                                                    if (Object.keys(newErrs[index]).length === 0) { delete newErrs[index]; }
                                                     setBulkErrors(newErrs);
                                                 }
                                             }
@@ -295,9 +305,7 @@ export default function Ratings() {
                                                 const newErrs = { ...bulkErrors };
                                                 if (newErrs[index]) {
                                                     delete newErrs[index].maturity_rating;
-                                                    if (Object.keys(newErrs[index]).length === 0) {
-                                                        delete newErrs[index];
-                                                    }
+                                                    if (Object.keys(newErrs[index]).length === 0) { delete newErrs[index]; }
                                                     setBulkErrors(newErrs);
                                                 }
                                             }
@@ -319,9 +327,7 @@ export default function Ratings() {
                                                 const newErrs = { ...bulkErrors };
                                                 if (newErrs[index]) {
                                                     delete newErrs[index].name_en;
-                                                    if (Object.keys(newErrs[index]).length === 0) {
-                                                        delete newErrs[index];
-                                                    }
+                                                    if (Object.keys(newErrs[index]).length === 0) { delete newErrs[index]; }
                                                     setBulkErrors(newErrs);
                                                 }
                                             }
@@ -344,9 +350,7 @@ export default function Ratings() {
                                                 const newErrs = { ...bulkErrors };
                                                 if (newErrs[index]) {
                                                     delete newErrs[index].name_ar;
-                                                    if (Object.keys(newErrs[index]).length === 0) {
-                                                        delete newErrs[index];
-                                                    }
+                                                    if (Object.keys(newErrs[index]).length === 0) { delete newErrs[index]; }
                                                     setBulkErrors(newErrs);
                                                 }
                                             }
@@ -357,9 +361,7 @@ export default function Ratings() {
 
                                 {/* Submit All Button */}
                                 {index === 0 && (
-                                    <div title="Submit All">
-                                        <PlusButton onClick={handleBulkSubmit} />
-                                    </div>
+                                    <PlusButton title="Submit All" disabled={isSubmitting} onClick={handleBulkSubmit} />
                                 )}
 
                                 {/* Remove row button */}
@@ -380,7 +382,7 @@ export default function Ratings() {
 
                             {/* The Plus Button (Visible ONLY on hover) */}
                             <div className="absolute transition-all duration-300 ease-in-out opacity-0 scale-50 rotate-[-90deg] group-hover:opacity-100 group-hover:scale-100 group-hover:rotate-0">
-                                <PlusButton onClick={addNewRow} />
+                                <PlusButton title="Add new row" onClick={addNewRow} />
                             </div>
                         </div>
 
@@ -400,12 +402,8 @@ export default function Ratings() {
                             <span className="text-sm font-medium text-gray-700">
                                 {selectedRows.size} row{selectedRows.size > 1 ? 's' : ''} selected
                             </span>
-                            <button
-                                onClick={handleDeleteSelected}
-                                className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition flex items-center gap-2"
-                            >
-                                <Trash2 size={16} />
-                                Delete Selected
+                            <button onClick={handleDeleteSelected} className="px-2 py-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition flex items-center gap-2">
+                                <Trash2 size={20} />
                             </button>
                         </div>
                     )}

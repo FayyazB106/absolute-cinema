@@ -5,7 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Support\Facades\Storage;
 
 class Movie extends Model
 {
@@ -24,7 +23,6 @@ class Movie extends Model
         'is_featured',
     ];
 
-    // Ensure these are all PUBLIC
     public function genres(): BelongsToMany
     {
         return $this->belongsToMany(Genre::class);

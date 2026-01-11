@@ -4,7 +4,7 @@ import { API_BASE_URL } from '../../constants/api';
 import PlusButton from '../shared/PlusButton';
 import Title from '../shared/Title';
 import { validateSimpleTableItem } from '../../utils/validation';
-import toast, { Toaster } from 'react-hot-toast';
+import Toast, { toast } from '../shared/Toast';
 
 interface TableItem {
     id: number;
@@ -27,6 +27,7 @@ export default function SimpleTablePage({ title, endpoint, singularName }: Simpl
     const [newItems, setNewItems] = useState([{ name_en: '', name_ar: '' }]);
     const [editingId, setEditingId] = useState<number | null>(null);
     const [editForm, setEditForm] = useState({ name_en: '', name_ar: '' });
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(10);
     const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set());
@@ -61,6 +62,9 @@ export default function SimpleTablePage({ title, endpoint, singularName }: Simpl
     const handleBulkSubmit = async () => {
         let hasLocalErrors = false;
         const newBulkErrors: Record<number, Record<string, string>> = {};
+
+        setIsSubmitting(true);
+        const toastId = toast.loading('Submitting');
 
         // Track values to detect duplicates
         const enValues = newItems.map(i => i.name_en.trim().toLowerCase());
@@ -140,7 +144,7 @@ export default function SimpleTablePage({ title, endpoint, singularName }: Simpl
 
             if (successfulIndices.size > 0) {
                 const count = successfulIndices.size;
-                toast.success(`${count} new row${count > 1 ? 's' : ''} added`);
+                toast.success(`${count} new row${count > 1 ? 's' : ''} added`, { id: toastId });
             }
 
             if (totalFailed > 0) {
@@ -167,19 +171,21 @@ export default function SimpleTablePage({ title, endpoint, singularName }: Simpl
             }
         } catch (err) {
             console.error("Bulk add failed", err);
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
     const removeNewRow = (indexToRemove: number) => {
-        // 1. Remove the item from the inputs
+        // Remove the item from the inputs
         const updatedItems = newItems.filter((_, i) => i !== indexToRemove);
         setNewItems(updatedItems);
 
-        // 2. Clear and shift the errors
+        // Clear and shift the errors
         setBulkErrors(prevErrors => {
             const updatedErrors: Record<number, Record<string, string>> = {};
 
-            // We iterate through the keys of the previous error state
+            // Iterate through the keys of the previous error state
             Object.keys(prevErrors).forEach((key) => {
                 const oldIndex = parseInt(key, 10);
 
@@ -204,6 +210,9 @@ export default function SimpleTablePage({ title, endpoint, singularName }: Simpl
             return;
         }
 
+        setIsSubmitting(true);
+        const toastId = toast.loading('Submitting');
+
         const res = await fetch(`${API_BASE_URL}/${endpoint}/${id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
@@ -214,6 +223,8 @@ export default function SimpleTablePage({ title, endpoint, singularName }: Simpl
             setEditingId(null);;
             setEditErrors({});
             fetchItems();
+            toast.success("Row updated", { id: toastId });
+            setIsSubmitting(false);
         } else if (res.status === 422) {
             const data = await res.json();
             const backendErrors: any = {};
@@ -226,6 +237,7 @@ export default function SimpleTablePage({ title, endpoint, singularName }: Simpl
                 backendErrors[key] = msg;
             });
             setEditErrors(backendErrors);
+            setIsSubmitting(false);
         }
     };
 
@@ -259,11 +271,7 @@ export default function SimpleTablePage({ title, endpoint, singularName }: Simpl
         const itemType = singularName || endpoint.slice(0, -1);
         const count = selectedRows.size;
         if (window.confirm(`Delete ${count} ${itemType}${count > 1 ? 's' : ''}?`)) {
-            await Promise.all(
-                Array.from(selectedRows).map(id =>
-                    fetch(`${API_BASE_URL}/${endpoint}/${id}`, { method: 'DELETE' })
-                )
-            );
+            await Promise.all(Array.from(selectedRows).map(id => fetch(`${API_BASE_URL}/${endpoint}/${id}`, { method: 'DELETE' })));
             setSelectedRows(new Set());
             fetchItems();
         }
@@ -289,7 +297,7 @@ export default function SimpleTablePage({ title, endpoint, singularName }: Simpl
 
     return (
         <div className="p-8">
-            <Toaster position="bottom-right" toastOptions={{ success: { style: { background: 'green', color: 'white' } } }} />
+            <Toast />
 
             <div className="flex justify-between items-center mb-8">
                 <Title text={title} />
@@ -314,17 +322,13 @@ export default function SimpleTablePage({ title, endpoint, singularName }: Simpl
                                                 const newErrs = { ...bulkErrors };
                                                 if (newErrs[index]) {
                                                     delete newErrs[index].name_en;
-                                                    if (Object.keys(newErrs[index]).length === 0) {
-                                                        delete newErrs[index];
-                                                    }
+                                                    if (Object.keys(newErrs[index]).length === 0) { delete newErrs[index]; }
                                                     setBulkErrors(newErrs);
                                                 }
                                             }
                                         }}
                                     />
-                                    {bulkErrors[index]?.name_en && (
-                                        <span className={errorStyle}>{bulkErrors[index].name_en}</span>
-                                    )}
+                                    {bulkErrors[index]?.name_en && (<span className={errorStyle}>{bulkErrors[index].name_en}</span>)}
                                 </div>
 
                                 <div className="flex flex-col w-full relative">
@@ -342,25 +346,17 @@ export default function SimpleTablePage({ title, endpoint, singularName }: Simpl
                                                 const newErrs = { ...bulkErrors };
                                                 if (newErrs[index]) {
                                                     delete newErrs[index].name_ar;
-                                                    if (Object.keys(newErrs[index]).length === 0) {
-                                                        delete newErrs[index];
-                                                    }
+                                                    if (Object.keys(newErrs[index]).length === 0) { delete newErrs[index]; }
                                                     setBulkErrors(newErrs);
                                                 }
                                             }
                                         }}
                                     />
-                                    {bulkErrors[index]?.name_ar && (
-                                        <span className={errorStyle}>{bulkErrors[index].name_ar}</span>
-                                    )}
+                                    {bulkErrors[index]?.name_ar && (<span className={errorStyle}>{bulkErrors[index].name_ar}</span>)}
                                 </div>
 
                                 {/* Submit All Button */}
-                                {index === 0 && (
-                                    <div title="Submit All">
-                                        <PlusButton onClick={handleBulkSubmit} />
-                                    </div>
-                                )}
+                                {index === 0 && (<PlusButton title="Submit All" disabled={isSubmitting} onClick={handleBulkSubmit} />)}
 
                                 {/* Remove row button*/}
                                 {index > 0 && (
@@ -380,7 +376,7 @@ export default function SimpleTablePage({ title, endpoint, singularName }: Simpl
 
                             {/* The Plus Button (Visible ONLY on hover) */}
                             <div className="absolute transition-all duration-300 ease-in-out opacity-0 scale-50 rotate-[-90deg] group-hover:opacity-100 group-hover:scale-100 group-hover:rotate-0">
-                                <PlusButton onClick={addNewRow} />
+                                <PlusButton title="Add new row" onClick={addNewRow} />
                             </div>
                         </div>
 
@@ -400,10 +396,7 @@ export default function SimpleTablePage({ title, endpoint, singularName }: Simpl
                             <span className="text-sm font-medium text-gray-700">
                                 {selectedRows.size} row{selectedRows.size > 1 ? 's' : ''} selected
                             </span>
-                            <button
-                                onClick={handleDeleteSelected}
-                                className="px-2 py-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition flex items-center gap-2"
-                            >
+                            <button onClick={handleDeleteSelected} className="px-2 py-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition flex items-center gap-2">
                                 <Trash2 size={20} />
                             </button>
                         </div>
@@ -435,9 +428,7 @@ export default function SimpleTablePage({ title, endpoint, singularName }: Simpl
                                 </button>
                             ) : (
                                 // Search Icon (Visible when empty)
-                                <div className="text-gray-400">
-                                    <Search size={18} />
-                                </div>
+                                <div className="text-gray-400"><Search size={18} /></div>
                             )}
                         </div>
                     </div>

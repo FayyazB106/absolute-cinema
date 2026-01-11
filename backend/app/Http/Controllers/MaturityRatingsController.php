@@ -10,9 +10,7 @@ class MaturityRatingsController extends BaseController
     protected string $modelClass = MaturityRating::class;
     protected string $resourceName = 'Maturity Rating';
 
-    /**
-     * Override rules to include new fields
-     */
+    // Override rules to include new fields
     protected function rules(Request $request, $id = null): array
     {
         $tableName = (new $this->modelClass)->getTable();
@@ -27,9 +25,7 @@ class MaturityRatingsController extends BaseController
         ];
     }
 
-    /**
-     * Override index to sort by ranking instead of name
-     */
+    // Override index to sort by ranking instead of name
     public function index()
     {
         try {
