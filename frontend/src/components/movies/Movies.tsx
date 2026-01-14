@@ -63,16 +63,6 @@ export default function Movies() {
         }
     };
 
-    const getLanguageStyles = (langauge: string) => {
-        switch (langauge.toLowerCase()) {
-            case 'english': return 'bg-white text-red-600 ring-2 ring-blue-800';
-            case 'arabic': return 'bg-green-600 text-white';
-            case 'french': return 'bg-blue-800 text-white ring-2 ring-red-600';
-            case 'spanish': return 'bg-[#AD1519] text-[#FABD00] ring-2 ring-[#FABD00]';
-            default: return 'bg-gray-500 text-white';
-        }
-    };
-
     const handleViewMovie = (movieId: number) => {
         setSelectedMovieId(movieId);
         setIsViewModalOpen(true);
@@ -133,7 +123,7 @@ export default function Movies() {
                         />
                         <div className="absolute right-3 top-2.5 flex items-center">
                             {searchTerm ? (
-                                <button onClick={() => setSearchTerm("")} className="text-gray-400 hover:text-gray-600 transition-colors">
+                                <button onClick={() => setSearchTerm("")} className="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer">
                                     <X size={18} />
                                 </button>
                             ) : (
@@ -147,7 +137,7 @@ export default function Movies() {
                     {/* Featured Toggle Button */}
                     <button
                         onClick={() => setShowFeaturedOnly(!showFeaturedOnly)}
-                        className={`flex items-center gap-2 px-4 py-2 rounded-full border transition-all ${showFeaturedOnly
+                        className={`flex items-center gap-2 px-4 py-2 rounded-full border transition-all cursor-pointer ${showFeaturedOnly
                             ? "bg-amber-100 border-amber-400 text-amber-700 shadow-inner"
                             : "bg-white border-gray-200 text-gray-600 hover:bg-gray-50"
                             }`}
@@ -161,7 +151,7 @@ export default function Movies() {
                     {/* Restricted Toggle Button */}
                     <button
                         onClick={() => setIsRestricted(!isRestricted)}
-                        className={`flex items-center gap-2 px-4 py-2 rounded-full border transition-all ${isRestricted
+                        className={`flex items-center gap-2 px-4 py-2 rounded-full border transition-all cursor-pointer ${isRestricted
                             ? "bg-red-100 border-red-400 text-red-700 shadow-inner"
                             : "bg-white border-gray-200 text-gray-600 hover:bg-gray-50"
                             }`}
@@ -202,7 +192,7 @@ export default function Movies() {
                                 setSelectedStatus("all");
                                 setSelectedLanguage("all");
                             }}
-                            className="text-xs text-red-500 hover:text-red-700 font-bold uppercase tracking-wider whitespace-nowrap"
+                            className="text-xs text-red-500 hover:text-red-700 font-bold uppercase tracking-wider whitespace-nowrap cursor-pointer"
                         >
                             Clear All
                         </button>
@@ -244,7 +234,15 @@ export default function Movies() {
                                 <div className='flex flex-wrap justify-center gap-2'>
                                     {movie.audio_languages && (
                                         movie.audio_languages.map(lang => (
-                                            <p key={lang.id} className={`${getLanguageStyles(lang.name_en)} px-3 py-1 rounded-full text-[10px] font-bold uppercase`}>
+                                            <p
+                                                key={lang.id}
+                                                className="px-3 py-1 rounded-full text-[10px] font-bold uppercase"
+                                                style={{
+                                                    backgroundColor: `#${lang.bg_color || '6b7280'}`,
+                                                    color: `#${lang.text_color || 'ffffff'}`,
+                                                    boxShadow: `0 0 0 2px #${lang.ring_color || '6b7280'}`
+                                                }}
+                                            >
                                                 {lang.name_en}
                                             </p>
                                         ))
@@ -258,7 +256,7 @@ export default function Movies() {
             </div>
 
             {/* No Results State */}
-            {filteredItems.length === 0 && (
+            {movies.length > 0 && filteredItems.length === 0 && (
                 <div className="flex flex-col items-center justify-center py-20 text-gray-400 bg-gray-50 rounded-xl">
                     <Search size={48} className="mb-4 opacity-20" />
                     <p className="text-xl font-medium">
@@ -271,7 +269,7 @@ export default function Movies() {
                                     setSearchTerm("");
                                     setShowFeaturedOnly(false);
                                 }}
-                                className="text-blue-500 hover:underline font-semibold"
+                                className="text-blue-500 hover:underline font-semibold cursor-pointer"
                             >
                                 Reset all filters
                             </button>

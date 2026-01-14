@@ -24,9 +24,9 @@ class DatabaseSeeder extends Seeder
 
         // 1. Basic Statuses
         \App\Models\Status::insert([
-            ['status' => 'Released'],
-            ['status' => 'Coming soon'],
-            ['status' => 'Unavailable']
+            ['name_en' => 'Released', 'name_ar' => 'صدر'],
+            ['name_en' => 'Coming soon', 'name_ar' => 'قريباً'],
+            ['name_en' => 'Unavailable', 'name_ar' => 'غير متاح']
         ]);
 
         // 2. Maturity Ratings

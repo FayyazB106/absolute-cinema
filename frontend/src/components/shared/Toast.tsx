@@ -19,6 +19,12 @@ export default function Toast() {
                         color: 'white',
                     },
                 },
+                error: {
+                    style: {
+                        background: 'red',
+                        color: 'white',
+                    },
+                },
             }}
         />
     );

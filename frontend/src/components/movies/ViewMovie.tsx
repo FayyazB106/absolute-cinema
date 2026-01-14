@@ -80,19 +80,19 @@ export default function ViewMovie({ isOpen, onClose, movieId, onMovieDeleted }: 
                     <div className="flex flex-row justify-end gap-2">
                         <button
                             onClick={() => movie && handleDelete(movie.id, movie.name_en)}
-                            className="text-white bg-red-500 rounded-full transition flex items-center gap-2 text-sm font-medium p-3 hover:bg-red-600"
+                            className="text-white bg-red-500 rounded-full transition flex items-center gap-2 text-sm font-medium p-3 hover:bg-red-600 cursor-pointer"
                         >
                             <Trash2 size={20} />
                         </button>
                         <button
                             onClick={() => setIsEditOpen(true)}
-                            className="text-white bg-amber-500 rounded-full transition flex items-center gap-2 text-sm font-medium p-3 hover:bg-amber-600"
+                            className="text-white bg-amber-500 rounded-full transition flex items-center gap-2 text-sm font-medium p-3 hover:bg-amber-600 cursor-pointer"
                         >
                             <Pencil size={20} />
                         </button>
                         <button
                             onClick={onClose}
-                            className="text-white hover:bg-white/20 rounded-full transition flex items-center gap-2 text-sm font-medium p-3 border">
+                            className="text-white hover:bg-white/20 rounded-full transition flex items-center gap-2 text-sm font-medium p-3 border cursor-pointer">
                             <X size={20} />
                         </button>
                     </div>
@@ -265,7 +265,7 @@ export default function ViewMovie({ isOpen, onClose, movieId, onMovieDeleted }: 
                                         {movie.poster_full_url && (
                                             <button
                                                 onClick={() => setPreviewImage({ url: movie.poster_full_url!, title: 'Main Poster' })}
-                                                className="flex items-center gap-1 text-blue-600 hover:text-blue-800 font-bold text-sm underline decoration-dotted"
+                                                className="flex items-center gap-1 text-blue-600 hover:text-blue-800 font-bold text-sm underline decoration-dotted cursor-pointer"
                                             >
                                                 <ImageIcon size={14} /> View Poster
                                             </button>
@@ -273,7 +273,7 @@ export default function ViewMovie({ isOpen, onClose, movieId, onMovieDeleted }: 
                                         {movie.featured_full_url && (
                                             <button
                                                 onClick={() => setPreviewImage({ url: movie.featured_full_url!, title: 'Featured Banner' })}
-                                                className="flex items-center gap-1 text-blue-600 hover:text-blue-800 font-bold text-sm underline decoration-dotted"
+                                                className="flex items-center gap-1 text-blue-600 hover:text-blue-800 font-bold text-sm underline decoration-dotted cursor-pointer"
                                             >
                                                 <ImageIcon size={14} /> View Featured Poster
                                             </button>

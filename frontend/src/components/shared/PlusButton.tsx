@@ -13,7 +13,7 @@ export default function PlusButton({ onClick, title , disabled }: PlusButtonProp
             title={title}
             aria-label={title}
             disabled={disabled}
-            className="bg-blue-600 text-white font-bold p-3 rounded-full hover:bg-blue-700 hover:scale-105 shadow-lg transform transition duration-200"
+            className="bg-blue-600 text-white font-bold p-3 rounded-full hover:bg-blue-700 hover:scale-105 shadow-lg transform transition duration-200 cursor-pointer"
         >
             <Plus size={24} />
         </button>

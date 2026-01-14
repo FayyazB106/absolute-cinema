@@ -86,7 +86,7 @@ export default function MultiSelect({ label, options, selected, onChange, placeh
                                 <div className="absolute right-3 top-2.5 flex items-center">
                                     {search ? (
                                         // Close/Clear Button (Visible when text exists)
-                                        <button onClick={() => { setSearch("") }} className="text-gray-400 hover:text-gray-600 transition-colors">
+                                        <button onClick={() => { setSearch("") }} className="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer">
                                             <X size={18} />
                                         </button>
                                     ) : (
@@ -118,7 +118,7 @@ export default function MultiSelect({ label, options, selected, onChange, placeh
                                             type="checkbox"
                                             checked={selected.includes(option.id.toString())}
                                             onChange={() => handleToggle(option.id.toString())}
-                                            className="w-4 h-4 text-blue-600 rounded"
+                                            className="w-4 h-4 text-blue-600 rounded cursor-pointer"
                                         />
                                         <span className="flex-1 text-gray-900">{option.name_en}</span>
                                     </label>
@@ -137,7 +137,7 @@ export default function MultiSelect({ label, options, selected, onChange, placeh
                             return (
                                 <span key={id} className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm flex items-center gap-2">
                                     {item.name_en}
-                                    <button type="button" onClick={() => handleToggle(id)} className="hover:bg-blue-200 rounded-full"><X size={14} /></button>
+                                    <button type="button" onClick={() => handleToggle(id)} className="hover:bg-blue-200 rounded-full cursor-pointer"><X size={14} /></button>
                                 </span>
                             );
                         })}

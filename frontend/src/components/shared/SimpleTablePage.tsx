@@ -360,7 +360,7 @@ export default function SimpleTablePage({ title, endpoint, singularName }: Simpl
 
                                 {/* Remove row button*/}
                                 {index > 0 && (
-                                    <button onClick={() => removeNewRow(index)} className="text-red-500 hover:bg-red-50 p-3 rounded-full transition">
+                                    <button onClick={() => removeNewRow(index)} className="text-red-500 hover:bg-red-50 p-3 rounded-full transition cursor-pointer">
                                         <Trash2 size={24} />
                                     </button>
                                 )}
@@ -396,7 +396,7 @@ export default function SimpleTablePage({ title, endpoint, singularName }: Simpl
                             <span className="text-sm font-medium text-gray-700">
                                 {selectedRows.size} row{selectedRows.size > 1 ? 's' : ''} selected
                             </span>
-                            <button onClick={handleDeleteSelected} className="px-2 py-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition flex items-center gap-2">
+                            <button onClick={handleDeleteSelected} className="px-2 py-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition flex items-center gap-2 cursor-pointer">
                                 <Trash2 size={20} />
                             </button>
                         </div>
@@ -422,7 +422,7 @@ export default function SimpleTablePage({ title, endpoint, singularName }: Simpl
                                         setSearchTerm("");
                                         setCurrentPage(1);
                                     }}
-                                    className="text-gray-400 hover:text-gray-600 transition-colors"
+                                    className="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
                                 >
                                     <X size={18} />
                                 </button>
@@ -499,8 +499,12 @@ export default function SimpleTablePage({ title, endpoint, singularName }: Simpl
                                             <div className="flex justify-center gap-2">
                                                 {editingId === item.id ? (
                                                     <>
-                                                        <button onClick={() => handleUpdate(item.id)} className="text-green-600 hover:bg-green-50 p-2 rounded-full"><Check size={18} /></button>
-                                                        <button onClick={() => setEditingId(null)} className="text-gray-600 hover:bg-gray-50 p-2 rounded-full"><X size={18} /></button>
+                                                        <button onClick={() => handleUpdate(item.id)} className="text-green-600 hover:bg-green-50 p-2 rounded-full cursor-pointer">
+                                                            <Check size={18} />
+                                                        </button>
+                                                        <button onClick={() => setEditingId(null)} className="text-gray-600 hover:bg-gray-50 p-2 rounded-full cursor-pointer">
+                                                            <X size={18} />
+                                                        </button>
                                                     </>
                                                 ) : (
                                                     <>
@@ -509,13 +513,13 @@ export default function SimpleTablePage({ title, endpoint, singularName }: Simpl
                                                                 setEditingId(item.id);
                                                                 setEditForm({ name_en: item.name_en, name_ar: item.name_ar });
                                                             }}
-                                                            className="text-amber-500 hover:bg-amber-50 p-2 rounded-full transition"
+                                                            className="text-amber-500 hover:bg-amber-50 p-2 rounded-full transition cursor-pointer"
                                                         >
                                                             <Pencil size={18} />
                                                         </button>
                                                         <button
                                                             onClick={() => handleDelete(item.id, item.name_en)}
-                                                            className="text-red-500 hover:bg-red-50 p-2 rounded-full transition"
+                                                            className="text-red-500 hover:bg-red-50 p-2 rounded-full transition cursor-pointer"
                                                         >
                                                             <Trash2 size={18} />
                                                         </button>
@@ -531,7 +535,7 @@ export default function SimpleTablePage({ title, endpoint, singularName }: Simpl
                                             <Search size={40} className="opacity-20" />
                                             <p className="text-lg font-medium">No results found for "{searchTerm}"</p>
                                             <p className="text-sm">Try checking your spelling or searching for something else.</p>
-                                            <button onClick={() => setSearchTerm("")} className="mt-2 text-blue-500 hover:underline text-sm font-semibold">
+                                            <button onClick={() => setSearchTerm("")} className="mt-2 text-blue-500 hover:underline text-sm font-semibold cursor-pointer">
                                                 Clear all filters
                                             </button>
                                         </div>
@@ -567,7 +571,7 @@ export default function SimpleTablePage({ title, endpoint, singularName }: Simpl
                             <button
                                 onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                                 disabled={currentPage === 1}
-                                className="px-4 py-2 border rounded-lg text-sm font-medium transition hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="px-4 py-2 border rounded-lg text-sm font-medium transition hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                             >
                                 Previous
                             </button>
@@ -577,7 +581,7 @@ export default function SimpleTablePage({ title, endpoint, singularName }: Simpl
                             <button
                                 onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                                 disabled={currentPage === totalPages}
-                                className="px-4 py-2 border rounded-lg text-sm font-medium transition hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="px-4 py-2 border rounded-lg text-sm font-medium transition hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                             >
                                 Next
                             </button>

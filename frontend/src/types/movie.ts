@@ -20,6 +20,9 @@ export interface Language {
     id: number;
     name_en: string;
     name_ar: string;
+    bg_color: string;
+    text_color: string;
+    ring_color: string;
 }
 
 export interface Rating {

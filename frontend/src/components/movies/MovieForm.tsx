@@ -316,7 +316,7 @@ export default function MovieForm({
                 <button
                     onClick={onSubmit}
                     disabled={isSubmitting}
-                    className="flex-1 flex justify-center items-center bg-green-600 text-white font-bold py-3 rounded-xl hover:bg-green-700 max-w-35 disabled:opacity-50"
+                    className="flex-1 flex justify-center items-center bg-green-600 text-white font-bold py-3 rounded-xl hover:bg-green-700 max-w-35 disabled:opacity-50 cursor-pointer"
                 >
                     {isSubmitting ? (<div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white" />) : (submitLabel)}
                 </button>

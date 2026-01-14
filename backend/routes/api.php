@@ -32,3 +32,7 @@ Route::resource('genres', GenreController::class);
 Route::resource('languages', LanguageController::class);
 Route::resource('ratings', MaturityRatingsController::class);
 Route::resource('statuses', StatusController::class);
+
+// Language color-specific routes
+Route::get('languages/{id}/colors', [LanguageController::class, 'getColors']);
+Route::put('languages/{id}/colors', [LanguageController::class, 'updateColors']);

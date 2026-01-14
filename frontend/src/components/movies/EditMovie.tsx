@@ -5,6 +5,7 @@ import type { Options } from '../../types/movie';
 import { INITIAL_MOVIE_FORM_STATE, type MovieFormData } from '../../types/movieForm';
 import { movieService } from '../../services/movieService';
 import { validateMovie } from '../../utils/validation';
+import Toast, { toast } from '../shared/Toast';
 
 interface EditMovieProps {
     isOpen: boolean;
@@ -25,6 +26,8 @@ export default function EditMovie({ isOpen, onClose, onSuccess, movie }: EditMov
 
     useEffect(() => {
         if (isOpen && movie) {
+            setErrors({});
+
             movieService.getOptions()
                 .then(data => setOptions(data))
                 .catch(err => console.error("Error fetching options", err))
@@ -61,6 +64,7 @@ export default function EditMovie({ isOpen, onClose, onSuccess, movie }: EditMov
         }
 
         setIsSubmitting(true);
+        const toastId = toast.loading('Submitting');
         try {
             const data = new FormData();
 
@@ -96,11 +100,11 @@ export default function EditMovie({ isOpen, onClose, onSuccess, movie }: EditMov
                     setErrors(backendErrors);
                     modalRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
                 }
-                alert("Validation Error: Please check the form for errors");
+                toast.error("Validation Error: Please check the form for errors", { id: toastId });
             }
         } catch (err) {
             console.error("Update Error:", err);
-            alert("Error updating movie");
+            toast.error("Error updating movie", { id: toastId });
         } finally {
             setIsSubmitting(false);
         }
@@ -110,10 +114,12 @@ export default function EditMovie({ isOpen, onClose, onSuccess, movie }: EditMov
 
     return (
         <div className="fixed inset-0 flex items-center justify-center z-50 p-4 overflow-y-auto no-scrollbar">
+            <Toast />
+            
             <div ref={modalRef} className="bg-white rounded-xl shadow-2xl max-w-5xl w-full my-8 max-h-[90vh] overflow-y-auto no-scrollbar">
                 <div className="sticky top-0 bg-white border-b px-8 py-4 flex justify-between items-center z-10">
                     <h1 className="text-2xl font-extrabold">Edit Movie</h1>
-                    <button onClick={onClose} className="hover:bg-gray-200 rounded-full p-2">
+                    <button onClick={onClose} className="hover:bg-gray-200 rounded-full p-2 cursor-pointer">
                         <X size={24} />
                     </button>
                 </div>

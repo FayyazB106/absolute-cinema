@@ -114,10 +114,26 @@ export const movieService = {
         });
     },
 
-    // Fetch all statuses
+    // Fetch all languages
     getLanguages: async (): Promise<Language[]> => {
         const res = await fetch(`${API_BASE_URL}/languages`);
         if (!res.ok) throw new Error('Failed to fetch languages');
+        return res.json();
+    },
+
+    // Update language colors only
+    updateLanguageColors: async (id: number, colors: { bg_color?: string | null; text_color?: string | null; ring_color?: string | null }): Promise<Response> => {
+        return await fetch(`${API_BASE_URL}/languages/${id}/colors`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(colors),
+        });
+    },
+
+    // Get language colors only
+    getLanguageColors: async (id: number) => {
+        const res = await fetch(`${API_BASE_URL}/languages/${id}/colors`);
+        if (!res.ok) throw new Error('Failed to fetch language colors');
         return res.json();
     },
 
