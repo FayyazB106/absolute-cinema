@@ -4,7 +4,9 @@ import { API_BASE_URL } from '../../constants/api';
 import PlusButton from '../shared/PlusButton';
 import Title from '../shared/Title';
 import { validateSimpleTableItem } from '../../utils/validation';
-import Toast, { toast } from '../shared/Toast';
+import { toast } from '../shared/Toast';
+import Swal from 'sweetalert2';
+import { confirmBulkDelete, confirmDelete, showErrorMessage, showSuccessMessage } from './DeleteModal';
 
 interface TableItem {
     id: number;
@@ -18,7 +20,7 @@ interface SimpleTablePageProps {
     singularName?: string; // For delete confirmation, e.g., 'actor'
 }
 
-export default function SimpleTablePage({ title, endpoint, singularName }: SimpleTablePageProps) {
+export default function SimpleTablePage({ title, endpoint }: SimpleTablePageProps) {
     const [items, setItems] = useState<TableItem[]>([]);
     const [bulkErrors, setBulkErrors] = useState<Record<number, Record<string, string>>>({});
     const [limitError, setLimitError] = useState("");
@@ -63,9 +65,6 @@ export default function SimpleTablePage({ title, endpoint, singularName }: Simpl
         let hasLocalErrors = false;
         const newBulkErrors: Record<number, Record<string, string>> = {};
 
-        setIsSubmitting(true);
-        const toastId = toast.loading('Submitting');
-
         // Track values to detect duplicates
         const enValues = newItems.map(i => i.name_en.trim().toLowerCase());
         const arValues = newItems.map(i => i.name_ar.trim().toLowerCase());
@@ -93,6 +92,9 @@ export default function SimpleTablePage({ title, endpoint, singularName }: Simpl
             setBulkErrors(newBulkErrors);
             return;
         }
+
+        setIsSubmitting(true);
+        const toastId = toast.loading('Submitting');
 
         try {
             const results = await Promise.all(
@@ -162,6 +164,7 @@ export default function SimpleTablePage({ title, endpoint, singularName }: Simpl
                 });
 
                 setBulkErrors(shiftedErrors);
+                toast.error(`${totalFailed} row${totalFailed > 1 ? 's' : ''} failed. Please fix errors and resubmit.`, { id: toastId });
                 fetchItems();
             } else {
                 // All rows succeeded
@@ -171,6 +174,7 @@ export default function SimpleTablePage({ title, endpoint, singularName }: Simpl
             }
         } catch (err) {
             console.error("Bulk add failed", err);
+            toast.error("Error submitting rows", { id: toastId });
         } finally {
             setIsSubmitting(false);
         }
@@ -242,10 +246,15 @@ export default function SimpleTablePage({ title, endpoint, singularName }: Simpl
     };
 
     const handleDelete = async (id: number, name: string) => {
-        const itemType = singularName || endpoint.slice(0, -1); // Remove 's' from plural
-        if (window.confirm(`Delete ${itemType} "${name}"?`)) {
-            await fetch(`${API_BASE_URL}/${endpoint}/${id}`, { method: 'DELETE' });
-            fetchItems();
+        const result = await confirmDelete({ itemName: name });
+        if (result.isConfirmed) {
+            try {
+                await fetch(`${API_BASE_URL}/${endpoint}/${id}`, { method: 'DELETE' });
+                fetchItems();
+                Swal.fire('Deleted!', 'The item has been removed.', 'success');
+            } catch (error) {
+                Swal.fire('Error', 'Something went wrong', 'error');
+            }
         }
     };
 
@@ -268,12 +277,28 @@ export default function SimpleTablePage({ title, endpoint, singularName }: Simpl
     };
 
     const handleDeleteSelected = async () => {
-        const itemType = singularName || endpoint.slice(0, -1);
         const count = selectedRows.size;
-        if (window.confirm(`Delete ${count} ${itemType}${count > 1 ? 's' : ''}?`)) {
-            await Promise.all(Array.from(selectedRows).map(id => fetch(`${API_BASE_URL}/${endpoint}/${id}`, { method: 'DELETE' })));
-            setSelectedRows(new Set());
-            fetchItems();
+        const result = await confirmBulkDelete(count);
+
+        if (result.isConfirmed) {
+            try {
+                const deletePromises = Array.from(selectedRows).map(id =>
+                    fetch(`${API_BASE_URL}/${endpoint}/${id}`, { method: 'DELETE' })
+                );
+
+                const responses = await Promise.all(deletePromises);
+
+                // Check if all responses were successful
+                if (responses.every(res => res.ok)) {
+                    setSelectedRows(new Set());
+                    fetchItems();
+                    showSuccessMessage(`${count} item${count > 1 ? 's' : ''} deleted successfully.`);
+                } else {
+                    throw new Error("Some items failed to delete");
+                }
+            } catch (error) {
+                showErrorMessage("Failed to delete some items. Please try again.");
+            }
         }
     };
 
@@ -297,8 +322,6 @@ export default function SimpleTablePage({ title, endpoint, singularName }: Simpl
 
     return (
         <div className="p-8">
-            <Toast />
-
             <div className="flex justify-between items-center mb-8">
                 <Title text={title} />
             </div>

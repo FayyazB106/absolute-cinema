@@ -8,12 +8,15 @@ import Statuses from '../components/Statuses';
 import Ratings from '../components/Ratings';
 import Export from '../components/Export';
 import LanguageStyler from '../components/LanguageStyler';
+import Toast from '../components/shared/Toast';
 
 export default function Dashboard() {
     const [activeModule, setActiveModule] = useState('movies');
 
     return (
         <div className="min-h-screen bg-gray-100">
+            <Toast />
+            
             {/* Navigation */}
             <nav className="bg-white shadow-lg">
                 <div className="w-full px-8">

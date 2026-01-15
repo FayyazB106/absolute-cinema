@@ -21,8 +21,7 @@ export const movieService = {
     createMovie: async (formData: FormData) => {
         const res = await fetch(`${API_BASE_URL}/movies`, {
             method: 'POST',
-            // NOTE: Do NOT set Content-Type header manually when sending FormData
-            // The browser will automatically set it to 'multipart/form-data' with the correct boundary
+            headers: { 'Accept': 'application/json' },
             body: formData,
         });
         return res;
@@ -33,8 +32,7 @@ export const movieService = {
         formData.append('_method', 'PUT');
         const res = await fetch(`${API_BASE_URL}/movies/${id}`, {
             method: 'POST',
-            // NOTE: Do NOT set Content-Type header manually when sending FormData
-            // The browser will automatically set it to 'multipart/form-data' with the correct boundary
+            headers: { 'Accept': 'application/json' },
             body: formData,
         });
         return res;

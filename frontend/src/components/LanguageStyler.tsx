@@ -4,7 +4,7 @@ import Title from './shared/Title';
 import { API_BASE_URL } from '../constants/api';
 import type { Language } from '../types/movie';
 import { movieService } from '../services/movieService';
-import Toast, { toast } from './shared/Toast';
+import { toast } from './shared/Toast';
 
 export default function LanguageStyler() {
     const [languages, setLanguages] = useState<Language[]>([]);
@@ -169,8 +169,6 @@ export default function LanguageStyler() {
 
     return (
         <div className="p-8">
-            <Toast />
-
             {/* Header */}
             <div className="flex justify-between items-center mb-8">
                 <Title text="Language Styler" />

@@ -5,7 +5,7 @@ import type { Options } from '../../types/movie';
 import { INITIAL_MOVIE_FORM_STATE, type MovieFormData } from '../../types/movieForm';
 import { movieService } from '../../services/movieService';
 import { validateMovie } from '../../utils/validation';
-import Toast, { toast } from '../shared/Toast';
+import { toast } from '../shared/Toast';
 
 interface AddMovieProps {
     isOpen: boolean;
@@ -41,7 +41,7 @@ export default function AddMovie({ isOpen, onClose, onSuccess }: AddMovieProps) 
         }
 
         setIsSubmitting(true);
-        const toastId = toast.loading('Submitting');
+        const toastId = toast.loading('Creating movie...');
         try {
             const data = new FormData();
 
@@ -91,9 +91,7 @@ export default function AddMovie({ isOpen, onClose, onSuccess }: AddMovieProps) 
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 flex items-center justify-center z-50 p-4 overflow-y-auto no-scrollbar">
-            <Toast />
-            
+        <div className="fixed inset-0 flex items-center justify-center z-50 p-4 overflow-y-auto no-scrollbar">            
             <div ref={modalRef} className="bg-white rounded-xl shadow-2xl max-w-5xl w-full my-8 max-h-[90vh] overflow-y-auto no-scrollbar">
                 <div className="sticky top-0 bg-white border-b px-8 py-4 flex justify-between items-center z-10">
                     <h1 className="text-2xl font-extrabold">Add New Movie</h1>

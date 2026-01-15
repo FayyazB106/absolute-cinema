@@ -4,6 +4,8 @@ import { Pencil } from 'lucide-react';
 import EditMovie from './EditMovie';
 import type { MovieDetails } from '../../types/movie';
 import { movieService } from '../../services/movieService';
+import { confirmMovieDelete } from '../shared/DeleteModal';
+import Swal from 'sweetalert2';
 
 interface ViewMovieProps {
     isOpen: boolean;
@@ -38,21 +40,16 @@ export default function ViewMovie({ isOpen, onClose, movieId, onMovieDeleted }: 
     }, [isOpen, movieId]);
 
     const handleDelete = async (id: number, name: string) => {
-        const confirmed = window.confirm(`Are you sure you want to delete "${name}"?`);
+        const result = await confirmMovieDelete(name);
 
-        if (confirmed) {
+        if (result.isConfirmed) {
             try {
-                const res = await movieService.deleteMovie(id);
-
-                if (res.ok) {
-                    alert("Movie deleted successfully");
-                    onMovieDeleted();
-                    onClose();
-                } else {
-                    alert("Failed to delete the movie");
-                }
+                await movieService.deleteMovie(id);
+                onMovieDeleted();
+                onClose();
+                Swal.fire('Deleted!', 'The movie has been removed.', 'success');
             } catch (error) {
-                console.error("Error deleting movie:", error);
+                Swal.fire('Error', 'Something went wrong', 'error');
             }
         }
     };
@@ -129,7 +126,7 @@ export default function ViewMovie({ isOpen, onClose, movieId, onMovieDeleted }: 
                         </div>
                     ) : movie ? (
                         <div className="space-y-6">
-                            
+
                             {/* Quick Info Cards */}
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                                 <div className="bg-blue-50 p-4 rounded-lg border border-blue-200 text-center">

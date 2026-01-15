@@ -5,7 +5,9 @@ import type { Rating } from '../types/movie';
 import Title from './shared/Title';
 import { movieService } from '../services/movieService';
 import { validateRating } from '../utils/validation';
-import Toast, { toast } from './shared/Toast';
+import { toast } from './shared/Toast';
+import { confirmBulkDelete, confirmDelete, showErrorMessage, showSuccessMessage } from './shared/DeleteModal';
+import Swal from 'sweetalert2';
 
 export default function Ratings() {
     const [ratings, setRatings] = useState<Rating[]>([]);
@@ -81,9 +83,6 @@ export default function Ratings() {
         let hasLocalErrors = false;
         const newBulkErrors: Record<number, Record<string, string>> = {};
 
-        setIsSubmitting(true);
-        const toastId = toast.loading('Submitting');
-
         newRatings.forEach((item, index) => {
             const errors = validateRating(item);
             if (Object.keys(errors).length > 0) {
@@ -96,6 +95,9 @@ export default function Ratings() {
             setBulkErrors(newBulkErrors);
             return;
         }
+
+        setIsSubmitting(true);
+        const toastId = toast.loading('Submitting');
 
         try {
             const results = await Promise.all(
@@ -156,6 +158,7 @@ export default function Ratings() {
                 });
 
                 setBulkErrors(shiftedErrors);
+                toast.error(`${totalFailed} row${totalFailed > 1 ? 's' : ''} failed. Please fix errors and resubmit.`, { id: toastId });
                 fetchRatings();
             } else {
                 // All rows succeeded
@@ -165,6 +168,7 @@ export default function Ratings() {
             }
         } catch (err) {
             console.error("Bulk add failed", err);
+            toast.error("Error submitting rows", { id: toastId });
         } finally {
             setIsSubmitting(false);
         }
@@ -204,9 +208,15 @@ export default function Ratings() {
     };
 
     const handleDelete = async (id: number, name: string) => {
-        if (window.confirm(`Delete "${name}"?`)) {
-            const res = await movieService.deleteRating(id);
-            if (res.ok) fetchRatings();
+        const result = await confirmDelete({ itemName: name });
+        if (result.isConfirmed) {
+            try {
+                await movieService.deleteRating(id);
+                fetchRatings();
+                Swal.fire('Deleted!', 'The item has been removed.', 'success');
+            } catch (error) {
+                Swal.fire('Error', 'Something went wrong', 'error');
+            }
         }
     };
 
@@ -230,14 +240,25 @@ export default function Ratings() {
 
     const handleDeleteSelected = async () => {
         const count = selectedRows.size;
-        if (window.confirm(`Delete ${count} maturity rating${count > 1 ? 's' : ''}?`)) {
-            await Promise.all(
-                Array.from(selectedRows).map(id =>
-                    movieService.deleteRating(id)
-                )
-            );
-            setSelectedRows(new Set());
-            fetchRatings();
+        const result = await confirmBulkDelete(count);
+
+        if (result.isConfirmed) {
+            try {
+                const deletePromises = Array.from(selectedRows).map(id => movieService.deleteRating(id));
+
+                const responses = await Promise.all(deletePromises);
+
+                // Check if all responses were successful
+                if (responses.every(res => res.ok)) {
+                    setSelectedRows(new Set());
+                    fetchRatings();
+                    showSuccessMessage(`${count} item${count > 1 ? 's' : ''} deleted successfully.`);
+                } else {
+                    throw new Error("Some items failed to delete");
+                }
+            } catch (error) {
+                showErrorMessage("Failed to delete some items. Please try again.");
+            }
         }
     };
 
@@ -258,8 +279,6 @@ export default function Ratings() {
 
     return (
         <div className="p-8">
-            <Toast />
-
             <div className="flex justify-between items-center mb-8">
                 <Title text="Maturity Ratings" />
             </div>
@@ -543,10 +562,10 @@ export default function Ratings() {
                                                     <>
                                                         <button onClick={() => handleUpdate(ratings.id)} className="text-green-600 hover:bg-green-50 p-2 rounded-full cursor-pointer">
                                                             <Check size={18} />
-                                                            </button>
+                                                        </button>
                                                         <button onClick={() => setEditingId(null)} className="text-gray-600 hover:bg-gray-50 p-2 rounded-full cursor-pointer">
                                                             <X size={18} />
-                                                            </button>
+                                                        </button>
                                                     </>
                                                 ) : (
                                                     <>

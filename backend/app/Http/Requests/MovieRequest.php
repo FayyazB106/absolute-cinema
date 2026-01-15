@@ -51,7 +51,7 @@ class MovieRequest extends FormRequest
 
             // Image Validation
             'poster_url' => [
-                $this->isMethod('post') ? 'required' : 'nullable',
+                'nullable',
                 'image',
                 'mimes:jpeg,png,jpg',
                 'max:2048', // 2MB
@@ -61,7 +61,7 @@ class MovieRequest extends FormRequest
                 'nullable',
                 'image',
                 'mimes:jpeg,png,jpg',
-                'max:2048',
+                'max:2048', // 2MB
                 'dimensions:width=1920,height=1080'
             ],
         ];
