@@ -1,5 +1,7 @@
 import SimpleTablePage from './shared/SimpleTablePage';
+import { useTranslation } from "react-i18next";
 
 export default function Statuses() {
-    return <SimpleTablePage title="Statuses" endpoint="statuses" singularName="status" />;
+    const { t } = useTranslation();
+    return <SimpleTablePage title={t('titles.statuses')} endpoint="statuses" />;
 }

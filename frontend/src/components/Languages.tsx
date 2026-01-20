@@ -1,5 +1,7 @@
 import SimpleTablePage from './shared/SimpleTablePage';
+import { useTranslation } from "react-i18next";
 
 export default function Languages() {
-    return <SimpleTablePage title="Languages" endpoint="languages" singularName="language" />;
+    const { t } = useTranslation();
+    return <SimpleTablePage title={t('titles.languages')} endpoint="languages" />;
 }

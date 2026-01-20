@@ -4,6 +4,7 @@ import Title from './shared/Title';
 import { API_BASE_URL } from '../constants/api';
 import { movieService } from '../services/movieService';
 import { toast } from './shared/Toast';
+import { useTranslation } from "react-i18next";
 
 interface TableOption {
     id: string;
@@ -15,11 +16,12 @@ interface TableOption {
 export default function Export() {
     const [selectedTables, setSelectedTables] = useState<Set<string>>(new Set());
     const [isExporting, setIsExporting] = useState(false);
+    const { t } = useTranslation();
 
     const tableOptions: TableOption[] = [
         {
             id: 'movies',
-            name: 'Movies',
+            name: t("nav.movies"),
             endpoint: 'movies',
             fetchFn: async () => {
                 const movies = await movieService.getMovies();
@@ -32,7 +34,7 @@ export default function Export() {
         },
         {
             id: 'actors',
-            name: 'Actors',
+            name: t('nav.actors'),
             endpoint: 'actors',
             fetchFn: async () => {
                 const res = await fetch(`${API_BASE_URL}/actors`);
@@ -41,7 +43,7 @@ export default function Export() {
         },
         {
             id: 'directors',
-            name: 'Directors',
+            name: t('nav.directors'),
             endpoint: 'directors',
             fetchFn: async () => {
                 const res = await fetch(`${API_BASE_URL}/directors`);
@@ -50,7 +52,7 @@ export default function Export() {
         },
         {
             id: 'genres',
-            name: 'Genres',
+            name: t('nav.genres'),
             endpoint: 'genres',
             fetchFn: async () => {
                 const res = await fetch(`${API_BASE_URL}/genres`);
@@ -59,7 +61,7 @@ export default function Export() {
         },
         {
             id: 'languages',
-            name: 'Languages',
+            name: t('nav.languages'),
             endpoint: 'languages',
             fetchFn: async () => {
                 const res = await fetch(`${API_BASE_URL}/languages`);
@@ -68,7 +70,7 @@ export default function Export() {
         },
         {
             id: 'ratings',
-            name: 'Ratings',
+            name: t('nav.ratings'),
             endpoint: 'ratings',
             fetchFn: async () => {
                 const data = await movieService.getRatings();
@@ -77,7 +79,7 @@ export default function Export() {
         },
         {
             id: 'statuses',
-            name: 'Statuses',
+            name: t('nav.statuses'),
             endpoint: 'statuses',
             fetchFn: async () => {
                 const data = await movieService.getStatuses();
@@ -106,12 +108,12 @@ export default function Export() {
 
     const handleExport = async () => {
         if (selectedTables.size === 0) {
-            toast.error('Please select at least one table to export');
+            toast.error(t('export.error_none'));
             return;
         }
 
         setIsExporting(true);
-        const toastId = toast.loading('Preparing your export...');
+        const toastId = toast.loading(t('export.preparing'));
 
         try {
             const workbook = XLSX.utils.book_new();
@@ -165,6 +167,9 @@ export default function Export() {
                             if (item.name_en) row['Name (English)'] = item.name_en;
                             if (item.name_ar) row['Name (Arabic)'] = item.name_ar;
                             if (item.status) row['Status'] = item.status;
+                            if (item.bg_color) row['Background Color (#)'] = item.bg_color;
+                            if (item.text_color) row['Text Color (#)'] = item.text_color;
+                            if (item.ring_color) row['Border/Ring Color (#)'] = item.ring_color;
                             if (item.created_at) row['Created'] = new Date(item.created_at).toLocaleDateString("en-GB");
                             if (item.updated_at) row['Updated'] = new Date(item.updated_at).toLocaleDateString("en-GB");
                         }
@@ -194,10 +199,10 @@ export default function Export() {
 
             const fileName = `Absolute-Cinema-Dataset.xlsx`;
             XLSX.writeFile(workbook, fileName);
-            toast.success(`Successfully exported ${selectedTables.size} table${selectedTables.size > 1 ? 's' : ''}`, { id: toastId });
+            toast.success(t('export.success', { count: selectedTables.size }), { id: toastId });
         } catch (err) {
             console.error('Export failed', err);
-            toast.error('Export failed. Please try again.', { id: toastId });
+            toast.error(t('export.error_failed'), { id: toastId });
         } finally {
             setIsExporting(false);
         }
@@ -206,12 +211,12 @@ export default function Export() {
     return (
         <div className="p-8">
             <div className="flex justify-between items-center mb-8">
-                <Title text="Export to Excel" />
+                <Title text={t("titles.export")} />
             </div>
 
             <div className='max-w-2xl mx-auto'>
                 <div className="bg-white rounded-xl shadow-md border p-6">
-                    <h2 className="text-lg font-bold text-gray-900 mb-6">Select Tables to Export</h2>
+                    <h2 className="text-lg font-bold text-gray-900 mb-6">{t("export.subheading")}</h2>
 
                     <div className="space-y-4 mb-6">
                         {/* Select All Option */}
@@ -223,8 +228,8 @@ export default function Export() {
                                 onChange={(e) => e.stopPropagation()}
                                 className="w-5 h-5 cursor-pointer"
                             />
-                            <label htmlFor="select-all" className="ml-3 cursor-pointer font-semibold text-gray-700 flex-grow" onClick={(e) => e.preventDefault()}>
-                                Select All Tables ({selectedTables.size}/{tableOptions.length})
+                            <label htmlFor="select-all" className="mx-3 cursor-pointer font-semibold text-gray-700 flex-grow" onClick={(e) => e.preventDefault()}>
+                                {t("export.select_all")} ({selectedTables.size}/{tableOptions.length})
                             </label>
                         </div>
 
@@ -243,7 +248,7 @@ export default function Export() {
                                         onChange={(e) => e.stopPropagation()}
                                         className="w-4 h-4 cursor-pointer"
                                     />
-                                    <label htmlFor={table.id} className="ml-3 cursor-pointer text-gray-700 flex-grow" onClick={(e) => e.preventDefault()}>
+                                    <label htmlFor={table.id} className="mx-3 cursor-pointer text-gray-700 flex-grow" onClick={(e) => e.preventDefault()}>
                                         {table.name}
                                     </label>
                                 </div>
@@ -257,16 +262,16 @@ export default function Export() {
                         disabled={isExporting || selectedTables.size === 0}
                         className="w-full px-6 py-3 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed transition"
                     >
-                        {isExporting ? 'Exporting...' : `Export Selected Table${selectedTables.size > 1 ? 's' : ''} (${selectedTables.size})`}
+                        {isExporting ? t(("export.exporting")) : t('export.button_label', { count: selectedTables.size })}
                     </button>
                 </div>
 
                 {/* Info Section */}
                 <div className="mt-6 bg-blue-50 border border-blue-200 rounded-xl p-4">
-                    <h3 className="font-semibold text-blue-900 mb-2">Export Info</h3>
+                    <h3 className="font-semibold text-blue-900 mb-2">{t("export.info")}</h3>
                     <ul className="text-md text-blue-800 space-y-1 list-disc list-inside">
-                        <li>Each selected table will be exported as a separate sheet</li>
-                        <li>All sheets will be in a single Excel file</li>
+                        <li>{t("export.info_point1")}</li>
+                        <li>{t("export.info_point2")}</li>
                     </ul>
                 </div>
             </div>

@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { ChevronDown, ChevronUp, Search, X } from 'lucide-react';
 import Asterisk from './Asterisk';
+import { useTranslation } from 'react-i18next';
 
 interface Option {
     id: number;
@@ -20,6 +21,8 @@ interface MultiSelectProps {
 }
 
 export default function MultiSelect({ label, options, selected, onChange, placeholder, error, required }: MultiSelectProps) {
+    const { t, i18n } = useTranslation();
+    const isEnglish = i18n.language === "en";
     const [isOpen, setIsOpen] = useState(false);
     const [search, setSearch] = useState('');
     const containerRef = useRef<HTMLDivElement>(null);
@@ -41,9 +44,12 @@ export default function MultiSelect({ label, options, selected, onChange, placeh
         };
     }, [isOpen]); // Re-run when isOpen changes
 
-    const filteredOptions = options.filter(option =>
-        option.name_en.toLowerCase().includes(search.toLowerCase())
-    );
+    const filteredOptions = options.filter(option => {
+        const searchLower = search.toLowerCase();
+        const matchesEn = option.name_en.toLowerCase().includes(searchLower);
+        const matchesAr = option.name_ar?.toLowerCase().includes(searchLower);
+        return matchesEn || matchesAr;
+    });
 
     const handleToggle = (id: string) => {
         if (selected.includes(id)) {
@@ -54,12 +60,12 @@ export default function MultiSelect({ label, options, selected, onChange, placeh
     };
 
     const getDisplayText = () => {
-        if (selected.length === 0) return placeholder || 'Select...';
+        if (selected.length === 0) return placeholder || t("movie_form.select_placeholder");
         if (selected.length === 1) {
             const item = options.find(o => o.id.toString() === selected[0]);
-            return item?.name_en || 'Selected';
+            return (isEnglish ? item?.name_en : item?.name_ar) || t('movie_form.selected');
         }
-        return `${selected.length} selected`;
+        return t('movie_form.items_selected', { count: selected.length });
     };
 
     return (
@@ -83,7 +89,7 @@ export default function MultiSelect({ label, options, selected, onChange, placeh
                         {/* Search Bar */}
                         <div className="p-3 border-b sticky top-0 bg-white rounded">
                             <div className="relative">
-                                <div className="absolute right-3 top-2.5 flex items-center">
+                                <div className={`absolute ${isEnglish ? "right-3" : "left-3"} top-2.5 flex items-center`}>
                                     {search ? (
                                         // Close/Clear Button (Visible when text exists)
                                         <button onClick={() => { setSearch("") }} className="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer">
@@ -98,7 +104,7 @@ export default function MultiSelect({ label, options, selected, onChange, placeh
                                 </div>
                                 <input
                                     type="text"
-                                    placeholder="Search..."
+                                    placeholder={t("movie_form.search_placeholder")}
                                     value={search}
                                     onChange={e => setSearch(e.target.value)}
                                     className="w-full p-2 border rounded focus:outline-none focus:border-blue-400"
@@ -110,7 +116,7 @@ export default function MultiSelect({ label, options, selected, onChange, placeh
                         {/* Options List */}
                         <div className="overflow-y-auto flex-1 no-scrollbar">
                             {filteredOptions.length === 0 ? (
-                                <div className="p-4 text-center text-gray-500">No options found</div>
+                                <div className="p-4 text-center text-gray-500">{t("movie_form.no_options")}</div>
                             ) : (
                                 filteredOptions.sort((a, b) => a.name_en.localeCompare(b.name_en)).map(option => (
                                     <label key={option.id} className="flex items-center gap-3 p-3 hover:bg-blue-50 cursor-pointer transition">
@@ -120,7 +126,7 @@ export default function MultiSelect({ label, options, selected, onChange, placeh
                                             onChange={() => handleToggle(option.id.toString())}
                                             className="w-4 h-4 text-blue-600 rounded cursor-pointer"
                                         />
-                                        <span className="flex-1 text-gray-900">{option.name_en}</span>
+                                        <span className="flex-1 text-gray-900">{isEnglish ? option.name_en : option.name_ar}</span>
                                     </label>
                                 ))
                             )}
@@ -136,7 +142,7 @@ export default function MultiSelect({ label, options, selected, onChange, placeh
                             if (!item) return null;
                             return (
                                 <span key={id} className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm flex items-center gap-2">
-                                    {item.name_en}
+                                    {isEnglish ? item.name_en : item.name_ar}
                                     <button type="button" onClick={() => handleToggle(id)} className="hover:bg-blue-200 rounded-full cursor-pointer"><X size={14} /></button>
                                 </span>
                             );

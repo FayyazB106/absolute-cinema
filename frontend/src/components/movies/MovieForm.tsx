@@ -4,6 +4,7 @@ import MultiSelect from '../shared/MultiSelect';
 import type { MovieFormProps } from '../../types/movieForm';
 import { validateImage } from '../../utils/validation';
 import Asterisk from '../shared/Asterisk';
+import { useTranslation } from 'react-i18next';
 
 export default function MovieForm({
     formData,
@@ -17,9 +18,11 @@ export default function MovieForm({
     setFeaturedFile,
     existingFeaturedPoster,
     onSubmit,
-    submitLabel = "Submit",
+    submitLabel = "submit",
     isSubmitting = false
 }: MovieFormProps) {
+    const { t, i18n } = useTranslation();
+    const isEnglish = i18n.language === "en";
     const modalRef = useRef<HTMLDivElement>(null);
     const subTitleStyle = "text-xl font-bold text-blue-700 text-center"
     const labelStyle = "font-bold text-md"
@@ -41,15 +44,15 @@ export default function MovieForm({
     return (
         <div ref={modalRef} className="space-y-8">
             <section className="space-y-4">
-                <h2 className={subTitleStyle}>Basic Information</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <h2 className={subTitleStyle}>{t("movie_form.basic_info")}</h2>
+                <div dir="ltr" className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="flex flex-col">
                         <label className={labelStyle}>Name <Asterisk /></label>
                         <input
                             name="name_en"
                             type="text"
                             placeholder="Name"
-                            className={`border rounded p-3 ${errors.name_en ? 'border-red-500' : ''}`}
+                            className={`border rounded p-3 text-left ${errors.name_en ? 'border-red-500' : ''}`}
                             value={formData.name_en}
                             onChange={handleChange}
                             required
@@ -74,7 +77,7 @@ export default function MovieForm({
                         <textarea
                             name="desc_en"
                             placeholder="Description"
-                            className={`border rounded p-3 h-24 ${errors.desc_en ? 'border-red-500' : ''}`}
+                            className={`border rounded p-3 h-24 text-left ${errors.desc_en ? 'border-red-500' : ''}`}
                             value={formData.desc_en}
                             onChange={handleChange}
                             required
@@ -97,14 +100,14 @@ export default function MovieForm({
             </section>
 
             <section className="space-y-4">
-                <h2 className={subTitleStyle}>Metadata</h2>
+                <h2 className={subTitleStyle}>{t("movie_form.metadata")}</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
                     <div className="flex flex-col">
-                        <label className={labelStyle}>Release Date <Asterisk /></label>
+                        <label className={labelStyle}>{t("movie_form.release_date")} <Asterisk /></label>
                         <input
                             name="release_date"
                             type="date"
-                            className={`border rounded p-2 ${errors.release_date ? 'border-red-500' : ''}`}
+                            className={`border rounded p-2 h-[51px] ${errors.release_date ? 'border-red-500' : ''}`}
                             value={formData.release_date}
                             onChange={handleChange}
                             required
@@ -112,19 +115,19 @@ export default function MovieForm({
                         {errors.release_date && <span className={errorStyle}>{errors.release_date}</span>}
                     </div>
                     <div className="flex flex-col">
-                        <label className={labelStyle}>IMDB URL</label>
+                        <label className={labelStyle}>{t("movie_form.imdb")}</label>
                         <input
                             name="imdb_url"
                             type="url"
                             placeholder="https://imdb.com/title/tt..."
-                            className={`border rounded p-2 ${errors.imdb_url ? 'border-red-500' : ''}`}
+                            className={`border rounded p-2 h-[51px] ${errors.imdb_url ? 'border-red-500' : ''}`}
                             value={formData.imdb_url}
                             onChange={handleChange}
                         />
                         {errors.imdb_url && <span className={errorStyle}>{errors.imdb_url}</span>}
                     </div>
                     <div className="flex flex-col">
-                        <label className={labelStyle}>Duration (minutes)</label>
+                        <label className={labelStyle}>{t("movie_form.duration")}</label>
                         <input
                             name="duration"
                             type="number"
@@ -132,14 +135,14 @@ export default function MovieForm({
                             step="1"
                             onKeyDown={(e) => { if (['-', '.', ',', 'e', 'E'].includes(e.key)) { e.preventDefault(); } }}
                             placeholder="120"
-                            className={`border rounded p-2 ${errors.duration ? 'border-red-500' : ''}`}
+                            className={`border rounded p-2 h-[51px] ${errors.duration ? 'border-red-500' : ''}`}
                             value={formData.duration}
                             onChange={handleChange}
                         />
                         {errors.duration && <span className={errorStyle}>{errors.duration}</span>}
                     </div>
                     <div className="flex flex-col">
-                        <label className={labelStyle}>Maturity Rating <Asterisk /></label>
+                        <label className={labelStyle}>{t("movie_form.maturity_rating")} <Asterisk /></label>
                         <select
                             name="maturity_id"
                             className={`border rounded p-2 hover:bg-gray-50 ${errors.maturity_id ? 'border-red-500' : ''}`}
@@ -147,7 +150,7 @@ export default function MovieForm({
                             onChange={handleChange}
                             required
                         >
-                            <option value="">Select...</option>
+                            <option value="">{t("movie_form.select_placeholder")}</option>
                             {options.maturity_ratings.sort((a, b) => a.ranking - b.ranking).map(m =>
                                 <option key={m.id} value={m.id}>{m.maturity_rating}</option>
                             )}
@@ -155,7 +158,7 @@ export default function MovieForm({
                         {errors.maturity_id && <span className={errorStyle}>{errors.maturity_id}</span>}
                     </div>
                     <div className="flex flex-col">
-                        <label className={labelStyle}>Status <Asterisk /></label>
+                        <label className={labelStyle}>{t("movie_form.status")} <Asterisk /></label>
                         <select
                             name="status_id"
                             className={`border rounded p-2 hover:bg-gray-50 ${errors.status_id ? 'border-red-500' : ''}`}
@@ -163,9 +166,9 @@ export default function MovieForm({
                             onChange={handleChange}
                             required
                         >
-                            <option value="">Select...</option>
+                            <option value="">{t("movie_form.select_placeholder")}</option>
                             {options.statuses.sort((a, b) => a.name_en.localeCompare(b.name_en)).map(s =>
-                                <option key={s.id} value={s.id}>{s.name_en}</option>
+                                <option key={s.id} value={s.id}>{isEnglish ? s.name_en : s.name_ar}</option>
                             )}
                         </select>
                         {errors.status_id && <span className={errorStyle}>{errors.status_id}</span>}
@@ -174,70 +177,70 @@ export default function MovieForm({
             </section>
 
             <section className="space-y-4">
-                <h2 className={subTitleStyle}>Cast, Crew & Genres</h2>
+                <h2 className={subTitleStyle}>{t("movie_form.crew_and_genres")}</h2>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <MultiSelect
-                        label="Starring"
+                        label={t("movie_form.starring")}
                         options={options.actors}
                         selected={formData.actors}
                         onChange={(selected) => setFormData({ ...formData, actors: selected })}
-                        placeholder="Select..."
+                        placeholder={t("movie_form.select_placeholder")}
                     />
                     <MultiSelect
-                        label="Directed By"
+                        label={t("movie_form.director")}
                         options={options.directors}
                         selected={formData.directors}
                         onChange={(selected) => setFormData({ ...formData, directors: selected })}
-                        placeholder="Select..."
+                        placeholder={t("movie_form.select_placeholder")}
                     />
                     <MultiSelect
-                        label="Genres"
+                        label={t("movie_form.genres")}
                         options={options.genres}
                         selected={formData.genres}
                         onChange={(selected) => setFormData({ ...formData, genres: selected })}
-                        placeholder="Select..."
+                        placeholder={t("movie_form.select_placeholder")}
                     />
                 </div>
             </section>
 
             <section className="space-y-4">
-                <h2 className={subTitleStyle}>Languages</h2>
+                <h2 className={subTitleStyle}>{t("movie_form.languages")}</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="flex flex-col">
                         <MultiSelect
-                            label="Languages"
+                            label={t("movie_form.languages")}
                             options={options.languages}
                             selected={formData.languages}
                             onChange={(selected) => {
                                 setFormData({ ...formData, languages: selected });
                                 if (errors.languages) setErrors({ ...errors, languages: '' });
                             }}
-                            placeholder="Select..."
+                            placeholder={t("movie_form.select_placeholder")}
                             error={errors.languages}
                             required
                         />
                         {errors.languages && <span className={errorStyle}>{errors.languages}</span>}
                     </div>
                     <MultiSelect
-                        label="Subtitles"
+                        label={t("movie_form.subtitles")}
                         options={options.languages}
                         selected={formData.subtitles}
                         onChange={(selected) => setFormData({ ...formData, subtitles: selected })}
-                        placeholder="Select..."
+                        placeholder={t("movie_form.select_placeholder")}
                     />
                 </div>
             </section>
 
             <section className="space-y-4 border-t pt-6">
-                <h2 className={subTitleStyle}>Media</h2>
+                <h2 className={subTitleStyle}>{t("movie_form.media")}</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     {/* Main Poster Upload */}
                     <div className="flex flex-col items-center p-4 border-2 border-dashed rounded-xl hover:bg-gray-50">
                         <label className="cursor-pointer text-center w-full flex flex-col gap-1">
                             <Upload className="mx-auto text-gray-400" size={32} />
-                            <p className="font-bold">Main Poster</p>
-                            <p className="text-xs text-gray-500">JPG, JPEG, PNG (Max 2MB)</p>
-                            <p className="text-xs text-gray-500">Must be 1000 x 1500</p>
+                            <p className="font-bold">{t("movie_form.main_poster")}</p>
+                            <p className="text-xs text-gray-500">{t("movie_form.requirements")}</p>
+                            <p className="text-xs text-gray-500">{t("movie_form.poster_size")}</p>
                             <input
                                 type="file"
                                 className="hidden"
@@ -247,7 +250,27 @@ export default function MovieForm({
                                     if (file) {
                                         const error = await validateImage(file, { width: 1000, minH: 1400, maxH: 1600 });
                                         if (error) {
-                                            setErrors({ ...errors, poster_url: error });
+                                            // Parse the error string: "validation.exact_width|1000|1024"
+                                            const parts = error.split('|');
+                                            const key = parts[0];
+                                            const params: any = {};
+
+                                            if (parts.length > 1) {
+                                                // Map parameters based on the error type
+                                                if (key === 'validation.exact_width') {
+                                                    params.width = parts[1];
+                                                    params.current = parts[2];
+                                                } else if (key === 'validation.min_height') {
+                                                    params.minH = parts[1];
+                                                } else if (key === 'validation.max_height') {
+                                                    params.maxH = parts[1];
+                                                } else if (key === 'validation.exact_height') {
+                                                    params.exactH = parts[1];
+                                                }
+                                            }
+
+                                            const translatedError = t(key, params) as string;
+                                            setErrors({ ...errors, poster_url: translatedError });
                                             setPosterFile(null);
                                         } else {
                                             setPosterFile(file);
@@ -265,9 +288,9 @@ export default function MovieForm({
                     <div className="flex flex-col items-center p-4 border-2 border-dashed rounded-xl hover:bg-gray-50">
                         <label className="cursor-pointer text-center w-full flex flex-col gap-1">
                             <Upload className="mx-auto text-gray-400" size={32} />
-                            <p className="font-bold">Featured Banner</p>
-                            <p className="text-xs text-gray-500">JPG, JPEG, PNG (Max 2MB)</p>
-                            <p className="text-xs text-gray-500">Must be 1920 x 1080</p>
+                            <p className="font-bold">{t("movie_form.featured_banner")}</p>
+                            <p className="text-xs text-gray-500">{t("movie_form.requirements")}</p>
+                            <p className="text-xs text-gray-500">{t("movie_form.banner_size")}</p>
                             <input
                                 type="file"
                                 className="hidden"
@@ -277,7 +300,27 @@ export default function MovieForm({
                                     if (file) {
                                         const error = await validateImage(file, { width: 1920, exactH: 1080 });
                                         if (error) {
-                                            setErrors({ ...errors, featured_poster_url: error });
+                                            // Parse the error string: "validation.exact_width|1920|1024"
+                                            const parts = error.split('|');
+                                            const key = parts[0];
+                                            const params: any = {};
+
+                                            if (parts.length > 1) {
+                                                // Map parameters based on the error type
+                                                if (key === 'validation.exact_width') {
+                                                    params.width = parts[1];
+                                                    params.current = parts[2];
+                                                } else if (key === 'validation.min_height') {
+                                                    params.minH = parts[1];
+                                                } else if (key === 'validation.max_height') {
+                                                    params.maxH = parts[1];
+                                                } else if (key === 'validation.exact_height') {
+                                                    params.exactH = parts[1];
+                                                }
+                                            }
+
+                                            const translatedError = t(key, params) as string;
+                                            setErrors({ ...errors, featured_poster_url: translatedError });
                                             setFeaturedFile(null);
                                         } else {
                                             setFeaturedFile(file);
@@ -295,7 +338,7 @@ export default function MovieForm({
 
             <div className="flex flex-row justify-between gap-4">
                 <div className='flex flex-row gap-2 items-center'>
-                    <label className="text-lg font-bold">Featured</label>
+                    <label className="text-lg font-bold">{t("movie_form.featured")}</label>
                     <button
                         type="button"
                         onClick={() => {
@@ -307,10 +350,13 @@ export default function MovieForm({
                         disabled={!existingFeaturedPoster && !featuredFile && !formData.is_featured}
                         className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${formData.is_featured ? 'bg-blue-600' : 'bg-gray-300'} ${!existingFeaturedPoster && !featuredFile && !formData.is_featured ? 'opacity-50 cursor-not-allowed' : ''}`}
                     >
-                        <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition ${formData.is_featured ? 'translate-x-6' : 'translate-x-1'}`} />
+                        <span className={
+                            `inline-block h-4 w-4 transform rounded-full bg-white transition 
+                            ${formData.is_featured ? (isEnglish ? 'translate-x-6' : '-translate-x-6') : (isEnglish ? 'translate-x-1' : '-translate-x-1')}`
+                        } />
                     </button>
                     {!existingFeaturedPoster && !featuredFile && !formData.is_featured && (
-                        <span className="text-xs text-gray-500 ml-2">Upload featured banner first</span>
+                        <span className="text-xs text-gray-500 ml-2">{t("movie_form.no_banner")}</span>
                     )}
                 </div>
                 <button
@@ -318,7 +364,7 @@ export default function MovieForm({
                     disabled={isSubmitting}
                     className="flex-1 flex justify-center items-center bg-green-600 text-white font-bold py-3 rounded-xl hover:bg-green-700 max-w-35 disabled:opacity-50 cursor-pointer"
                 >
-                    {isSubmitting ? (<div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white" />) : (submitLabel)}
+                    {isSubmitting ? (<div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white" />) : t(`movie_form.${submitLabel}`)}
                 </button>
             </div>
         </div>

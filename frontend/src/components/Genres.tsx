@@ -1,5 +1,7 @@
 import SimpleTablePage from './shared/SimpleTablePage';
+import { useTranslation } from "react-i18next";
 
 export default function Actors() {
-    return <SimpleTablePage title="Genres" endpoint="genres" singularName="genre" />;
+    const { t } = useTranslation();
+    return <SimpleTablePage title={t('titles.genres')} endpoint="genres" />;
 }

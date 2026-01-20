@@ -9,88 +9,49 @@ import Ratings from '../components/Ratings';
 import Export from '../components/Export';
 import LanguageStyler from '../components/LanguageStyler';
 import Toast from '../components/shared/Toast';
+import { useTranslation } from "react-i18next";
+import DashboardHeader from '../components/DashboardHeader';
 
 export default function Dashboard() {
     const [activeModule, setActiveModule] = useState('movies');
+    const { t } = useTranslation();
+
+    const navItems = [
+        { id: 'movies', label: t('nav.movies'), component: <Movies /> },
+        { id: 'actors', label: t('nav.actors'), component: <Actors /> },
+        { id: 'directors', label: t('nav.directors'), component: <Directors /> },
+        { id: 'genres', label: t('nav.genres'), component: <Genres /> },
+        { id: 'languages', label: t('nav.languages'), component: <Languages /> },
+        { id: 'ratings', label: t('nav.ratings'), component: <Ratings /> },
+        { id: 'statuses', label: t('nav.statuses'), component: <Statuses /> },
+        { id: 'export', label: t('nav.export'), component: <Export /> },
+        { id: 'playground', label: t('nav.playground'), component: <LanguageStyler /> },
+    ];
 
     return (
         <div className="min-h-screen bg-gray-100">
             <Toast />
-            
+            <DashboardHeader />
+
             {/* Navigation */}
             <nav className="bg-white shadow-lg">
                 <div className="w-full px-8">
                     <div className="flex space-x-4 py-4">
-                        <button
-                            onClick={() => setActiveModule('movies')}
-                            className={`px-4 py-2 rounded cursor-pointer ${activeModule === 'movies' ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}
-                        >
-                            Movies
-                        </button>
-                        <button
-                            onClick={() => setActiveModule('actors')}
-                            className={`px-4 py-2 rounded cursor-pointer ${activeModule === 'actors' ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}
-                        >
-                            Actors
-                        </button>
-                        <button
-                            onClick={() => setActiveModule('directors')}
-                            className={`px-4 py-2 rounded cursor-pointer ${activeModule === 'directors' ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}
-                        >
-                            Directors
-                        </button>
-                        <button
-                            onClick={() => setActiveModule('genres')}
-                            className={`px-4 py-2 rounded cursor-pointer ${activeModule === 'genres' ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}
-                        >
-                            Genres
-                        </button>
-                        <button
-                            onClick={() => setActiveModule('languages')}
-                            className={`px-4 py-2 rounded cursor-pointer ${activeModule === 'languages' ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}
-                        >
-                            Languages
-                        </button>
-                        <button
-                            onClick={() => setActiveModule('ratings')}
-                            className={`px-4 py-2 rounded cursor-pointer ${activeModule === 'ratings' ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}
-                        >
-                            Maturity Ratings
-                        </button>
-                        <button
-                            onClick={() => setActiveModule('statuses')}
-                            className={`px-4 py-2 rounded cursor-pointer ${activeModule === 'statuses' ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}
-                        >
-                            Statuses
-                        </button>
-                        <button
-                            onClick={() => setActiveModule('export')}
-                            className={`px-4 py-2 rounded cursor-pointer ${activeModule === 'export' ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}
-                        >
-                            Export
-                        </button>
-                        <button
-                            onClick={() => setActiveModule('playground')}
-                            className={`px-4 py-2 rounded cursor-pointer ${activeModule === 'playground' ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}
-                        >
-                            Playground
-                        </button>
+                        {navItems.map((item) => (
+                            <button
+                                key={item.id}
+                                onClick={() => setActiveModule(item.id)}
+                                className={`px-4 py-2 rounded cursor-pointer transition-colors ${activeModule === item.id ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}
+                            >
+                                {item.label}
+                            </button>
+                        ))}
                     </div>
                 </div>
             </nav>
 
             {/* Content */}
-            <div>
-                {activeModule === 'movies' && <Movies />}
-                {activeModule === 'actors' && <Actors />}
-                {activeModule === 'directors' && <Directors />}
-                {activeModule === 'genres' && <Genres />}
-                {activeModule === 'languages' && <Languages />}
-                {activeModule === 'ratings' && <Ratings />}
-                {activeModule === 'statuses' && <Statuses />}
-                {activeModule === 'export' && <Export />}
-                {activeModule === 'playground' && <LanguageStyler />}
-            </div>
+            {navItems.find(item => item.id === activeModule)?.component}
         </div>
     );
 }

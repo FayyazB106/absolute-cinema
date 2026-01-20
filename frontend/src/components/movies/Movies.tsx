@@ -6,8 +6,11 @@ import PlusButton from '../shared/PlusButton';
 import type { Language, Movie, Rating, Status } from '../../types/movie';
 import { movieService } from '../../services/movieService';
 import Title from '../shared/Title';
+import { useTranslation } from 'react-i18next';
 
 export default function Movies() {
+    const { t, i18n } = useTranslation();
+    const isEnglish = i18n.language === "en";
     const [movies, setMovies] = useState<Movie[]>([]);
     const [ratings, setRatings] = useState<Rating[]>([]);
     const [statuses, setStatuses] = useState<Status[]>([]);
@@ -51,11 +54,12 @@ export default function Movies() {
     };
 
     const getStatusName = (id: number) => {
-        return statuses.find(m => m.id === id)?.name_en || '';
+        const status = statuses.find(m => m.id === id);
+        return { en: status?.name_en || '', ar: status?.name_ar || '' };
     };
 
-    const getStatusStyles = (status: string) => {
-        switch (status.toLowerCase()) {
+    const getStatusStyles = (status: { en: string; ar: string }) => {
+        switch (status.en.toLowerCase()) {
             case 'released': return 'bg-green-600 text-white';
             case 'coming soon': return 'bg-blue-600 text-white';
             case 'unavailable': return 'bg-amber-500 text-white';
@@ -63,20 +67,20 @@ export default function Movies() {
         }
     };
 
-    const handleViewMovie = (movieId: number) => {
-        setSelectedMovieId(movieId);
-        setIsViewModalOpen(true);
-    };
-
     // Define status priority order (lower number = higher priority)
     const getStatusPriority = (statusId: number) => {
-        const statusName = getStatusName(statusId).toLowerCase();
-        switch (statusName) {
+        const status = getStatusName(statusId);
+        switch (status.en.toLowerCase()) {
             case 'released': return 1;
             case 'coming soon': return 2;
             case 'unavailable': return 3;
             default: return 4;
         }
+    };
+
+    const handleViewMovie = (movieId: number) => {
+        setSelectedMovieId(movieId);
+        setIsViewModalOpen(true);
     };
 
     const filteredItems = movies
@@ -87,7 +91,7 @@ export default function Movies() {
             // Filter items with toggle
             const matchesFeatured = showFeaturedOnly ? item.is_featured : true;
             const matchesStatus = selectedStatus === "all" ? true : item.status_id === Number(selectedStatus);
-            const matchesLanguage = selectedLanguage === "all" ? true : item.audio_languages?.some(lang => lang.name_en === selectedLanguage);
+            const matchesLanguage = selectedLanguage === "all" ? true : item.audio_languages?.some(lang => lang.id === Number(selectedLanguage));
             const matchesRestriced = isRestricted ? getRatingName(item.maturity_id).toUpperCase().startsWith('R') : true;
 
             return matchesSearch && matchesFeatured && matchesStatus && matchesLanguage && matchesRestriced;
@@ -104,24 +108,30 @@ export default function Movies() {
             return a.name_en.localeCompare(b.name_en);
         });
 
-    if (loading) { return <div className="p-10 text-center text-xl font-semibold">Loading Movies...</div>; }
+    if (loading) {
+        return (
+            <div className="flex flex-col items-center justify-center min-h-[400px] w-full p-10 space-y-4">
+                <div className="w-12 h-12 border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin" />
+            </div>
+        )
+    }
 
     return (
         <div className="p-8">
             <div className="flex justify-between items-center mb-8">
-                <Title text="Movies Library" />
+                <Title text={t("titles.movies")} />
 
                 <div className='flex flex-row gap-5'>
                     {/* Search bar */}
                     <div className="relative w-full max-w-md mx-4">
                         <input
                             type="text"
-                            placeholder="Search movies..."
+                            placeholder={t("movies_library.search_placeholder")}
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             className="w-full p-2 pl-4 pr-10 border rounded-full focus:border-blue-400 outline-none shadow-sm transition-all"
                         />
-                        <div className="absolute right-3 top-2.5 flex items-center">
+                        <div className={`absolute ${isEnglish ? "right-3" : "left-3"} top-2.5 flex items-center`}>
                             {searchTerm ? (
                                 <button onClick={() => setSearchTerm("")} className="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer">
                                     <X size={18} />
@@ -145,7 +155,7 @@ export default function Movies() {
                         <div className={`${showFeaturedOnly ? "fill-amber-500 text-amber-500" : "text-gray-400"}`}>
                             <Star size={18} />
                         </div>
-                        <span className="text-sm font-semibold">Featured</span>
+                        <span className="text-sm font-semibold">{t("movies_library.featured")}</span>
                     </button>
 
                     {/* Restricted Toggle Button */}
@@ -159,7 +169,7 @@ export default function Movies() {
                         <div className={`${isRestricted ? "fill-red-500 text-red-500" : "text-gray-400"}`}>
                             <OctagonMinus size={18} />
                         </div>
-                        <span className="text-sm font-semibold">Restricted</span>
+                        <span className="text-sm font-semibold">{t("movies_library.restricted")}</span>
                     </button>
 
                     {/* Status Dropdown */}
@@ -168,8 +178,8 @@ export default function Movies() {
                         onChange={(e) => setSelectedStatus(e.target.value)}
                         className="text-gray-600 p-2 px-4 rounded-full border border-gray-200 text-sm font-medium focus:ring-2 focus:ring-blue-400 outline-none bg-white cursor-pointer"
                     >
-                        <option value="all">All Statuses</option>
-                        {statuses.map(s => (<option key={s.id} value={s.id}>{s.name_en}</option>))}
+                        <option value="all">{t("movies_library.all_statuses")}</option>
+                        {statuses.map(s => (<option key={s.id} value={s.id}>{isEnglish ? s.name_en : s.name_ar}</option>))}
                     </select>
 
                     {/* Language Dropdown */}
@@ -178,8 +188,8 @@ export default function Movies() {
                         onChange={(e) => setSelectedLanguage(e.target.value)}
                         className="text-gray-600 p-2 px-4 rounded-full border border-gray-200 text-sm font-medium focus:ring-2 focus:ring-blue-400 outline-none bg-white cursor-pointer"
                     >
-                        <option value="all">All Languages</option>
-                        {languages.map(s => (<option key={s.id} value={s.id}>{s.name_en}</option>))}
+                        <option value="all">{t("movies_library.all_languages")}</option>
+                        {languages.map(l => (<option key={l.id} value={l.id}>{isEnglish ? l.name_en : l.name_ar}</option>))}
                     </select>
 
                     {/* Clear All Filters Button (Visible only when filtering) */}
@@ -194,12 +204,12 @@ export default function Movies() {
                             }}
                             className="text-xs text-red-500 hover:text-red-700 font-bold uppercase tracking-wider whitespace-nowrap cursor-pointer"
                         >
-                            Clear All
+                            {t("movies_library.clear_all")}
                         </button>
                     )}
                 </div>
 
-                <PlusButton title="Add new movie" onClick={() => setIsAddModalOpen(true)} />
+                <PlusButton title={t("movies_library.add_new_movie")} onClick={() => setIsAddModalOpen(true)} />
             </div>
 
             <div className="grid grid-cols-6 gap-6">
@@ -223,11 +233,11 @@ export default function Movies() {
                                 </div>
                             )}
                             <div className={`h-full bg-white p-6 flex flex-col justify-between gap-2 text-center ${isRestricted ? "" : "rounded-b-xl"}`}>
-                                <h3 className="text-lg font-bold line-clamp-2">{movie.name_en}</h3>
+                                <h3 className="text-lg font-bold line-clamp-2">{isEnglish ? movie.name_en : movie.name_ar}</h3>
                                 <div className='flex justify-center'>
                                     {statusLabel &&
                                         <p className={`${getStatusStyles(statusLabel)} px-3 py-1 rounded-full text-[10px] font-bold uppercase`}>
-                                            {statusLabel}
+                                            {isEnglish ? statusLabel.en : statusLabel.ar}
                                         </p>
                                     }
                                 </div>
@@ -243,7 +253,7 @@ export default function Movies() {
                                                     boxShadow: `0 0 0 2px #${lang.ring_color || '6b7280'}`
                                                 }}
                                             >
-                                                {lang.name_en}
+                                                {isEnglish ? lang.name_en : lang.name_ar}
                                             </p>
                                         ))
                                     )}
@@ -260,7 +270,7 @@ export default function Movies() {
                 <div className="flex flex-col items-center justify-center py-20 text-gray-400 bg-gray-50 rounded-xl">
                     <Search size={48} className="mb-4 opacity-20" />
                     <p className="text-xl font-medium">
-                        No {showFeaturedOnly ? "featured " : ""}movies match your criteria
+                        {t("movies_library.no_matches", { type: showFeaturedOnly ? t("movies_library.type_featured") : "" })}
                     </p>
                     <div className="flex gap-4 mt-4">
                         {(searchTerm || showFeaturedOnly) && (
@@ -271,7 +281,7 @@ export default function Movies() {
                                 }}
                                 className="text-blue-500 hover:underline font-semibold cursor-pointer"
                             >
-                                Reset all filters
+                                {t("movies_library.reset_filters")}
                             </button>
                         )}
                     </div>
@@ -280,7 +290,7 @@ export default function Movies() {
 
             {movies.length === 0 && (
                 <div className="text-center py-12">
-                    <p className="text-xl">No movies found. Add your first movie!</p>
+                    <p className="text-xl">{t("movies_library.no_movies_found")}</p>
                 </div>
             )}
 

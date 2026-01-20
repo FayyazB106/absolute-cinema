@@ -4,8 +4,8 @@ import { Pencil } from 'lucide-react';
 import EditMovie from './EditMovie';
 import type { MovieDetails } from '../../types/movie';
 import { movieService } from '../../services/movieService';
-import { confirmMovieDelete } from '../shared/DeleteModal';
-import Swal from 'sweetalert2';
+import { confirmMovieDelete, showErrorMessage, showSuccessMessage } from '../shared/SweetAlert';
+import { useTranslation } from 'react-i18next';
 
 interface ViewMovieProps {
     isOpen: boolean;
@@ -15,6 +15,8 @@ interface ViewMovieProps {
 }
 
 export default function ViewMovie({ isOpen, onClose, movieId, onMovieDeleted }: ViewMovieProps) {
+    const { t, i18n } = useTranslation();
+    const isEnglish = i18n.language === "en";
     const [movie, setMovie] = useState<MovieDetails | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -33,7 +35,7 @@ export default function ViewMovie({ isOpen, onClose, movieId, onMovieDeleted }: 
                 })
                 .catch(err => {
                     console.error("Could not fetch movie details", err);
-                    setError("Failed to load movie details");
+                    setError(t("movies_library.error_load_details"));
                     setLoading(false);
                 });
         }
@@ -47,9 +49,9 @@ export default function ViewMovie({ isOpen, onClose, movieId, onMovieDeleted }: 
                 await movieService.deleteMovie(id);
                 onMovieDeleted();
                 onClose();
-                Swal.fire('Deleted!', 'The movie has been removed.', 'success');
+                showSuccessMessage(t("movies_library.success_remove"));
             } catch (error) {
-                Swal.fire('Error', 'Something went wrong', 'error');
+                showErrorMessage(t("movies_library.error_general"));
             }
         }
     };
@@ -78,18 +80,22 @@ export default function ViewMovie({ isOpen, onClose, movieId, onMovieDeleted }: 
                         <button
                             onClick={() => movie && handleDelete(movie.id, movie.name_en)}
                             className="text-white bg-red-500 rounded-full transition flex items-center gap-2 text-sm font-medium p-3 hover:bg-red-600 cursor-pointer"
+                            title={t("buttons.delete")}
                         >
                             <Trash2 size={20} />
                         </button>
                         <button
                             onClick={() => setIsEditOpen(true)}
                             className="text-white bg-amber-500 rounded-full transition flex items-center gap-2 text-sm font-medium p-3 hover:bg-amber-600 cursor-pointer"
+                            title={t("buttons.edit")}
                         >
                             <Pencil size={20} />
                         </button>
                         <button
                             onClick={onClose}
-                            className="text-white hover:bg-white/20 rounded-full transition flex items-center gap-2 text-sm font-medium p-3 border cursor-pointer">
+                            className="text-white hover:bg-white/20 rounded-full transition flex items-center gap-2 text-sm font-medium p-3 border cursor-pointer"
+                            title={t("buttons.close")}
+                        >
                             <X size={20} />
                         </button>
                     </div>
@@ -99,11 +105,11 @@ export default function ViewMovie({ isOpen, onClose, movieId, onMovieDeleted }: 
                                 <div className="h-8 bg-white bg-opacity-20 rounded w-64 animate-pulse"></div>
                             ) : movie ? (
                                 <div className='text-center'>
-                                    <h1 className="text-3xl font-extrabold mb-2">{movie.name_en}</h1>
-                                    <h2 className="text-xl opacity-90">{movie.name_ar}</h2>
+                                    <h1 className="text-3xl font-extrabold mb-2">{isEnglish ? movie.name_en : movie.name_ar}</h1>
+                                    <h2 className="text-xl opacity-90">{isEnglish ? movie.name_ar : movie.name_en}</h2>
                                     {Boolean(movie.is_featured) && (
                                         <span className="text-md text-amber-400 font-bold py-2 flex items-center justify-center gap-1">
-                                            <Star size={16} /> FEATURED
+                                            <Star size={16} /> {t("movies_library.featured")}
                                         </span>
                                     )}
                                 </div>
@@ -132,42 +138,42 @@ export default function ViewMovie({ isOpen, onClose, movieId, onMovieDeleted }: 
                                 <div className="bg-blue-50 p-4 rounded-lg border border-blue-200 text-center">
                                     <div className="flex justify-center items-center gap-2 text-blue-700 mb-1">
                                         <Calendar size={18} />
-                                        <span className="text-xs font-semibold uppercase">Release Date</span>
+                                        <span className="text-xs font-semibold uppercase">{t("movies_library.release_date")}</span>
                                     </div>
                                     <p className="text-lg font-bold">
-                                        {new Date(movie.release_date).toLocaleDateString("en-GB", { day: 'numeric', month: 'short', year: 'numeric' })}
+                                        {new Date(movie.release_date).toLocaleDateString(isEnglish ? "en-GB" : "ar-GB", { day: 'numeric', month: 'short', year: 'numeric' })}
                                     </p>
                                 </div>
 
                                 <div className="bg-purple-50 p-4 rounded-lg border border-purple-200 text-center">
                                     <div className="flex justify-center items-center gap-2 text-purple-700 mb-1">
                                         <Clock size={18} />
-                                        <span className="text-xs font-semibold uppercase">Duration</span>
+                                        <span className="text-xs font-semibold uppercase">{t("movies_library.duration")}</span>
                                     </div>
-                                    <p className="text-lg font-bold">{movie.duration} min</p>
+                                    <p className="text-lg font-bold">{t("movies_library.duration_minutes", { count: movie.duration })}</p>
                                 </div>
 
                                 <div className="bg-green-50 p-4 rounded-lg border border-green-200 text-center">
                                     <div className="flex justify-center items-center gap-2 text-green-700 mb-1">
                                         <UserRound size={18} />
-                                        <span className="text-xs font-semibold uppercase">Maturity Rating</span>
+                                        <span className="text-xs font-semibold uppercase">{t("movies_library.maturity_rating")}</span>
                                     </div>
-                                    <p className="text-lg font-bold">{movie.maturity_ratings?.maturity_rating || 'N/A'}</p>
+                                    <p className="text-lg font-bold">{movie.maturity_ratings?.maturity_rating}</p>
                                 </div>
 
                                 <div className="bg-orange-50 p-4 rounded-lg border border-orange-200 text-center">
                                     <div className="flex justify-center items-center gap-2 text-orange-700 mb-1">
                                         <Film size={18} />
-                                        <span className="text-xs font-semibold uppercase">Status</span>
+                                        <span className="text-xs font-semibold uppercase">{t("movies_library.status")}</span>
                                     </div>
-                                    <p className="text-lg font-bold">{movie.status?.name_en || 'N/A'}</p>
+                                    <p className="text-lg font-bold">{isEnglish ? movie.status?.name_en : movie.status?.name_ar}</p>
                                 </div>
                             </div>
 
                             {/* Descriptions */}
                             <div className="border-t pt-6">
-                                <h3 className="text-xl font-bold mb-3">Description</h3>
-                                <div className="space-y-4">
+                                <h3 className="text-xl font-bold mb-3">{t("movies_library.description")}</h3>
+                                <div className={`space-y-4 flex ${isEnglish ? "flex-col" : "flex-col-reverse" }`}>
                                     <div className="bg-gray-50 p-4 rounded-lg text-left leading-relaxed">{movie.desc_en}</div>
                                     <div className="bg-gray-50 p-4 rounded-lg text-right leading-relaxed">{movie.desc_ar}</div>
                                 </div>
@@ -177,12 +183,12 @@ export default function ViewMovie({ isOpen, onClose, movieId, onMovieDeleted }: 
                             {movie.genres && movie.genres.length > 0 && (
                                 <div className="border-t pt-6">
                                     <h3 className="text-xl font-bold mb-3 flex items-center gap-2">
-                                        <Film size={20} /> Genres
+                                        <Film size={20} /> {t("movies_library.genres")}
                                     </h3>
                                     <div className="flex flex-wrap gap-2">
                                         {movie.genres.map(genre => (
                                             <span key={genre.id} className="bg-blue-100 text-blue-800 px-4 py-2 rounded-full text-sm font-semibold">
-                                                {genre.name_en}
+                                                {isEnglish ? genre.name_en : genre.name_ar}
                                             </span>
                                         ))}
                                     </div>
@@ -195,11 +201,11 @@ export default function ViewMovie({ isOpen, onClose, movieId, onMovieDeleted }: 
                                 {movie.actors && movie.actors.length > 0 && (
                                     <div>
                                         <h3 className="text-lg font-bold mb-3 flex items-center gap-2">
-                                            <Users size={20} /> Starring
+                                            <Users size={20} /> {t("movies_library.starring")}
                                         </h3>
                                         <ul className="space-y-2">
                                             {movie.actors.map(actor => (
-                                                <li key={actor.id} className="bg-gray-50 px-4 py-2 rounded-lg">{actor.name_en}</li>
+                                                <li key={actor.id} className="bg-gray-50 px-4 py-2 rounded-lg">{isEnglish ? actor.name_en : actor.name_ar}</li>
                                             ))}
                                         </ul>
                                     </div>
@@ -209,11 +215,11 @@ export default function ViewMovie({ isOpen, onClose, movieId, onMovieDeleted }: 
                                 {movie.directors && movie.directors.length > 0 && (
                                     <div>
                                         <h3 className="text-lg font-bold mb-3 flex items-center gap-2">
-                                            <Video size={20} /> Directed By
+                                            <Video size={20} /> {t("movies_library.directed_by")}
                                         </h3>
                                         <ul className="space-y-2">
                                             {movie.directors.map(director => (
-                                                <li key={director.id} className="bg-gray-50 px-4 py-2 rounded-lg">{director.name_en}</li>
+                                                <li key={director.id} className="bg-gray-50 px-4 py-2 rounded-lg">{isEnglish ? director.name_en : director.name_ar}</li>
                                             ))}
                                         </ul>
                                     </div>
@@ -226,11 +232,13 @@ export default function ViewMovie({ isOpen, onClose, movieId, onMovieDeleted }: 
                                 {movie.audio_languages && movie.audio_languages.length > 0 && (
                                     <div>
                                         <h3 className="text-lg font-bold mb-3 flex items-center gap-2">
-                                            <Globe size={20} /> Languages
+                                            <Globe size={20} /> {t("movies_library.languages")}
                                         </h3>
                                         <div className="flex flex-wrap gap-2">
                                             {movie.audio_languages.map(lang => (
-                                                <span key={lang.id} className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-semibold">{lang.name_en}</span>
+                                                <span key={lang.id} className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-semibold">
+                                                    {isEnglish ? lang.name_en : lang.name_ar}
+                                                </span>
                                             ))}
                                         </div>
                                     </div>
@@ -240,11 +248,13 @@ export default function ViewMovie({ isOpen, onClose, movieId, onMovieDeleted }: 
                                 {movie.subtitles && movie.subtitles.length > 0 && (
                                     <div>
                                         <h3 className="text-lg font-bold mb-3 flex items-center gap-2">
-                                            <Subtitles size={20} /> Subtitles
+                                            <Subtitles size={20} /> {t("movies_library.subtitles")}
                                         </h3>
                                         <div className="flex flex-wrap gap-2">
                                             {movie.subtitles.map(sub => (
-                                                <span key={sub.id} className="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm font-semibold">{sub.name_en}</span>
+                                                <span key={sub.id} className="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm font-semibold">
+                                                    {isEnglish ? sub.name_en : sub.name_ar}
+                                                </span>
                                             ))}
                                         </div>
                                     </div>
@@ -254,25 +264,25 @@ export default function ViewMovie({ isOpen, onClose, movieId, onMovieDeleted }: 
                             {/* IMDB Link + Posters + Metadata */}
                             <div className="border-t pt-6 text-xs space-y-1 flex flex-row justify-between items-center">
                                 <div>
-                                    <p><strong>Created:</strong> {new Date(movie.created_at).toLocaleString()}</p>
-                                    <p><strong>Last Updated:</strong> {new Date(movie.updated_at).toLocaleString()}</p>
-                                    <p><strong>Movie ID:</strong> {movie.id}</p>
+                                    <p><strong>{t("movies_library.meta_created")}:</strong> {new Date(movie.created_at).toLocaleString(i18n.language)}</p>
+                                    <p><strong>{t("movies_library.meta_updated")}:</strong> {new Date(movie.updated_at).toLocaleString(i18n.language)}</p>
+                                    <p><strong>{t("movies_library.meta_id")}:</strong> {movie.id}</p>
                                     {/* Clickable Image Links */}
                                     <div className="flex gap-4 mt-3">
                                         {movie.poster_full_url && (
                                             <button
-                                                onClick={() => setPreviewImage({ url: movie.poster_full_url!, title: 'Main Poster' })}
+                                                onClick={() => setPreviewImage({ url: movie.poster_full_url!, title: t("movies_library.poster_main") })}
                                                 className="flex items-center gap-1 text-blue-600 hover:text-blue-800 font-bold text-sm underline decoration-dotted cursor-pointer"
                                             >
-                                                <ImageIcon size={14} /> View Poster
+                                                <ImageIcon size={14} /> {t("movies_library.view_poster")}
                                             </button>
                                         )}
                                         {movie.featured_full_url && (
                                             <button
-                                                onClick={() => setPreviewImage({ url: movie.featured_full_url!, title: 'Featured Banner' })}
+                                                onClick={() => setPreviewImage({ url: movie.featured_full_url!, title: t("movies_library.poster_featured") })}
                                                 className="flex items-center gap-1 text-blue-600 hover:text-blue-800 font-bold text-sm underline decoration-dotted cursor-pointer"
                                             >
-                                                <ImageIcon size={14} /> View Featured Poster
+                                                <ImageIcon size={14} /> {t("movies_library.view_featured")}
                                             </button>
                                         )}
                                     </div>
@@ -285,7 +295,7 @@ export default function ViewMovie({ isOpen, onClose, movieId, onMovieDeleted }: 
                                             rel="noopener noreferrer"
                                             className="inline-flex items-center gap-2 bg-yellow-500 hover:bg-yellow-600 text-white font-bold px-6 py-3 rounded-lg transition"
                                         >
-                                            <Star size={20} /> View on IMDB
+                                            <Star size={20} /> {t("movies_library.view_imdb")}
                                         </a>
                                     </div>
                                 )}

@@ -6,13 +6,14 @@ import Title from './shared/Title';
 import { movieService } from '../services/movieService';
 import { validateRating } from '../utils/validation';
 import { toast } from './shared/Toast';
-import { confirmBulkDelete, confirmDelete, showErrorMessage, showSuccessMessage } from './shared/DeleteModal';
-import Swal from 'sweetalert2';
+import { confirmBulkDelete, confirmDelete, showErrorMessage, showSuccessMessage } from './shared/SweetAlert';
+import { Trans, useTranslation } from 'react-i18next';
 
 export default function Ratings() {
+    const { t, i18n } = useTranslation();
+    const isEnglish = i18n.language === "en";
     const [ratings, setRatings] = useState<Rating[]>([]);
     const [bulkErrors, setBulkErrors] = useState<Record<number, Record<string, string>>>({});
-    const [limitError, setLimitError] = useState("");
     const [editErrors, setEditErrors] = useState<Record<string, string>>({});
     const [loading, setLoading] = useState(true);
     const [newRatings, setNewRatings] = useState([
@@ -54,8 +55,7 @@ export default function Ratings() {
 
     const addNewRow = () => {
         if (newRatings.length >= 5) {
-            setLimitError("Maximum 5 rows allowed");
-            setTimeout(() => setLimitError(""), 3000);
+            toast.error(t("table.max_rows"));
             return;
         }
         setNewRatings([...newRatings, { maturity_rating: '', name_en: '', name_ar: '', ranking: 1 }]);
@@ -97,7 +97,7 @@ export default function Ratings() {
         }
 
         setIsSubmitting(true);
-        const toastId = toast.loading('Submitting');
+        const toastId = toast.loading(t("table.submitting"));
 
         try {
             const results = await Promise.all(
@@ -112,7 +112,7 @@ export default function Ratings() {
                             if (data.errors[key] && data.errors[key].length > 0) {
                                 let msg = data.errors[key][0];
                                 if (msg === "The maturity rating has already been taken.") {
-                                    msg = "Rating must be unique";
+                                    msg = t("table.error_unique_rating");
                                 }
                                 backendErrors[key] = msg;
                             }
@@ -140,7 +140,7 @@ export default function Ratings() {
 
             if (successfulIndices.size > 0) {
                 const count = successfulIndices.size;
-                toast.success(`${count} new row${count > 1 ? 's' : ''} added`, { id: toastId });
+                toast.success(t('table.rows_added', { count }), { id: toastId });
             }
 
             if (totalFailed > 0) {
@@ -158,7 +158,7 @@ export default function Ratings() {
                 });
 
                 setBulkErrors(shiftedErrors);
-                toast.error(`${totalFailed} row${totalFailed > 1 ? 's' : ''} failed. Please fix errors and resubmit.`, { id: toastId });
+                toast.error(t('table.rows_added_failed', { count: totalFailed }), { id: toastId });
                 fetchRatings();
             } else {
                 // All rows succeeded
@@ -168,7 +168,7 @@ export default function Ratings() {
             }
         } catch (err) {
             console.error("Bulk add failed", err);
-            toast.error("Error submitting rows", { id: toastId });
+            toast.error(t('table.error_submit'), { id: toastId });
         } finally {
             setIsSubmitting(false);
         }
@@ -182,14 +182,14 @@ export default function Ratings() {
         }
 
         setIsSubmitting(true);
-        const toastId = toast.loading('Submitting');
+        const toastId = toast.loading(t("table.submitting"));
 
         const res = await movieService.updateRating(id, editForm);
         if (res.ok) {
             setEditingId(null);
             setEditErrors({});
             fetchRatings();
-            toast.success("Row updated", { id: toastId });
+            toast.success(t("table.row_updated"), { id: toastId });
             setIsSubmitting(false);
         } else if (res.status === 422) {
             const data = await res.json();
@@ -198,11 +198,12 @@ export default function Ratings() {
                 let msg = data.errors[key][0];
                 // CUSTOM ERROR MESSAGE LOGIC
                 if (msg === "The maturity rating has already been taken.") {
-                    msg = "Rating must be unique";
+                    msg = t("table.errorNameRating");
                 }
                 backendErrors[key] = msg;
             });
             setEditErrors(backendErrors);
+            toast.dismiss(toastId);
             setIsSubmitting(false);
         }
     };
@@ -213,9 +214,9 @@ export default function Ratings() {
             try {
                 await movieService.deleteRating(id);
                 fetchRatings();
-                Swal.fire('Deleted!', 'The item has been removed.', 'success');
+                showSuccessMessage(t("swal.deleted_text"));
             } catch (error) {
-                Swal.fire('Error', 'Something went wrong', 'error');
+                showErrorMessage(t("swal.error_general"));
             }
         }
     };
@@ -252,12 +253,12 @@ export default function Ratings() {
                 if (responses.every(res => res.ok)) {
                     setSelectedRows(new Set());
                     fetchRatings();
-                    showSuccessMessage(`${count} item${count > 1 ? 's' : ''} deleted successfully.`);
+                    showSuccessMessage(t('table.rows_deleted', { count }));
                 } else {
-                    throw new Error("Some items failed to delete");
+                    throw new Error(t("table.rows_deleted_fail_some"));
                 }
             } catch (error) {
-                showErrorMessage("Failed to delete some items. Please try again.");
+                showErrorMessage(t("table.rows_deleted_fail_try_again"));
             }
         }
     };
@@ -280,15 +281,15 @@ export default function Ratings() {
     return (
         <div className="p-8">
             <div className="flex justify-between items-center mb-8">
-                <Title text="Maturity Ratings" />
+                <Title text={t("titles.ratings")} />
             </div>
             <div className='max-w-7xl mx-auto flex flex-col justify-center'>
                 {/* Quick Add Section */}
                 <div className="bg-blue-50 p-4 rounded-xl border border-blue-100 mb-6 shadow-sm relative">
-                    <div className="flex flex-col gap-4">
+                    <div className="flex flex-col gap-4" dir='ltr'>
                         {newRatings.map((item, index) => (
                             <div key={index} className="flex gap-4 items-start relative pb-4">
-                                <div className="flex flex-col flex-1">
+                                <div className="flex flex-col flex-1 min-w-0">
                                     <input
                                         placeholder="Ranking"
                                         type="number"
@@ -308,12 +309,12 @@ export default function Ratings() {
                                             }
                                         }}
                                     />
-                                    {bulkErrors[index]?.ranking && <span className={errorStyle}>{bulkErrors[index].ranking}</span>}
+                                    {bulkErrors[index]?.ranking && <span className={errorStyle}>{t(bulkErrors[index].ranking)}</span>}
                                 </div>
 
-                                <div className="flex flex-col flex-1">
+                                <div className="flex flex-col flex-1 min-w-0">
                                     <input
-                                        placeholder="Maturity Rating"
+                                        placeholder={t("table.rating_placeholder")}
                                         className={`${quickInputStyle} ${bulkErrors[index]?.maturity_rating ? 'border-red-500' : ''}`}
                                         value={item.maturity_rating}
                                         onChange={(e) => {
@@ -330,10 +331,10 @@ export default function Ratings() {
                                             }
                                         }}
                                     />
-                                    {bulkErrors[index]?.maturity_rating && <span className={errorStyle}>{bulkErrors[index].maturity_rating}</span>}
+                                    {bulkErrors[index]?.maturity_rating && <span className={errorStyle}>{t(bulkErrors[index].maturity_rating)}</span>}
                                 </div>
 
-                                <div className="flex flex-col flex-1">
+                                <div className="flex flex-col flex-1 min-w-0">
                                     <input
                                         placeholder="Name"
                                         className={`${quickInputStyle} ${bulkErrors[index]?.name_en ? 'border-red-500' : ''}`}
@@ -352,10 +353,10 @@ export default function Ratings() {
                                             }
                                         }}
                                     />
-                                    {bulkErrors[index]?.name_en && <span className={errorStyle}>{bulkErrors[index].name_en}</span>}
+                                    {bulkErrors[index]?.name_en && <span className={errorStyle}>{t(bulkErrors[index].name_en)}</span>}
                                 </div>
 
-                                <div className="flex flex-col flex-1">
+                                <div className="flex flex-col flex-1 min-w-0">
                                     <input
                                         placeholder="الاسم"
                                         className={`${quickInputStyle} ${bulkErrors[index]?.name_ar ? 'border-red-500' : ''}`}
@@ -375,12 +376,12 @@ export default function Ratings() {
                                             }
                                         }}
                                     />
-                                    {bulkErrors[index]?.name_ar && <span className={errorStyle}>{bulkErrors[index].name_ar}</span>}
+                                    {bulkErrors[index]?.name_ar && <span className={errorStyle}>{t(bulkErrors[index].name_ar)}</span>}
                                 </div>
 
                                 {/* Submit All Button */}
                                 {index === 0 && (
-                                    <PlusButton title="Submit All" disabled={isSubmitting} onClick={handleBulkSubmit} />
+                                    <PlusButton title={t("table.submit")} disabled={isSubmitting} onClick={handleBulkSubmit} />
                                 )}
 
                                 {/* Remove row button */}
@@ -395,31 +396,24 @@ export default function Ratings() {
 
                     {/* Add New Row Button */}
                     <div className="absolute left-1/2 -bottom-5 -translate-x-1/2 group">
-                        <div onClick={addNewRow} className="relative cursor-pointer flex items-center justify-center w-10 h-10 transition-all duration-500 ease-in-out">
+                        <div className="relative cursor-pointer flex items-center justify-center w-10 h-10 transition-all duration-500 ease-in-out">
                             {/* The Small Blue Dot (Visible when NOT hovered) */}
                             <div className="absolute w-2 h-2 bg-blue-500 rounded-full shadow-sm transition-all duration-300 ease-in-out group-hover:opacity-0 group-hover:scale-0 opacity-100 scale-100" />
 
                             {/* The Plus Button (Visible ONLY on hover) */}
                             <div className="absolute transition-all duration-300 ease-in-out opacity-0 scale-50 rotate-[-90deg] group-hover:opacity-100 group-hover:scale-100 group-hover:rotate-0">
-                                <PlusButton title="Add new row" onClick={addNewRow} />
+                                <PlusButton title={t("table.add_row")} onClick={addNewRow} />
                             </div>
                         </div>
-
-                        {/* Limit Error Message */}
-                        {limitError && (
-                            <span className="text-red-600 text-sm font-bold mt-1 bg-white px-2 py-0.5 rounded-full shadow-sm border border-red-100 absolute top-full whitespace-nowrap">
-                                {limitError}
-                            </span>
-                        )}
                     </div>
                 </div>
 
                 {/* Table */}
                 <div className="bg-white rounded-xl shadow-md border overflow-hidden">
-                    {selectedRows.size > 0 && (
+                    {selectedRows.size > 1 && (
                         <div className="bg-blue-50 border-b p-4 flex items-center justify-between">
                             <span className="text-sm font-medium text-gray-700">
-                                {selectedRows.size} row{selectedRows.size > 1 ? 's' : ''} selected
+                                {t('table.selected', { count: selectedRows.size })}
                             </span>
                             <button onClick={handleDeleteSelected} className="px-2 py-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition flex items-center gap-2 cursor-pointer">
                                 <Trash2 size={20} />
@@ -430,7 +424,7 @@ export default function Ratings() {
                     <div className="relative">
                         <input
                             type="text"
-                            placeholder="Search by name..."
+                            placeholder={t("table.search_rating")}
                             value={searchTerm}
                             onChange={(e) => {
                                 setSearchTerm(e.target.value);
@@ -453,14 +447,12 @@ export default function Ratings() {
                                 </button>
                             ) : (
                                 // Search Icon (Visible when empty)
-                                <div className="text-gray-400">
-                                    <Search size={18} />
-                                </div>
+                                <div className="text-gray-400"><Search size={18} /></div>
                             )}
                         </div>
                     </div>
 
-                    <table className="w-full text-left">
+                    <table className="w-full text-left" dir='ltr'>
                         <thead className="bg-gray-50 border-b">
                             <tr>
                                 <th className="px-4 py-4 w-12">
@@ -471,17 +463,23 @@ export default function Ratings() {
                                         className="w-4 h-4 cursor-pointer"
                                     />
                                 </th>
-                                <th className="px-6 py-4 font-bold text-gray-700 text-center">Ranking</th>
-                                <th className="px-6 py-4 font-bold text-gray-700 text-center">Maturity Ratings</th>
+                                <th className="px-6 py-4 font-bold text-gray-700 text-center">{t("table.ranking")}</th>
+                                <th className="px-6 py-4 font-bold text-gray-700 text-center">{t("table.rating")}</th>
                                 <th className="px-6 py-4 font-bold text-gray-700">Name</th>
                                 <th className="px-6 py-4 font-bold text-gray-700 text-right">الاسم</th>
-                                <th className="px-6 py-4 font-bold text-gray-700 text-center w-32">Actions</th>
+                                <th className="px-6 py-4 font-bold text-gray-700 text-center w-32">{t("table.actions")}</th>
                             </tr>
                         </thead>
 
                         <tbody className="divide-y">
                             {loading ? (
-                                <tr><td colSpan={6} className="text-center py-10 animate-pulse text-gray-400">Loading maturities...</td></tr>
+                                <tr>
+                                    <td colSpan={6} className="py-10">
+                                        <div className="flex flex-col items-center justify-center space-y-3">
+                                            <div className="w-10 h-10 border-4 border-gray-200 border-t-blue-500 rounded-full animate-spin" />
+                                        </div>
+                                    </td>
+                                </tr>
                             ) : paginatedItems.length > 0 ? (
                                 paginatedItems.map(ratings => (
                                     <tr key={ratings.id} className="hover:bg-gray-50 transition">
@@ -505,7 +503,7 @@ export default function Ratings() {
                                                         }}
                                                         className={inputStyle}
                                                     />
-                                                    {editErrors.ranking && (<span className="text-xs text-red-500 text-left">{editErrors.ranking}</span>)}
+                                                    {editErrors.ranking && (<span className="text-xs text-red-500 text-left">{t(editErrors.ranking)}</span>)}
                                                 </div>
                                             ) : ratings.ranking}
                                         </td>
@@ -521,7 +519,7 @@ export default function Ratings() {
                                                         }}
                                                         className={inputStyle}
                                                     />
-                                                    {editErrors.maturity_rating && (<span className="text-xs text-red-500 text-left">{editErrors.maturity_rating}</span>)}
+                                                    {editErrors.maturity_rating && (<span className="text-xs text-red-500 text-left">{t(editErrors.maturity_rating)}</span>)}
                                                 </div>
                                             ) : ratings.maturity_rating}
                                         </td>
@@ -536,7 +534,7 @@ export default function Ratings() {
                                                         }}
                                                         className={inputStyle}
                                                     />
-                                                    {editErrors.name_en && (<span className="text-xs text-red-500 text-left">{editErrors.name_en}</span>)}
+                                                    {editErrors.name_en && (<span className="text-xs text-red-500 text-left">{t(editErrors.name_en)}</span>)}
                                                 </div>
                                             ) : ratings.name_en}
                                         </td>
@@ -552,7 +550,7 @@ export default function Ratings() {
                                                         className={inputStyle}
                                                         dir="rtl"
                                                     />
-                                                    {editErrors.name_ar && (<span className="text-xs text-red-500 text-left">{editErrors.name_ar}</span>)}
+                                                    {editErrors.name_ar && (<span className="text-xs text-red-500 text-left">{t(editErrors.name_ar)}</span>)}
                                                 </div>
                                             ) : ratings.name_ar}
                                         </td>
@@ -560,10 +558,18 @@ export default function Ratings() {
                                             <div className="flex justify-center gap-2">
                                                 {editingId === ratings.id ? (
                                                     <>
-                                                        <button onClick={() => handleUpdate(ratings.id)} className="text-green-600 hover:bg-green-50 p-2 rounded-full cursor-pointer">
+                                                        <button
+                                                            onClick={() => handleUpdate(ratings.id)}
+                                                            className="text-green-600 hover:bg-green-50 p-2 rounded-full cursor-pointer"
+                                                            title={t("buttons.confirm")}
+                                                        >
                                                             <Check size={18} />
                                                         </button>
-                                                        <button onClick={() => setEditingId(null)} className="text-gray-600 hover:bg-gray-50 p-2 rounded-full cursor-pointer">
+                                                        <button
+                                                            onClick={() => setEditingId(null)}
+                                                            className="text-gray-600 hover:bg-gray-50 p-2 rounded-full cursor-pointer"
+                                                            title={t("buttons.cancel")}
+                                                        >
                                                             <X size={18} />
                                                         </button>
                                                     </>
@@ -575,12 +581,14 @@ export default function Ratings() {
                                                                 setEditForm({ ...ratings });
                                                             }}
                                                             className="text-amber-500 hover:bg-amber-50 p-2 rounded-full transition cursor-pointer"
+                                                            title={t("buttons.edit")}
                                                         >
                                                             <Pencil size={18} />
                                                         </button>
                                                         <button
                                                             onClick={() => handleDelete(ratings.id, ratings.maturity_rating)}
                                                             className="text-red-500 hover:bg-red-50 p-2 rounded-full transition cursor-pointer"
+                                                            title={t("buttons.delete")}
                                                         >
                                                             <Trash2 size={18} />
                                                         </button>
@@ -594,10 +602,10 @@ export default function Ratings() {
                                     <td colSpan={6} className="text-center py-20">
                                         <div className="flex flex-col items-center justify-center text-gray-400 gap-2">
                                             <Search size={40} className="opacity-20" />
-                                            <p className="text-lg font-medium">No results found for "{searchTerm}"</p>
-                                            <p className="text-sm">Try checking your spelling or searching for something else.</p>
+                                            <p dir={isEnglish ? "ltr" : "rtl"} className="text-lg font-medium">{t('table.no_results', { query: searchTerm })}</p>
+                                            <p className="text-sm">{t("table.no_results_guide")}</p>
                                             <button onClick={() => setSearchTerm("")} className="mt-2 text-blue-500 hover:underline text-sm font-semibold cursor-pointer">
-                                                Clear all filters
+                                                {t("table.clear_search")}
                                             </button>
                                         </div>
                                     </td>
@@ -611,11 +619,11 @@ export default function Ratings() {
                 {!loading && ratings.length > 10 && (
                     <div className="mt-4 flex items-center justify-between bg-white p-4 rounded-lg border shadow-sm">
                         <div className="flex items-center gap-2">
-                            <span className="text-sm text-gray-600">Show:</span>
+                            <span className="text-sm text-gray-600">{t("pagination.show")}:</span>
                             <select
                                 value={itemsPerPage}
                                 onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
-                                className="border rounded px-3 py-1 text-sm focus:ring-2 focus:ring-blue-400 outline-none"
+                                className="border rounded px-3 py-1 text-sm outline-none"
                             >
                                 <option value={10}>10</option>
                                 <option value={25}>25</option>
@@ -624,9 +632,15 @@ export default function Ratings() {
                             </select>
                         </div>
 
-                        <div className="text-sm text-gray-600">
-                            Showing <span className="font-semibold">{startIndex + 1}</span> - <span className="font-semibold">{endIndex}</span> of <span className="font-semibold">{totalItems}</span>
-                        </div>
+                        {endIndex !== 0 && (
+                            <div className="text-sm text-gray-600">
+                                <Trans
+                                    i18nKey="pagination.showing"
+                                    values={{ start: startIndex + 1, end: endIndex, total: totalItems }}
+                                    components={{ 1: <span className="font-semibold" />, 2: <span className="font-semibold" />, 3: <span className="font-semibold" /> }}
+                                />
+                            </div>
+                        )}
 
                         <div className="flex gap-2">
                             <button
@@ -634,17 +648,21 @@ export default function Ratings() {
                                 disabled={currentPage === 1}
                                 className="px-4 py-2 border rounded-lg text-sm font-medium transition hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                             >
-                                Previous
+                                {t('pagination.previous')}
                             </button>
                             <div className="flex items-center px-3 text-sm">
-                                Page <span className="font-semibold mx-1">{currentPage}</span> of <span className="font-semibold ml-1">{totalPages}</span>
+                                <Trans
+                                    i18nKey="pagination.page_info"
+                                    values={{ current: currentPage, total: totalPages }}
+                                    components={{ 1: <span className="font-semibold mx-1" />, 2: <span className="font-semibold mx-1" /> }}
+                                />
                             </div>
                             <button
                                 onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                                 disabled={currentPage === totalPages}
                                 className="px-4 py-2 border rounded-lg text-sm font-medium transition hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                             >
-                                Next
+                                {t('pagination.next')}
                             </button>
                         </div>
                     </div>

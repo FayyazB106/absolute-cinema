@@ -5,8 +5,8 @@ import PlusButton from '../shared/PlusButton';
 import Title from '../shared/Title';
 import { validateSimpleTableItem } from '../../utils/validation';
 import { toast } from '../shared/Toast';
-import Swal from 'sweetalert2';
-import { confirmBulkDelete, confirmDelete, showErrorMessage, showSuccessMessage } from './DeleteModal';
+import { confirmBulkDelete, confirmDelete, showErrorMessage, showSuccessMessage } from './SweetAlert';
+import { Trans, useTranslation } from 'react-i18next';
 
 interface TableItem {
     id: number;
@@ -21,9 +21,10 @@ interface SimpleTablePageProps {
 }
 
 export default function SimpleTablePage({ title, endpoint }: SimpleTablePageProps) {
+    const { t, i18n } = useTranslation();
+    const isEnglish = i18n.language === "en";
     const [items, setItems] = useState<TableItem[]>([]);
     const [bulkErrors, setBulkErrors] = useState<Record<number, Record<string, string>>>({});
-    const [limitError, setLimitError] = useState("");
     const [editErrors, setEditErrors] = useState<Record<string, string>>({});
     const [loading, setLoading] = useState(true);
     const [newItems, setNewItems] = useState([{ name_en: '', name_ar: '' }]);
@@ -54,8 +55,7 @@ export default function SimpleTablePage({ title, endpoint }: SimpleTablePageProp
 
     const addNewRow = () => {
         if (newItems.length >= 5) {
-            setLimitError("Maximum 5 rows allowed");
-            setTimeout(() => setLimitError(""), 3000); // Auto-clear error
+            toast.error(t("table.max_rows"));
             return;
         }
         setNewItems([...newItems, { name_en: '', name_ar: '' }]);
@@ -74,10 +74,10 @@ export default function SimpleTablePage({ title, endpoint }: SimpleTablePageProp
 
             // Check for duplicate in the current list of new items
             if (item.name_en && enValues.filter(v => v === item.name_en.trim().toLowerCase()).length > 1) {
-                errors.name_en = "Duplicate in list";
+                errors.name_en = t("table.error_duplicate_quick_add");
             }
             if (item.name_ar && arValues.filter(v => v === item.name_ar.trim().toLowerCase()).length > 1) {
-                errors.name_ar = "Duplicate in list";
+                errors.name_ar = t("table.error_duplicate_quick_add");
             }
 
             // If there are errors, add them to the bulk errors for this specific row
@@ -94,7 +94,7 @@ export default function SimpleTablePage({ title, endpoint }: SimpleTablePageProp
         }
 
         setIsSubmitting(true);
-        const toastId = toast.loading('Submitting');
+        const toastId = toast.loading(t("table.submitting"));
 
         try {
             const results = await Promise.all(
@@ -116,7 +116,7 @@ export default function SimpleTablePage({ title, endpoint }: SimpleTablePageProp
                             if (data.errors[key] && data.errors[key].length > 0) {
                                 let msg = data.errors[key][0];
                                 if (msg.includes("already been taken")) {
-                                    msg = "Name must be unique";
+                                    msg = t("table.error_unique_name");
                                 }
                                 backendErrors[key] = msg;
                             }
@@ -146,7 +146,7 @@ export default function SimpleTablePage({ title, endpoint }: SimpleTablePageProp
 
             if (successfulIndices.size > 0) {
                 const count = successfulIndices.size;
-                toast.success(`${count} new row${count > 1 ? 's' : ''} added`, { id: toastId });
+                toast.success(t('table.rows_added', { count }), { id: toastId });
             }
 
             if (totalFailed > 0) {
@@ -164,7 +164,7 @@ export default function SimpleTablePage({ title, endpoint }: SimpleTablePageProp
                 });
 
                 setBulkErrors(shiftedErrors);
-                toast.error(`${totalFailed} row${totalFailed > 1 ? 's' : ''} failed. Please fix errors and resubmit.`, { id: toastId });
+                toast.error(t('table.rows_added_failed', { count: totalFailed }), { id: toastId });
                 fetchItems();
             } else {
                 // All rows succeeded
@@ -174,7 +174,7 @@ export default function SimpleTablePage({ title, endpoint }: SimpleTablePageProp
             }
         } catch (err) {
             console.error("Bulk add failed", err);
-            toast.error("Error submitting rows", { id: toastId });
+            toast.error(t('table.error_submit'), { id: toastId });
         } finally {
             setIsSubmitting(false);
         }
@@ -215,7 +215,7 @@ export default function SimpleTablePage({ title, endpoint }: SimpleTablePageProp
         }
 
         setIsSubmitting(true);
-        const toastId = toast.loading('Submitting');
+        const toastId = toast.loading(t("table.submitting"));
 
         const res = await fetch(`${API_BASE_URL}/${endpoint}/${id}`, {
             method: 'PUT',
@@ -227,7 +227,7 @@ export default function SimpleTablePage({ title, endpoint }: SimpleTablePageProp
             setEditingId(null);;
             setEditErrors({});
             fetchItems();
-            toast.success("Row updated", { id: toastId });
+            toast.success(t("table.row_updated"), { id: toastId });
             setIsSubmitting(false);
         } else if (res.status === 422) {
             const data = await res.json();
@@ -235,12 +235,13 @@ export default function SimpleTablePage({ title, endpoint }: SimpleTablePageProp
             Object.keys(data.errors).forEach(key => {
                 let msg = data.errors[key][0];
                 // CUSTOM ERROR MESSAGE LOGIC
-                if (msg === "The name en has already been taken." || msg === "The name ar has already been taken.") {
-                    msg = "Name must be unique";
+                if (msg.includes("already been taken")) {
+                    msg = t("table.error_unique_name");
                 }
                 backendErrors[key] = msg;
             });
             setEditErrors(backendErrors);
+            toast.dismiss(toastId);
             setIsSubmitting(false);
         }
     };
@@ -251,9 +252,9 @@ export default function SimpleTablePage({ title, endpoint }: SimpleTablePageProp
             try {
                 await fetch(`${API_BASE_URL}/${endpoint}/${id}`, { method: 'DELETE' });
                 fetchItems();
-                Swal.fire('Deleted!', 'The item has been removed.', 'success');
+                showSuccessMessage(t("swal.deleted_text"));
             } catch (error) {
-                Swal.fire('Error', 'Something went wrong', 'error');
+                showErrorMessage(t("swal.error_general"));
             }
         }
     };
@@ -292,12 +293,12 @@ export default function SimpleTablePage({ title, endpoint }: SimpleTablePageProp
                 if (responses.every(res => res.ok)) {
                     setSelectedRows(new Set());
                     fetchItems();
-                    showSuccessMessage(`${count} item${count > 1 ? 's' : ''} deleted successfully.`);
+                    showSuccessMessage(t('table.rows_deleted', { count }));
                 } else {
-                    throw new Error("Some items failed to delete");
+                    throw new Error(t("table.rows_deleted_fail_some"));
                 }
             } catch (error) {
-                showErrorMessage("Failed to delete some items. Please try again.");
+                showErrorMessage(t("table.rows_deleted_fail_try_again"));
             }
         }
     };
@@ -328,10 +329,10 @@ export default function SimpleTablePage({ title, endpoint }: SimpleTablePageProp
             <div className='max-w-7xl mx-auto flex flex-col justify-center'>
                 {/* Quick Add Section */}
                 <div className="bg-blue-50 p-4 rounded-xl border border-blue-100 mb-6 shadow-sm relative">
-                    <div className="flex flex-col gap-4">
+                    <div className="flex flex-col gap-4" dir='ltr'>
                         {newItems.map((item, index) => (
                             <div key={index} className="flex gap-4 items-start relative pb-4">
-                                <div className="flex flex-col w-full relative">
+                                <div className="flex flex-col flex-1 min-w-0">
                                     <input
                                         placeholder="Name"
                                         className={`${quickInputStyle} ${bulkErrors[index]?.name_en ? 'border-red-500' : ''}`}
@@ -351,10 +352,10 @@ export default function SimpleTablePage({ title, endpoint }: SimpleTablePageProp
                                             }
                                         }}
                                     />
-                                    {bulkErrors[index]?.name_en && (<span className={errorStyle}>{bulkErrors[index].name_en}</span>)}
+                                    {bulkErrors[index]?.name_en && (<span className={errorStyle}>{t(bulkErrors[index].name_en)}</span>)}
                                 </div>
 
-                                <div className="flex flex-col w-full relative">
+                                <div className="flex flex-col flex-1 min-w-0">
                                     <input
                                         placeholder="الاسم"
                                         dir="rtl"
@@ -375,11 +376,11 @@ export default function SimpleTablePage({ title, endpoint }: SimpleTablePageProp
                                             }
                                         }}
                                     />
-                                    {bulkErrors[index]?.name_ar && (<span className={errorStyle}>{bulkErrors[index].name_ar}</span>)}
+                                    {bulkErrors[index]?.name_ar && (<span className={errorStyle}>{t(bulkErrors[index].name_ar)}</span>)}
                                 </div>
 
                                 {/* Submit All Button */}
-                                {index === 0 && (<PlusButton title="Submit All" disabled={isSubmitting} onClick={handleBulkSubmit} />)}
+                                {index === 0 && (<PlusButton title={t("table.submit")} disabled={isSubmitting} onClick={handleBulkSubmit} />)}
 
                                 {/* Remove row button*/}
                                 {index > 0 && (
@@ -393,31 +394,24 @@ export default function SimpleTablePage({ title, endpoint }: SimpleTablePageProp
 
                     {/* Add New Row Button */}
                     <div className="absolute left-1/2 -bottom-5 -translate-x-1/2 group">
-                        <div onClick={addNewRow} className="relative cursor-pointer flex items-center justify-center w-10 h-10 transition-all duration-500 ease-in-out">
+                        <div className="relative cursor-pointer flex items-center justify-center w-10 h-10 transition-all duration-500 ease-in-out">
                             {/* The Small Blue Dot (Visible when NOT hovered) */}
                             <div className="absolute w-2 h-2 bg-blue-500 rounded-full shadow-sm transition-all duration-300 ease-in-out group-hover:opacity-0 group-hover:scale-0 opacity-100 scale-100" />
 
                             {/* The Plus Button (Visible ONLY on hover) */}
                             <div className="absolute transition-all duration-300 ease-in-out opacity-0 scale-50 rotate-[-90deg] group-hover:opacity-100 group-hover:scale-100 group-hover:rotate-0">
-                                <PlusButton title="Add new row" onClick={addNewRow} />
+                                <PlusButton title={t("table.add_row")} onClick={addNewRow} />
                             </div>
                         </div>
-
-                        {/* Limit Error Message */}
-                        {limitError && (
-                            <span className="text-red-600 text-sm font-bold mt-1 bg-white px-2 py-0.5 rounded-full shadow-sm border border-red-100 absolute top-full whitespace-nowrap">
-                                {limitError}
-                            </span>
-                        )}
                     </div>
                 </div>
 
                 {/* Table */}
                 <div className="bg-white rounded-xl shadow-md border overflow-hidden">
-                    {selectedRows.size > 0 && (
+                    {selectedRows.size > 1 && (
                         <div className="bg-blue-50 border-b p-4 flex items-center justify-between">
                             <span className="text-sm font-medium text-gray-700">
-                                {selectedRows.size} row{selectedRows.size > 1 ? 's' : ''} selected
+                                {t('table.selected', { count: selectedRows.size })}
                             </span>
                             <button onClick={handleDeleteSelected} className="px-2 py-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition flex items-center gap-2 cursor-pointer">
                                 <Trash2 size={20} />
@@ -428,7 +422,7 @@ export default function SimpleTablePage({ title, endpoint }: SimpleTablePageProp
                     <div className="relative">
                         <input
                             type="text"
-                            placeholder="Search by name..."
+                            placeholder={t("table.search_name")}
                             value={searchTerm}
                             onChange={(e) => {
                                 setSearchTerm(e.target.value);
@@ -437,7 +431,7 @@ export default function SimpleTablePage({ title, endpoint }: SimpleTablePageProp
                             className="w-full p-2 pl-4 pr-10 focus:ring-2 focus:ring-blue-400 outline-none shadow-sm"
                         />
 
-                        <div className="absolute right-3 top-2.5 flex items-center">
+                        <div className={`absolute ${isEnglish ? "right-3" : "left-3"} top-2.5 flex items-center`}>
                             {searchTerm ? (
                                 // Close/Clear Button (Visible when text exists)
                                 <button
@@ -456,7 +450,7 @@ export default function SimpleTablePage({ title, endpoint }: SimpleTablePageProp
                         </div>
                     </div>
 
-                    <table className="w-full text-left">
+                    <table className="w-full text-left" dir='ltr'>
                         <thead className="bg-gray-50 border-b">
                             <tr>
                                 <th className="px-4 py-4 w-12">
@@ -469,13 +463,19 @@ export default function SimpleTablePage({ title, endpoint }: SimpleTablePageProp
                                 </th>
                                 <th className="px-6 py-4 font-bold text-gray-700">Name</th>
                                 <th className="px-6 py-4 font-bold text-gray-700 text-right">الاسم</th>
-                                <th className="px-6 py-4 font-bold text-gray-700 text-center w-32">Actions</th>
+                                <th className="px-6 py-4 font-bold text-gray-700 text-center w-32">{t("table.actions")}</th>
                             </tr>
                         </thead>
 
                         <tbody className="divide-y">
                             {loading ? (
-                                <tr><td colSpan={4} className="text-center py-10 animate-pulse text-gray-400">Loading {endpoint}...</td></tr>
+                                <tr>
+                                    <td colSpan={4} className="text-center py-10 animate-pulse text-gray-400">
+                                        <div className="flex flex-col items-center justify-center space-y-3">
+                                            <div className="w-10 h-10 border-4 border-gray-200 border-t-blue-500 rounded-full animate-spin" />
+                                        </div>
+                                    </td>
+                                </tr>
                             ) : paginatedItems.length > 0 ? (
                                 paginatedItems.map(item => (
                                     <tr key={item.id} className="hover:bg-gray-50 transition">
@@ -498,7 +498,7 @@ export default function SimpleTablePage({ title, endpoint }: SimpleTablePageProp
                                                         }}
                                                         className={inputStyle}
                                                     />
-                                                    {editErrors.name_en && (<span className="text-xs text-red-500 text-left">{editErrors.name_en}</span>)}
+                                                    {editErrors.name_en && (<span className="text-xs text-red-500 text-left">{t(editErrors.name_en)}</span>)}
                                                 </div>
                                             ) : item.name_en}
                                         </td>
@@ -514,7 +514,7 @@ export default function SimpleTablePage({ title, endpoint }: SimpleTablePageProp
                                                         className={inputStyle}
                                                         dir="rtl"
                                                     />
-                                                    {editErrors.name_ar && (<span className="text-xs text-red-500 text-left">{editErrors.name_ar}</span>)}
+                                                    {editErrors.name_ar && (<span className="text-xs text-red-500 text-left">{t(editErrors.name_ar)}</span>)}
                                                 </div>
                                             ) : item.name_ar}
                                         </td>
@@ -522,10 +522,18 @@ export default function SimpleTablePage({ title, endpoint }: SimpleTablePageProp
                                             <div className="flex justify-center gap-2">
                                                 {editingId === item.id ? (
                                                     <>
-                                                        <button onClick={() => handleUpdate(item.id)} className="text-green-600 hover:bg-green-50 p-2 rounded-full cursor-pointer">
+                                                        <button
+                                                            onClick={() => handleUpdate(item.id)}
+                                                            className="text-green-600 hover:bg-green-50 p-2 rounded-full cursor-pointer"
+                                                            title={t("buttons.confirm")}
+                                                        >
                                                             <Check size={18} />
                                                         </button>
-                                                        <button onClick={() => setEditingId(null)} className="text-gray-600 hover:bg-gray-50 p-2 rounded-full cursor-pointer">
+                                                        <button
+                                                            onClick={() => setEditingId(null)}
+                                                            className="text-gray-600 hover:bg-gray-50 p-2 rounded-full cursor-pointer"
+                                                            title={t("buttons.cancel")}
+                                                        >
                                                             <X size={18} />
                                                         </button>
                                                     </>
@@ -537,12 +545,14 @@ export default function SimpleTablePage({ title, endpoint }: SimpleTablePageProp
                                                                 setEditForm({ name_en: item.name_en, name_ar: item.name_ar });
                                                             }}
                                                             className="text-amber-500 hover:bg-amber-50 p-2 rounded-full transition cursor-pointer"
+                                                            title={t("buttons.edit")}
                                                         >
                                                             <Pencil size={18} />
                                                         </button>
                                                         <button
                                                             onClick={() => handleDelete(item.id, item.name_en)}
                                                             className="text-red-500 hover:bg-red-50 p-2 rounded-full transition cursor-pointer"
+                                                            title={t("buttons.delete")}
                                                         >
                                                             <Trash2 size={18} />
                                                         </button>
@@ -556,10 +566,10 @@ export default function SimpleTablePage({ title, endpoint }: SimpleTablePageProp
                                     <td colSpan={4} className="text-center py-20">
                                         <div className="flex flex-col items-center justify-center text-gray-400 gap-2">
                                             <Search size={40} className="opacity-20" />
-                                            <p className="text-lg font-medium">No results found for "{searchTerm}"</p>
-                                            <p className="text-sm">Try checking your spelling or searching for something else.</p>
+                                            <p dir={isEnglish ? "ltr" : "rtl"} className="text-lg font-medium">{t('table.no_results', { query: searchTerm })}</p>
+                                            <p className="text-sm">{t("table.no_results_guide")}</p>
                                             <button onClick={() => setSearchTerm("")} className="mt-2 text-blue-500 hover:underline text-sm font-semibold cursor-pointer">
-                                                Clear all filters
+                                                {t("table.clear_search")}
                                             </button>
                                         </div>
                                     </td>
@@ -573,11 +583,11 @@ export default function SimpleTablePage({ title, endpoint }: SimpleTablePageProp
                 {!loading && items.length > 10 && (
                     <div className="mt-4 flex items-center justify-between bg-white p-4 rounded-lg border shadow-sm">
                         <div className="flex items-center gap-2">
-                            <span className="text-sm text-gray-600">Show:</span>
+                            <span className="text-sm text-gray-600">{t("pagination.show")}:</span>
                             <select
                                 value={itemsPerPage}
                                 onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
-                                className="border rounded px-3 py-1 text-sm focus:ring-2 focus:ring-blue-400 outline-none"
+                                className="border rounded px-3 py-1 text-sm outline-none"
                             >
                                 <option value={10}>10</option>
                                 <option value={25}>25</option>
@@ -586,9 +596,15 @@ export default function SimpleTablePage({ title, endpoint }: SimpleTablePageProp
                             </select>
                         </div>
 
-                        <div className="text-sm text-gray-600">
-                            Showing <span className="font-semibold">{startIndex + 1}</span> - <span className="font-semibold">{endIndex}</span> of <span className="font-semibold">{totalItems}</span>
-                        </div>
+                        {endIndex !== 0 && (
+                            <div className="text-sm text-gray-600">
+                                <Trans
+                                    i18nKey="pagination.showing"
+                                    values={{ start: startIndex + 1, end: endIndex, total: totalItems }}
+                                    components={{ 1: <span className="font-semibold" />, 2: <span className="font-semibold" />, 3: <span className="font-semibold" /> }}
+                                />
+                            </div>
+                        )}
 
                         <div className="flex gap-2">
                             <button
@@ -596,17 +612,21 @@ export default function SimpleTablePage({ title, endpoint }: SimpleTablePageProp
                                 disabled={currentPage === 1}
                                 className="px-4 py-2 border rounded-lg text-sm font-medium transition hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                             >
-                                Previous
+                                {t('pagination.previous')}
                             </button>
                             <div className="flex items-center px-3 text-sm">
-                                Page <span className="font-semibold mx-1">{currentPage}</span> of <span className="font-semibold ml-1">{totalPages}</span>
+                                <Trans
+                                    i18nKey="pagination.page_info"
+                                    values={{ current: currentPage, total: totalPages }}
+                                    components={{ 1: <span className="font-semibold mx-1" />, 2: <span className="font-semibold mx-1" /> }}
+                                />
                             </div>
                             <button
                                 onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                                 disabled={currentPage === totalPages}
                                 className="px-4 py-2 border rounded-lg text-sm font-medium transition hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                             >
-                                Next
+                                {t('pagination.next')}
                             </button>
                         </div>
                     </div>
