@@ -11,19 +11,27 @@ import LanguageStyler from '../components/LanguageStyler';
 import Toast from '../components/shared/Toast';
 import { useTranslation } from "react-i18next";
 import DashboardHeader from '../components/DashboardHeader';
-import { ChevronLeft, ChevronRight, /*Film,*/ Library } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Film, Library } from 'lucide-react';
 import { showMobileWarning } from '../components/shared/SweetAlert';
+import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 
 export default function Dashboard() {
     const [activeModule, setActiveModule] = useState('movies');
-    const [activeSection, setActiveSection] = useState('library');
+    // const [activeSection, setActiveSection] = useState('library');
     const [isCollapsed, setIsCollapsed] = useState(false);
     const { t, i18n } = useTranslation();
     const isEnglish = i18n.language === "en";
+    const navigate = useNavigate();
+    const { pathname } = useLocation();
+    const activeSection = pathname.split('/')[2] || 'library';
+
+    const handleSectionChange = (id: string) => {
+        navigate(`/dashboard/${id}`);
+    };
 
     const sidebarNavItems = [
         { id: 'library', label: t('nav.library'), icon: <Library size={20} /> },
-        // { id: 'showtimes', label: t('nav.showtimes'), icon: <Film size={20} />}
+        { id: 'showtimes', label: t('nav.showtimes'), icon: <Film size={20} />}
     ];
 
     const libraryItems = [
@@ -55,7 +63,7 @@ export default function Dashboard() {
 
             <div className="flex flex-1 overflow-hidden">
                 {/* Sidebar */}
-                <aside className={`db-navBar shadow-xl transition-all duration-300 flex flex-col sticky top-0 h-full ${isCollapsed ? 'w-19' : 'w-45'}`}>
+                <aside className={`db-navBar shadow-xl transition-all dark-duration flex flex-col sticky top-0 h-full ${isCollapsed ? 'w-19' : 'w-45'}`}>
                     {/* Toggle Button */}
                     <button onClick={() => setIsCollapsed(!isCollapsed)} className="p-6 flex justify-start text-gray-500 hover:text-blue-600 cursor-pointer">
                         {isCollapsed ? (isEnglish ? <ChevronRight /> : <ChevronLeft />) : (isEnglish ? <ChevronLeft /> : <ChevronRight />)}
@@ -65,7 +73,7 @@ export default function Dashboard() {
                         {sidebarNavItems.map((item) => (
                             <button
                                 key={item.id}
-                                onClick={() => setActiveSection(item.id)}
+                                onClick={() => handleSectionChange(item.id)}
                                 title={isCollapsed ? item.label : ''}
                                 className={`w-full flex items-center p-3 rounded-lg transition-colors cursor-pointer h-11
                                     ${activeSection === item.id ? 'bg-blue-600 text-white shadow-md' : 'text-gray-600 hover:bg-blue-50 hover:text-blue-600'} 
@@ -79,29 +87,37 @@ export default function Dashboard() {
                 </aside>
 
                 <main className="flex-1 overflow-y-auto db-mainBG no-scrollbar">
-                    {activeSection === 'library' && (
-                        <>
-                            {/* Library */}
-                            <nav className="db-navBar shadow-lg">
-                                <div className="w-full px-8">
-                                    <div className="flex space-x-4 py-4">
-                                        {libraryItems.map((item) => (
-                                            <button
-                                                key={item.id}
-                                                onClick={() => setActiveModule(item.id)}
-                                                className={`px-4 py-2 rounded cursor-pointer transition-colors ${activeModule === item.id ? 'bg-blue-600 text-white' : 'db-navInactiveButton'}`}
-                                            >
-                                                {item.label}
-                                            </button>
-                                        ))}
+                    <Routes>
+                        {/* Library */}
+                        <Route path="library" element={
+                            <>
+                                <nav className="db-navBar shadow-lg">
+                                    <div className="w-full px-8">
+                                        <div className="flex space-x-4 py-4">
+                                            {libraryItems.map((item) => (
+                                                <button
+                                                    key={item.id}
+                                                    onClick={() => setActiveModule(item.id)}
+                                                    className={`px-4 py-2 rounded cursor-pointer transition-colors ${activeModule === item.id ? 'bg-blue-600 text-white' : 'db-navInactiveButton'}`}
+                                                >
+                                                    {item.label}
+                                                </button>
+                                            ))}
+                                        </div>
                                     </div>
-                                </div>
-                            </nav>
+                                </nav>
 
-                            {/* Content */}
-                            {libraryItems.find(item => item.id === activeModule)?.component}
-                        </>
-                    )}
+                                {/* Content */}
+                                {libraryItems.find(item => item.id === activeModule)?.component}
+                            </>
+                        } />
+
+                        {/* For future sections */}
+                        <Route path="showtimes" element={<div className='flex justify-center items-center h-full text-7xl'>{t("common.stay_tuned")}</div>} />
+
+                        {/* Default Redirect */}
+                        <Route path="*" element={<Navigate to="library" replace />} />
+                    </Routes>
                 </main>
             </div>
         </div>

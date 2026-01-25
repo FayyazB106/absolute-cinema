@@ -396,10 +396,10 @@ export default function SimpleTablePage({ title, endpoint }: SimpleTablePageProp
                     <div className="absolute left-1/2 -bottom-5 -translate-x-1/2 group">
                         <div className="relative cursor-pointer flex items-center justify-center w-10 h-10 transition-all duration-500 ease-in-out">
                             {/* The Small Blue Dot (Visible when NOT hovered) */}
-                            <div className="absolute w-2 h-2 bg-blue-500 rounded-full shadow-sm transition-all duration-300 ease-in-out group-hover:opacity-0 group-hover:scale-0 opacity-100 scale-100" />
+                            <div className="absolute w-2 h-2 bg-blue-500 rounded-full shadow-sm transition-all dark-duration ease-in-out group-hover:opacity-0 group-hover:scale-0 opacity-100 scale-100" />
 
                             {/* The Plus Button (Visible ONLY on hover) */}
-                            <div className="absolute transition-all duration-300 ease-in-out opacity-0 scale-50 rotate-[-90deg] group-hover:opacity-100 group-hover:scale-100 group-hover:rotate-0">
+                            <div className="absolute transition-all dark-duration ease-in-out opacity-0 scale-50 rotate-[-90deg] group-hover:opacity-100 group-hover:scale-100 group-hover:rotate-0">
                                 <PlusButton title={t("table.add_row")} onClick={addNewRow} />
                             </div>
                         </div>

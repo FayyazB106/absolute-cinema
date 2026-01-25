@@ -1,4 +1,7 @@
 {
+  "common": {
+    "stay_tuned": "Stay Tuned"
+  },
   "nav": {
     "movies": "Movies",
     "actors": "Actors",
@@ -9,13 +12,14 @@
     "statuses": "Statuses",
     "export": "Export",
     "playground": "Playground",
-    "library": "Library"
+    "library": "Library",
+    "showtimes": "Showtimes"
   },
-  "dashboardHeader": {
+  "dashboard_header": {
     "title": "ABSOLUTE DASHBOARD",
     "switch_ar": "Switch to Arabic",
     "switch_en": "Switch to English",
-    "darkMode": "Toggle dark mode"
+    "dark_mode": "Toggle dark mode"
   },
   "titles": {
     "movies": "Movies Library",
@@ -99,7 +103,7 @@
     "mobile_warning_title": "Desktop Recommended",
     "mobile_warning_text": "This dashboard is not optimized for mobile screens."
   },
-  "languageStyler": {
+  "language_styler": {
     "submitting": "Submitting",
     "all": "All language styles",
     "update_failed": "Failed to update {{name}}",

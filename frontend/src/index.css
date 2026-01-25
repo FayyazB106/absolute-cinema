@@ -2,8 +2,11 @@
 @variant dark (&:where(.dark, .dark *));
 
 /* Light/Dark mode Colors (I'm not an artist pls send help)*/
+@utility dark-duration {
+  @apply duration-300;
+}
 @utility dark-transition {
-  @apply transition-colors duration-300;
+  @apply transition-colors dark-duration;
 }
 
 @utility db-header {

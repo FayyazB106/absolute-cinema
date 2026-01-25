@@ -84,7 +84,7 @@ export default function LanguageStyler() {
         if (!editedLanguage) return;
 
         setSaving(true);
-        const toastId = toast.loading(t("languageStyler.submitting"));
+        const toastId = toast.loading(t("language_styler.submitting"));
         try {
             const response = await movieService.updateLanguageColors(editedLanguage.id, {
                 bg_color: editedLanguage.bg_color,
@@ -93,10 +93,10 @@ export default function LanguageStyler() {
             });
 
             if (!response.ok) {
-                toast.error(t("languageStyler.update_failed", { name: editedLanguage.name_en }));
+                toast.error(t("language_styler.update_failed", { name: editedLanguage.name_en }));
             }
 
-            toast.success(t("languageStyler.save_success"), { id: toastId })
+            toast.success(t("language_styler.save_success"), { id: toastId })
             setLanguages(prevLanguages =>
                 prevLanguages.map(lang =>
                     lang.id === editedLanguage.id ? editedLanguage : lang
@@ -104,7 +104,7 @@ export default function LanguageStyler() {
             );
         } catch (error) {
             console.error('Failed to save language style:', error);
-            toast.error(t("languageStyler.save_error"), { id: toastId });
+            toast.error(t("language_styler.save_error"), { id: toastId });
         } finally {
             setSaving(false);
         }
@@ -128,7 +128,7 @@ export default function LanguageStyler() {
     }
 
     if (!editedLanguage) {
-        return <div className="p-10 text-center text-xl">{t("languageStyler.empty")}</div>;
+        return <div className="p-10 text-center text-xl">{t("language_styler.empty")}</div>;
     }
 
     const bgHex = normalizeHex(editedLanguage.bg_color, DEFAULT_BG_COLOR);
@@ -166,7 +166,7 @@ export default function LanguageStyler() {
                                 placeholder={placeholder}
                                 className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-400 focus:border-purple-400 outline-none transition-all font-mono uppercase"
                             />
-                            <p className="text-xs text-gray-500 mt-1.5">{t("languageStyler.hex_hint")}</p>
+                            <p className="text-xs text-gray-500 mt-1.5">{t("language_styler.hex_hint")}</p>
                         </div>
                     </div>
                 </div>
@@ -186,7 +186,7 @@ export default function LanguageStyler() {
                         className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-100 font-medium transition-all disabled:opacity-50 flex items-center gap-2 cursor-pointer"
                     >
                         <RefreshCw size={18} />
-                        {t("languageStyler.reset")}
+                        {t("language_styler.reset")}
                     </button>
                     <button
                         onClick={handleSave}
@@ -194,7 +194,7 @@ export default function LanguageStyler() {
                         className="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 font-medium transition-all disabled:opacity-50 flex items-center gap-2 cursor-pointer"
                     >
                         <Save size={18} />
-                        {saving ? t("languageStyler.saving") : t("languageStyler.save")}
+                        {saving ? t("language_styler.saving") : t("language_styler.save")}
                     </button>
                 </div>
             </div>
@@ -202,12 +202,12 @@ export default function LanguageStyler() {
             {/* Info Banner */}
             <div className="bg-purple-50 border border-purple-200 rounded-lg p-4 mb-6 flex items-start gap-3">
                 <Palette className="text-purple-600 mt-0.5" size={20} />
-                <p className="text-purple-900 font-medium mb-1">{t("languageStyler.customize")}</p>
+                <p className="text-purple-900 font-medium mb-1">{t("language_styler.customize")}</p>
             </div>
 
             {/* Language Selection Dropdown */}
             <div className="mb-8">
-                <label className="block text-sm font-semibold text-gray-700 mb-3">{t("languageStyler.select")}</label>
+                <label className="block text-sm font-semibold text-gray-700 mb-3">{t("language_styler.select")}</label>
                 <div className="relative max-w-md">
                     <select
                         value={selectedLanguageId || ''}
@@ -237,9 +237,9 @@ export default function LanguageStyler() {
                 <div className='flex flex-row justify-between'>
                     {/* Color Pickers */}
                     <div className="flex flex-row justify-evenly w-full">
-                        {renderColorPicker(t("languageStyler.bg_color"), 'bg_color')}
-                        {renderColorPicker(t("languageStyler.text_color"), 'text_color')}
-                        {renderColorPicker(t("languageStyler.ring_color"), 'ring_color')}
+                        {renderColorPicker(t("language_styler.bg_color"), 'bg_color')}
+                        {renderColorPicker(t("language_styler.text_color"), 'text_color')}
+                        {renderColorPicker(t("language_styler.ring_color"), 'ring_color')}
                     </div>
 
                     {/* Live Preview */}
@@ -253,7 +253,7 @@ export default function LanguageStyler() {
             </div>
 
             <div className='mt-10'>
-                <Title text={t("languageStyler.all")} />
+                <Title text={t("language_styler.all")} />
                 <div className='grid grid-cols-4 gap-y-5 mt-5'>
                     {languages.map(lang => (
                         <div key={lang.id}>

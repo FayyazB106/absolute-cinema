@@ -1,4 +1,7 @@
 {
+  "common": {
+    "stay_tuned": "قريباً"
+  },
   "nav": {
     "movies": "الأفلام",
     "actors": "الممثلون",
@@ -9,13 +12,14 @@
     "statuses": "الحالات",
     "export": "تصدير",
     "playground": "ساحة التجربة",
-    "library": "مكتبة"
+    "library": "مكتبة",
+    "showtimes": "مواعيد العرض"
   },
-  "dashboardHeader": {
+  "dashboard_header": {
     "title": "أبسولوت داشبورد",
     "switch_ar": "التبديل إلى العربية",
     "switch_en": "التبديل إلى الإنجليزية",
-    "darkMode": "تبديل الوضع الليلي"
+    "dark_mode": "تبديل الوضع الليلي"
   },
   "titles": {
     "movies": "مكتبة الأفلام",
@@ -120,7 +124,7 @@
     "mobile_warning_title": "يُفضل استخدام أجهزة الكمبيوتر",
     "mobile_warning_text": "لوحة التحكم هذه غير مخصصة لشاشات الهاتف المحمول."
   },
-  "languageStyler": {
+  "language_styler": {
     "submitting": "جاري الإرسال...",
     "all": "كافة أنماط اللغات",
     "update_failed": "فشل تحديث {{name}}",
