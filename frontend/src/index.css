@@ -1,1 +1,59 @@
 @import "tailwindcss";
+@variant dark (&:where(.dark, .dark *));
+
+/* Light/Dark mode Colors (I'm not an artist pls send help)*/
+@utility dark-transition {
+  @apply transition-colors duration-300;
+}
+
+@utility db-header {
+  @apply bg-blue-600 dark:bg-slate-900 dark-transition;
+}
+
+@utility db-navBar {
+  @apply bg-white dark:bg-slate-800 dark-transition;
+}
+
+@utility db-navInactiveButton {
+  @apply bg-gray-200 dark:bg-slate-700 dark:text-white dark-transition;
+}
+
+@utility db-mainBG {
+  @apply dark:bg-slate-600 dark:text-white dark-transition;
+}
+
+@utility db-movieBG {
+  @apply bg-white dark:bg-slate-900 dark-transition;
+}
+
+@utility db-featuredRing {
+  @apply ring-amber-400 dark:ring-amber-600 dark-transition;
+}
+
+@utility db-noPoster {
+  @apply bg-gray-200 dark:bg-gray-800 dark-transition;
+}
+
+@utility db-quickAdd {
+  @apply bg-blue-50 border border-blue-100 dark:bg-slate-700 dark:border-slate-700 dark-transition;
+}
+
+@utility db-deleteButton {
+  @apply text-red-500 hover:bg-red-50 dark:hover:bg-red-900 dark-transition;
+}
+
+@utility db-tableBG {
+  @apply bg-white dark:bg-slate-700 dark-transition;
+}
+
+@utility db-tableHeader {
+  @apply bg-gray-50 dark:bg-slate-700 dark-transition;
+}
+
+@utility db-tableRows {
+  @apply hover:bg-gray-50 dark:hover:bg-slate-800 dark-transition;
+}
+
+@utility db-tableSearchBar {
+  @apply bg-white dark:bg-slate-800 dark-transition;
+}

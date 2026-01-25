@@ -75,3 +75,20 @@ export const showErrorMessage = (message: string) => {
         icon: 'error',
     });
 };
+
+export const showMobileWarning = () => {
+    return Swal.fire({
+        title: t('swal.mobile_warning_title') || 'Desktop Recommended',
+        text: t('swal.mobile_warning_text') || 'This dashboard is not optimized for mobile screens.',
+        icon: 'error',
+        confirmButtonText: 'Country Roads, Take Me Home',
+        confirmButtonColor: '#2563eb',
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        backdrop: `rgba(15, 23, 42, 1)`
+    }).then((result) => {
+        if (result.isConfirmed) {
+            window.location.href = '/';
+        }
+    });
+};

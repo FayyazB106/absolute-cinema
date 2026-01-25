@@ -1,5 +1,5 @@
 import { useRef } from 'react';
-import { Upload } from 'lucide-react';
+import { ChevronDown, Upload } from 'lucide-react';
 import MultiSelect from '../shared/MultiSelect';
 import type { MovieFormProps } from '../../types/movieForm';
 import { validateImage } from '../../utils/validation';
@@ -143,34 +143,44 @@ export default function MovieForm({
                     </div>
                     <div className="flex flex-col">
                         <label className={labelStyle}>{t("movie_form.maturity_rating")} <Asterisk /></label>
-                        <select
-                            name="maturity_id"
-                            className={`border rounded p-2 hover:bg-gray-50 ${errors.maturity_id ? 'border-red-500' : ''}`}
-                            value={formData.maturity_id}
-                            onChange={handleChange}
-                            required
-                        >
-                            <option value="">{t("movie_form.select_placeholder")}</option>
-                            {options.maturity_ratings.sort((a, b) => a.ranking - b.ranking).map(m =>
-                                <option key={m.id} value={m.id}>{m.maturity_rating}</option>
-                            )}
-                        </select>
+                        <div className="relative flex items-center h-full">
+                            <select
+                                name="maturity_id"
+                                className={`border rounded p-2 hover:bg-gray-50 appearance-none outline-none w-full h-full ${errors.maturity_id ? 'border-red-500' : ''}`}
+                                value={formData.maturity_id}
+                                onChange={handleChange}
+                                required
+                            >
+                                <option value="">{t("movie_form.select_placeholder")}</option>
+                                {options.maturity_ratings.sort((a, b) => a.ranking - b.ranking).map(m =>
+                                    <option key={m.id} value={m.id}>{m.maturity_rating}</option>
+                                )}
+                            </select>
+                            <div className={`absolute ${isEnglish ? "right-2" : "left-2"} pointer-events-none`}>
+                                <ChevronDown size={18} />
+                            </div>
+                        </div>
                         {errors.maturity_id && <span className={errorStyle}>{errors.maturity_id}</span>}
                     </div>
                     <div className="flex flex-col">
                         <label className={labelStyle}>{t("movie_form.status")} <Asterisk /></label>
-                        <select
-                            name="status_id"
-                            className={`border rounded p-2 hover:bg-gray-50 ${errors.status_id ? 'border-red-500' : ''}`}
-                            value={formData.status_id}
-                            onChange={handleChange}
-                            required
-                        >
-                            <option value="">{t("movie_form.select_placeholder")}</option>
-                            {options.statuses.sort((a, b) => a.name_en.localeCompare(b.name_en)).map(s =>
-                                <option key={s.id} value={s.id}>{isEnglish ? s.name_en : s.name_ar}</option>
-                            )}
-                        </select>
+                        <div className="relative flex items-center h-full">
+                            <select
+                                name="status_id"
+                                className={`border rounded p-2 hover:bg-gray-50 appearance-none outline-none w-full h-full ${errors.status_id ? 'border-red-500' : ''}`}
+                                value={formData.status_id}
+                                onChange={handleChange}
+                                required
+                            >
+                                <option value="">{t("movie_form.select_placeholder")}</option>
+                                {options.statuses.sort((a, b) => a.name_en.localeCompare(b.name_en)).map(s =>
+                                    <option key={s.id} value={s.id}>{isEnglish ? s.name_en : s.name_ar}</option>
+                                )}
+                            </select>
+                            <div className={`absolute ${isEnglish ? "right-2" : "left-2"} pointer-events-none`}>
+                                <ChevronDown size={18} />
+                            </div>
+                        </div>
                         {errors.status_id && <span className={errorStyle}>{errors.status_id}</span>}
                     </div>
                 </div>

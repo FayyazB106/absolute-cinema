@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Pencil, Trash2, X, Check, Search } from 'lucide-react';
+import { Pencil, Trash2, X, Check, Search, ChevronDown } from 'lucide-react';
 import { API_BASE_URL } from '../../constants/api';
 import PlusButton from '../shared/PlusButton';
 import Title from '../shared/Title';
@@ -35,8 +35,8 @@ export default function SimpleTablePage({ title, endpoint }: SimpleTablePageProp
     const [itemsPerPage, setItemsPerPage] = useState(10);
     const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set());
     const [searchTerm, setSearchTerm] = useState("");
-    const quickInputStyle = "flex-1 p-2 border rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-0 outline-none"
-    const inputStyle = "border rounded px-2 py-1 w-full"
+    const quickInputStyle = "flex-1 p-2 border border-black rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-0 outline-none placeholder:text-gray-400"
+    const inputStyle = "border border-black rounded px-2 py-1 w-full placeholder:text-gray-400"
     const errorStyle = "text-red-500"
 
     const fetchItems = async () => {
@@ -328,7 +328,7 @@ export default function SimpleTablePage({ title, endpoint }: SimpleTablePageProp
             </div>
             <div className='max-w-7xl mx-auto flex flex-col justify-center'>
                 {/* Quick Add Section */}
-                <div className="bg-blue-50 p-4 rounded-xl border border-blue-100 mb-6 shadow-sm relative">
+                <div className="db-quickAdd p-4 rounded-xl mb-6 shadow-sm relative">
                     <div className="flex flex-col gap-4" dir='ltr'>
                         {newItems.map((item, index) => (
                             <div key={index} className="flex gap-4 items-start relative pb-4">
@@ -384,7 +384,7 @@ export default function SimpleTablePage({ title, endpoint }: SimpleTablePageProp
 
                                 {/* Remove row button*/}
                                 {index > 0 && (
-                                    <button onClick={() => removeNewRow(index)} className="text-red-500 hover:bg-red-50 p-3 rounded-full transition cursor-pointer">
+                                    <button onClick={() => removeNewRow(index)} className="db-deleteButton p-3 rounded-full transition cursor-pointer">
                                         <Trash2 size={24} />
                                     </button>
                                 )}
@@ -407,10 +407,10 @@ export default function SimpleTablePage({ title, endpoint }: SimpleTablePageProp
                 </div>
 
                 {/* Table */}
-                <div className="bg-white rounded-xl shadow-md border overflow-hidden">
+                <div className="db-tableBG rounded-xl shadow-md border border-black overflow-hidden">
                     {selectedRows.size > 1 && (
-                        <div className="bg-blue-50 border-b p-4 flex items-center justify-between">
-                            <span className="text-sm font-medium text-gray-700">
+                        <div className="db-quickAdd border-b p-4 flex items-center justify-between">
+                            <span className="text-sm font-medium">
                                 {t('table.selected', { count: selectedRows.size })}
                             </span>
                             <button onClick={handleDeleteSelected} className="px-2 py-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition flex items-center gap-2 cursor-pointer">
@@ -419,7 +419,7 @@ export default function SimpleTablePage({ title, endpoint }: SimpleTablePageProp
                         </div>
                     )}
 
-                    <div className="relative">
+                    <div className="relative db-tableSearchBar">
                         <input
                             type="text"
                             placeholder={t("table.search_name")}
@@ -428,7 +428,7 @@ export default function SimpleTablePage({ title, endpoint }: SimpleTablePageProp
                                 setSearchTerm(e.target.value);
                                 setCurrentPage(1);
                             }}
-                            className="w-full p-2 pl-4 pr-10 focus:ring-2 focus:ring-blue-400 outline-none shadow-sm"
+                            className="w-full p-2 pl-4 pr-10 focus:ring-2 focus:ring-blue-400 outline-none shadow-sm placeholder:text-gray-400"
                         />
 
                         <div className={`absolute ${isEnglish ? "right-3" : "left-3"} top-2.5 flex items-center`}>
@@ -451,7 +451,7 @@ export default function SimpleTablePage({ title, endpoint }: SimpleTablePageProp
                     </div>
 
                     <table className="w-full text-left" dir='ltr'>
-                        <thead className="bg-gray-50 border-b">
+                        <thead className="db-tableHeader border-b border-black">
                             <tr>
                                 <th className="px-4 py-4 w-12">
                                     <input
@@ -461,9 +461,9 @@ export default function SimpleTablePage({ title, endpoint }: SimpleTablePageProp
                                         className="w-4 h-4 cursor-pointer"
                                     />
                                 </th>
-                                <th className="px-6 py-4 font-bold text-gray-700">Name</th>
-                                <th className="px-6 py-4 font-bold text-gray-700 text-right">الاسم</th>
-                                <th className="px-6 py-4 font-bold text-gray-700 text-center w-32">{t("table.actions")}</th>
+                                <th className="px-6 py-4 font-bold">Name</th>
+                                <th className="px-6 py-4 font-bold text-right">الاسم</th>
+                                <th className="px-6 py-4 font-bold text-center w-32">{t("table.actions")}</th>
                             </tr>
                         </thead>
 
@@ -478,7 +478,7 @@ export default function SimpleTablePage({ title, endpoint }: SimpleTablePageProp
                                 </tr>
                             ) : paginatedItems.length > 0 ? (
                                 paginatedItems.map(item => (
-                                    <tr key={item.id} className="hover:bg-gray-50 transition">
+                                    <tr key={item.id} className="db-tableRows transition border-black">
                                         <td className="px-4 py-4">
                                             <input
                                                 type="checkbox"
@@ -487,7 +487,7 @@ export default function SimpleTablePage({ title, endpoint }: SimpleTablePageProp
                                                 className="w-4 h-4 cursor-pointer"
                                             />
                                         </td>
-                                        <td className="px-6 py-4 text-gray-900">
+                                        <td className="px-6 py-4">
                                             {editingId === item.id ? (
                                                 <div className='flex flex-col'>
                                                     <input
@@ -502,7 +502,7 @@ export default function SimpleTablePage({ title, endpoint }: SimpleTablePageProp
                                                 </div>
                                             ) : item.name_en}
                                         </td>
-                                        <td className="px-6 py-4 text-gray-900 text-right">
+                                        <td className="px-6 py-4 text-right">
                                             {editingId === item.id ? (
                                                 <div className='flex flex-col'>
                                                     <input
@@ -581,23 +581,26 @@ export default function SimpleTablePage({ title, endpoint }: SimpleTablePageProp
 
                 {/* Pagination */}
                 {!loading && items.length > 10 && (
-                    <div className="mt-4 flex items-center justify-between bg-white p-4 rounded-lg border shadow-sm">
-                        <div className="flex items-center gap-2">
-                            <span className="text-sm text-gray-600">{t("pagination.show")}:</span>
+                    <div className="mt-4 flex items-center justify-between p-4 rounded-lg border border-black shadow-sm">
+                        <div className="relative flex items-center gap-2">
+                            <span className="text-sm">{t("pagination.show")}:</span>
                             <select
                                 value={itemsPerPage}
                                 onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
-                                className="border rounded px-3 py-1 text-sm outline-none"
+                                className="border rounded px-3 py-1 text-sm outline-none appearance-none"
                             >
                                 <option value={10}>10</option>
                                 <option value={25}>25</option>
                                 <option value={50}>50</option>
                                 <option value={100}>100</option>
                             </select>
+                            <div className={`absolute ${isEnglish ? "right-1" : "left-1"} pointer-events-none`}>
+                                <ChevronDown size={16} />
+                            </div>
                         </div>
 
                         {endIndex !== 0 && (
-                            <div className="text-sm text-gray-600">
+                            <div className="text-sm">
                                 <Trans
                                     i18nKey="pagination.showing"
                                     values={{ start: startIndex + 1, end: endIndex, total: totalItems }}

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import AddMovie from './AddMovie';
 import ViewMovie from './ViewMovie';
-import { Film, OctagonMinus, Search, Star, X } from 'lucide-react';
+import { ChevronDown, Film, OctagonMinus, Search, Star, X } from 'lucide-react';
 import PlusButton from '../shared/PlusButton';
 import type { Language, Movie, Rating, Status } from '../../types/movie';
 import { movieService } from '../../services/movieService';
@@ -129,7 +129,7 @@ export default function Movies() {
                             placeholder={t("movies_library.search_placeholder")}
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full p-2 pl-4 pr-10 border rounded-full focus:border-blue-400 outline-none shadow-sm transition-all"
+                            className="w-full p-2 pl-4 pr-10 border rounded-full focus:border-blue-400 outline-none shadow-sm transition-all placeholder:text-gray-400"
                         />
                         <div className={`absolute ${isEnglish ? "right-3" : "left-3"} top-2.5 flex items-center`}>
                             {searchTerm ? (
@@ -173,24 +173,34 @@ export default function Movies() {
                     </button>
 
                     {/* Status Dropdown */}
-                    <select
-                        value={selectedStatus}
-                        onChange={(e) => setSelectedStatus(e.target.value)}
-                        className="text-gray-600 p-2 px-4 rounded-full border border-gray-200 text-sm font-medium focus:ring-2 focus:ring-blue-400 outline-none bg-white cursor-pointer"
-                    >
-                        <option value="all">{t("movies_library.all_statuses")}</option>
-                        {statuses.map(s => (<option key={s.id} value={s.id}>{isEnglish ? s.name_en : s.name_ar}</option>))}
-                    </select>
+                    <div className='relative flex items-center'>
+                        <select
+                            value={selectedStatus}
+                            onChange={(e) => setSelectedStatus(e.target.value)}
+                            className="text-gray-600 p-2 px-6 rounded-full border border-gray-200 text-sm font-medium focus:ring-2 focus:ring-blue-400 appearance-none outline-none bg-white cursor-pointer"
+                        >
+                            <option value="all">{t("movies_library.all_statuses")}</option>
+                            {statuses.map(s => (<option key={s.id} value={s.id}>{isEnglish ? s.name_en : s.name_ar}</option>))}
+                        </select>
+                        <div className={`absolute ${isEnglish ? "right-2" : "left-2"} pointer-events-none`}>
+                            <ChevronDown size={18} />
+                        </div>
+                    </div>
 
                     {/* Language Dropdown */}
-                    <select
-                        value={selectedLanguage}
-                        onChange={(e) => setSelectedLanguage(e.target.value)}
-                        className="text-gray-600 p-2 px-4 rounded-full border border-gray-200 text-sm font-medium focus:ring-2 focus:ring-blue-400 outline-none bg-white cursor-pointer"
-                    >
-                        <option value="all">{t("movies_library.all_languages")}</option>
-                        {languages.map(l => (<option key={l.id} value={l.id}>{isEnglish ? l.name_en : l.name_ar}</option>))}
-                    </select>
+                    <div className='relative flex items-center'>
+                        <select
+                            value={selectedLanguage}
+                            onChange={(e) => setSelectedLanguage(e.target.value)}
+                            className="text-gray-600 p-2 px-6 rounded-full border border-gray-200 text-sm font-medium focus:ring-2 focus:ring-blue-400 appearance-none outline-none bg-white cursor-pointer"
+                        >
+                            <option value="all">{t("movies_library.all_languages")}</option>
+                            {languages.map(l => (<option key={l.id} value={l.id}>{isEnglish ? l.name_en : l.name_ar}</option>))}
+                        </select>
+                        <div className={`absolute ${isEnglish ? "right-2" : "left-2"} pointer-events-none`}>
+                            <ChevronDown size={18} />
+                        </div>
+                    </div>
 
                     {/* Clear All Filters Button (Visible only when filtering) */}
                     {(searchTerm || showFeaturedOnly || isRestricted || selectedStatus !== "all" || selectedLanguage !== "all") && (
@@ -222,17 +232,17 @@ export default function Movies() {
                         <div
                             key={movie.id}
                             onClick={() => handleViewMovie(movie.id)}
-                            className={`flex flex-col h-full transition-all duration-200 hover:shadow-xl rounded-xl ${movie.is_featured ? "ring-2 ring-amber-400" : "hover:ring-2 hover:ring-blue-400"} cursor-pointer hover:scale-105`}
+                            className={`flex flex-col h-full transition-all duration-200 hover:shadow-xl rounded-xl ${movie.is_featured ? "ring-2 db-featuredRing" : "hover:ring-2 hover:ring-blue-400"} cursor-pointer hover:scale-105`}
                         >
                             {movie.poster_full_url ? (
                                 <img src={movie.poster_full_url} alt={movie.name_en} className="aspect-[2/3] w-full rounded-t-xl object-cover" />
                             ) : (
-                                <div className="aspect-[2/3] w-full rounded-t-xl bg-gray-200 flex flex-col items-center justify-center border-b border-gray-300">
+                                <div className="aspect-[2/3] w-full rounded-t-xl db-noPoster flex flex-col items-center justify-center">
                                     <Film className="text-gray-400 mb-2" size={40} />
                                     <span className="text-gray-500 font-bold text-lg">N/A</span>
                                 </div>
                             )}
-                            <div className={`h-full bg-white p-6 flex flex-col justify-between gap-2 text-center ${isRestricted ? "" : "rounded-b-xl"}`}>
+                            <div className={`h-full db-movieBG p-6 flex flex-col justify-between gap-2 text-center ${hasRestrictedRating ? "" : "rounded-b-xl"}`}>
                                 <h3 className="text-lg font-bold line-clamp-2">{isEnglish ? movie.name_en : movie.name_ar}</h3>
                                 <div className='flex justify-center'>
                                     {statusLabel &&
@@ -267,8 +277,8 @@ export default function Movies() {
 
             {/* No Results State */}
             {movies.length > 0 && filteredItems.length === 0 && (
-                <div className="flex flex-col items-center justify-center py-20 text-gray-400 bg-gray-50 rounded-xl">
-                    <Search size={48} className="mb-4 opacity-20" />
+                <div className="flex flex-col items-center justify-center py-20 text-gray-400">
+                    <Search size={50} className="mb-4 opacity-50" />
                     <p className="text-xl font-medium">
                         {t("movies_library.no_matches", { type: showFeaturedOnly ? t("movies_library.type_featured") : "" })}
                     </p>

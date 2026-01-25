@@ -8,12 +8,14 @@
     "ratings": "تصنيفات الفئة العمرية",
     "statuses": "الحالات",
     "export": "تصدير",
-    "playground": "ساحة التجربة"
+    "playground": "ساحة التجربة",
+    "library": "مكتبة"
   },
   "dashboardHeader": {
     "title": "أبسولوت داشبورد",
     "switch_ar": "التبديل إلى العربية",
-    "switch_en": "التبديل إلى الإنجليزية"
+    "switch_en": "التبديل إلى الإنجليزية",
+    "darkMode": "تبديل الوضع الليلي"
   },
   "titles": {
     "movies": "مكتبة الأفلام",
@@ -114,7 +116,9 @@
     "delete_movie_title": "حذف الفيلم؟",
     "delete_movie_text": "أنت على وشك إزالة \"{{name}}\" نهائيًا. سيؤدي هذا إلى حذف جميع البيانات المرتبطة.",
     "confirm_button_movie": "نعم، احذف الفيلم",
-    "movie_added_title": "تم إضافة الفيلم بنجاح!"
+    "movie_added_title": "تم إضافة الفيلم بنجاح!",
+    "mobile_warning_title": "يُفضل استخدام أجهزة الكمبيوتر",
+    "mobile_warning_text": "لوحة التحكم هذه غير مخصصة لشاشات الهاتف المحمول."
   },
   "languageStyler": {
     "submitting": "جاري الإرسال...",

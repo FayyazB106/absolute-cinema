@@ -215,8 +215,8 @@ export default function Export() {
             </div>
 
             <div className='max-w-2xl mx-auto'>
-                <div className="bg-white rounded-xl shadow-md border p-6">
-                    <h2 className="text-lg font-bold text-gray-900 mb-6">{t("export.subheading")}</h2>
+                <div className="rounded-xl shadow-md border border-black p-6">
+                    <h2 className="text-lg font-bold mb-6">{t("export.subheading")}</h2>
 
                     <div className="space-y-4 mb-6">
                         {/* Select All Option */}

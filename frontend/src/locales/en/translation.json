@@ -8,12 +8,14 @@
     "ratings": "Maturity Ratings",
     "statuses": "Statuses",
     "export": "Export",
-    "playground": "Playground"
+    "playground": "Playground",
+    "library": "Library"
   },
   "dashboardHeader": {
     "title": "ABSOLUTE DASHBOARD",
     "switch_ar": "Switch to Arabic",
-    "switch_en": "Switch to English"
+    "switch_en": "Switch to English",
+    "darkMode": "Toggle dark mode"
   },
   "titles": {
     "movies": "Movies Library",
@@ -93,7 +95,9 @@
     "delete_movie_title": "Delete Movie?",
     "delete_movie_text": "You are about to permanently remove \"{{name}}\". This will delete all associated data.",
     "confirm_button_movie": "Yes, delete movie",
-    "movie_added_title": "Movie added successfully!"
+    "movie_added_title": "Movie added successfully!",
+    "mobile_warning_title": "Desktop Recommended",
+    "mobile_warning_text": "This dashboard is not optimized for mobile screens."
   },
   "languageStyler": {
     "submitting": "Submitting",
