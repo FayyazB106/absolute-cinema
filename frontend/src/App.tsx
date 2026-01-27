@@ -1,13 +1,21 @@
 import './App.css'
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import Home from './pages/Home';
+import AbsoluteCinema from './pages/AbsoluteCinema';
 import Dashboard from './pages/Dashboard';
+import Home from './pages/Home';
+import MainLayout from './layouts/MainLayout';
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Home />} />
+        {/* Material UI */}
+        <Route element={<MainLayout />}>
+          <Route path="/" element={<Home />} />
+        </Route>
+
+        {/* Traditional React UI */}
+        <Route path="/lol" element={<AbsoluteCinema />} />
         <Route path="/dashboard/*" element={<Dashboard />} />
       </Routes>
     </BrowserRouter>

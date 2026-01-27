@@ -21,6 +21,9 @@
     "switch_en": "Switch to English",
     "dark_mode": "Toggle dark mode"
   },
+  "header": {
+    "title": "ABSOLUTE CINEMA"
+  },
   "titles": {
     "movies": "Movies Library",
     "actors": "Actors",
