@@ -36,9 +36,9 @@ export default function Ratings() {
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(10);
     const [searchTerm, setSearchTerm] = useState("");
-    const quickInputStyle = "flex-1 p-2 border border-black rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-0 outline-none placeholder:text-gray-400"
-    const inputStyle = "border border-black rounded px-2 py-1 w-full placeholder:text-gray-400"
-    const errorStyle = "text-red-500"
+    const quickInputStyle = "flex-1 p-2 db-input border db-border rounded-lg db-focus-ring focus:border-0 outline-none placeholder:text-gray-400"
+    const inputStyle = "db-input border db-border rounded px-2 py-1 w-full placeholder:text-gray-400 db-focus-border"
+    const errorStyle = "db-error"
 
     const fetchRatings = async () => {
         try {
@@ -396,12 +396,12 @@ export default function Ratings() {
 
                     {/* Add New Row Button */}
                     <div className="absolute left-1/2 -bottom-5 -translate-x-1/2 group">
-                        <div className="relative cursor-pointer flex items-center justify-center w-10 h-10 transition-all duration-500 ease-in-out">
+                        <div className="relative cursor-pointer flex items-center justify-center w-10 h-10 transition-all ease-in-out">
                             {/* The Small Blue Dot (Visible when NOT hovered) */}
-                            <div className="absolute w-2 h-2 bg-blue-500 rounded-full shadow-sm transition-all dark-duration ease-in-out group-hover:opacity-0 group-hover:scale-0 opacity-100 scale-100" />
+                            <div className="absolute w-2 h-2 bg-blue-500 rounded-full shadow-sm transition-all dark-transition ease-in-out group-hover:opacity-0 group-hover:scale-0 opacity-100 scale-100" />
 
                             {/* The Plus Button (Visible ONLY on hover) */}
-                            <div className="absolute transition-all dark-duration ease-in-out opacity-0 scale-50 rotate-[-90deg] group-hover:opacity-100 group-hover:scale-100 group-hover:rotate-0">
+                            <div className="absolute transition-all dark-transition ease-in-out opacity-0 scale-50 rotate-[-90deg] group-hover:opacity-100 group-hover:scale-100 group-hover:rotate-0">
                                 <PlusButton title={t("table.add_row")} onClick={addNewRow} />
                             </div>
                         </div>
@@ -409,19 +409,19 @@ export default function Ratings() {
                 </div>
 
                 {/* Table */}
-                <div className="db-tableBG rounded-xl shadow-md border border-black overflow-hidden">
+                <div className="db-tableBG rounded-xl shadow-md border db-border overflow-hidden dark-transition">
                     {selectedRows.size > 1 && (
-                        <div className="db-quickAdd border-b p-4 flex items-center justify-between">
-                            <span className="text-sm font-medium">
+                        <div className="db-quickAdd border-b db-border p-4 flex items-center justify-between dark-transition">
+                            <span className="text-sm font-medium db-text">
                                 {t('table.selected', { count: selectedRows.size })}
                             </span>
-                            <button onClick={handleDeleteSelected} className="px-2 py-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition flex items-center gap-2 cursor-pointer">
+                            <button onClick={handleDeleteSelected} className="px-2 py-2 db-delete-batch-small flex items-center gap-2 cursor-pointer">
                                 <Trash2 size={20} />
                             </button>
                         </div>
                     )}
 
-                    <div className="relative db-tableSearchBar">
+                    <div className="relative db-tableSearchBar dark-transition">
                         <input
                             type="text"
                             placeholder={t("table.search_rating")}
@@ -430,7 +430,7 @@ export default function Ratings() {
                                 setSearchTerm(e.target.value);
                                 setCurrentPage(1);
                             }}
-                            className="w-full p-2 pl-4 pr-10 focus:ring-2 focus:ring-blue-400 outline-none shadow-sm placeholder:text-gray-400"
+                            className="w-full p-2 pl-4 pr-10 db-input border db-border db-focus-ring outline-none shadow-sm placeholder:text-gray-400 dark-transition"
                         />
 
                         <div className="absolute right-3 top-2.5 flex items-center">
@@ -441,26 +441,26 @@ export default function Ratings() {
                                         setSearchTerm("");
                                         setCurrentPage(1);
                                     }}
-                                    className="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
+                                    className="db-text-secondary hover:db-text cursor-pointer dark-transition"
                                 >
                                     <X size={18} />
                                 </button>
                             ) : (
                                 // Search Icon (Visible when empty)
-                                <div className="text-gray-400"><Search size={18} /></div>
+                                <div className="db-text-secondary dark-transition"><Search size={18} /></div>
                             )}
                         </div>
                     </div>
 
                     <table className="w-full text-left" dir='ltr'>
-                        <thead className="db-tableHeader border-b border-black">
+                        <thead className="db-tableHeader border-b db-border dark-transition">
                             <tr>
                                 <th className="px-4 py-4 w-12">
                                     <input
                                         type="checkbox"
                                         checked={selectedRows.size === paginatedItems.length && paginatedItems.length > 0}
                                         onChange={toggleSelectAll}
-                                        className="w-4 h-4 cursor-pointer"
+                                        className="w-4 h-4 cursor-pointer db-checkbox\"
                                     />
                                 </th>
                                 <th className="px-6 py-4 font-bold text-center">{t("table.ranking")}</th>
@@ -471,24 +471,24 @@ export default function Ratings() {
                             </tr>
                         </thead>
 
-                        <tbody className="divide-y">
+                        <tbody className="divide-y db-divider dark-transition">
                             {loading ? (
                                 <tr>
                                     <td colSpan={6} className="py-10">
                                         <div className="flex flex-col items-center justify-center space-y-3">
-                                            <div className="w-10 h-10 border-4 border-gray-200 border-t-blue-500 rounded-full animate-spin" />
+                                            <div className="w-10 h-10 border-4 db-spinner rounded-full animate-spin" />
                                         </div>
                                     </td>
                                 </tr>
                             ) : paginatedItems.length > 0 ? (
                                 paginatedItems.map(ratings => (
-                                    <tr key={ratings.id} className="db-tableRows transition border-black">
+                                    <tr key={ratings.id} className="db-tableRows transition db-border dark-transition">
                                         <td className="px-4 py-4">
                                             <input
                                                 type="checkbox"
                                                 checked={selectedRows.has(ratings.id)}
                                                 onChange={() => toggleRowSelection(ratings.id)}
-                                                className="w-4 h-4 cursor-pointer"
+                                                className="w-4 h-4 cursor-pointer db-checkbox\"
                                             />
                                         </td>
                                         <td className="px-6 py-4 text-center">
@@ -560,14 +560,14 @@ export default function Ratings() {
                                                     <>
                                                         <button
                                                             onClick={() => handleUpdate(ratings.id)}
-                                                            className="text-green-600 hover:bg-green-50 p-2 rounded-full cursor-pointer"
+                                                            className="db-action-success-inline"
                                                             title={t("buttons.confirm")}
                                                         >
                                                             <Check size={18} />
                                                         </button>
                                                         <button
                                                             onClick={() => setEditingId(null)}
-                                                            className="text-gray-600 hover:bg-gray-50 p-2 rounded-full cursor-pointer"
+                                                            className="db-btn-edit-secondary"
                                                             title={t("buttons.cancel")}
                                                         >
                                                             <X size={18} />
@@ -580,14 +580,14 @@ export default function Ratings() {
                                                                 setEditingId(ratings.id);
                                                                 setEditForm({ ...ratings });
                                                             }}
-                                                            className="text-amber-500 hover:bg-amber-50 p-2 rounded-full transition cursor-pointer"
+                                                            className="db-action-warning-inline"
                                                             title={t("buttons.edit")}
                                                         >
                                                             <Pencil size={18} />
                                                         </button>
                                                         <button
                                                             onClick={() => handleDelete(ratings.id, ratings.maturity_rating)}
-                                                            className="text-red-500 hover:bg-red-50 p-2 rounded-full transition cursor-pointer"
+                                                            className="db-action-danger-inline"
                                                             title={t("buttons.delete")}
                                                         >
                                                             <Trash2 size={18} />
@@ -600,11 +600,11 @@ export default function Ratings() {
                                 ))) : (
                                 <tr>
                                     <td colSpan={6} className="text-center py-20">
-                                        <div className="flex flex-col items-center justify-center text-gray-400 gap-2">
+                                        <div className="flex flex-col items-center justify-center db-text-secondary gap-2">
                                             <Search size={40} className="opacity-20" />
-                                            <p dir={isEnglish ? "ltr" : "rtl"} className="text-lg font-medium">{t('table.no_results', { query: searchTerm })}</p>
-                                            <p className="text-sm">{t("table.no_results_guide")}</p>
-                                            <button onClick={() => setSearchTerm("")} className="mt-2 text-blue-500 hover:underline text-sm font-semibold cursor-pointer">
+                                            <p dir={isEnglish ? "ltr" : "rtl"} className="text-lg font-medium db-text">{t('table.no_results', { query: searchTerm })}</p>
+                                            <p className="text-sm db-text-secondary">{t("table.no_results_guide")}</p>
+                                            <button onClick={() => setSearchTerm("")} className="mt-2 db-link-reset text-sm font-semibold cursor-pointer dark-transition">
                                                 {t("table.clear_search")}
                                             </button>
                                         </div>
@@ -617,26 +617,26 @@ export default function Ratings() {
 
                 {/* Pagination */}
                 {!loading && ratings.length > 10 && (
-                    <div className="mt-4 flex items-center justify-between p-4 rounded-lg border border-black shadow-sm">
+                    <div className="mt-4 flex items-center justify-between p-4 rounded-lg border db-border db-quickAdd shadow-sm dark-transition">
                         <div className="relative flex items-center gap-2">
-                            <span className="text-sm text-gray-600">{t("pagination.show")}:</span>
+                            <span className="text-sm db-text-secondary">{t("pagination.show")}:</span>
                             <select
                                 value={itemsPerPage}
                                 onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
-                                className="border rounded px-3 py-1 text-sm outline-none appearance-none"
+                                className="db-select border db-border rounded px-3 py-1 text-sm outline-none appearance-none dark-transition"
                             >
                                 <option value={10}>10</option>
                                 <option value={25}>25</option>
                                 <option value={50}>50</option>
                                 <option value={100}>100</option>
                             </select>
-                            <div className={`absolute ${isEnglish ? "right-1" : "left-1"} pointer-events-none`}>
+                            <div className={`absolute ${isEnglish ? "right-1" : "left-1"} pointer-events-none db-text-secondary`}>
                                 <ChevronDown size={16} />
                             </div>
                         </div>
 
                         {endIndex !== 0 && (
-                            <div className="text-sm">
+                            <div className="text-sm db-text">
                                 <Trans
                                     i18nKey="pagination.showing"
                                     values={{ start: startIndex + 1, end: endIndex, total: totalItems }}
@@ -649,11 +649,11 @@ export default function Ratings() {
                             <button
                                 onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                                 disabled={currentPage === 1}
-                                className="px-4 py-2 border rounded-lg text-sm font-medium transition hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                                className="px-4 py-2 db-input border db-border rounded-lg text-sm font-medium transition db-hover-light disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer dark-transition"
                             >
                                 {t('pagination.previous')}
                             </button>
-                            <div className="flex items-center px-3 text-sm">
+                            <div className="flex items-center px-3 text-sm db-text">
                                 <Trans
                                     i18nKey="pagination.page_info"
                                     values={{ current: currentPage, total: totalPages }}
@@ -663,7 +663,7 @@ export default function Ratings() {
                             <button
                                 onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                                 disabled={currentPage === totalPages}
-                                className="px-4 py-2 border rounded-lg text-sm font-medium transition hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                                className="px-4 py-2 db-input border db-border rounded-lg text-sm font-medium transition db-hover-light disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer dark-transition"
                             >
                                 {t('pagination.next')}
                             </button>

@@ -111,7 +111,7 @@ export default function Movies() {
     if (loading) {
         return (
             <div className="flex flex-col items-center justify-center min-h-[400px] w-full p-10 space-y-4">
-                <div className="w-12 h-12 border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin" />
+                <div className="w-12 h-12 border-4 db-spinner-blue rounded-full animate-spin" />
             </div>
         )
     }
@@ -129,15 +129,15 @@ export default function Movies() {
                             placeholder={t("movies_library.search_placeholder")}
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full p-2 pl-4 pr-10 border rounded-full focus:border-blue-400 outline-none shadow-sm transition-all placeholder:text-gray-400"
+                            className="w-full p-2 pl-4 pr-10 db-input border db-border rounded-full db-focus-border outline-none shadow-sm transition-all placeholder:text-gray-400"
                         />
                         <div className={`absolute ${isEnglish ? "right-3" : "left-3"} top-2.5 flex items-center`}>
                             {searchTerm ? (
-                                <button onClick={() => setSearchTerm("")} className="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer">
+                                <button onClick={() => setSearchTerm("")} className="db-text-secondary hover:db-text cursor-pointer">
                                     <X size={18} />
                                 </button>
                             ) : (
-                                <div className="text-gray-400">
+                                <div className="db-text-secondary">
                                     <Search size={18} />
                                 </div>
                             )}
@@ -147,12 +147,10 @@ export default function Movies() {
                     {/* Featured Toggle Button */}
                     <button
                         onClick={() => setShowFeaturedOnly(!showFeaturedOnly)}
-                        className={`flex items-center gap-2 px-4 py-2 rounded-full border transition-all cursor-pointer ${showFeaturedOnly
-                            ? "bg-amber-100 border-amber-400 text-amber-700 shadow-inner"
-                            : "bg-white border-gray-200 text-gray-600 hover:bg-gray-50"
-                            }`}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-full border transition-all cursor-pointer 
+                            ${showFeaturedOnly ? "db-badge-amber shadow-inner" : "db-badge-white"}`}
                     >
-                        <div className={`${showFeaturedOnly ? "fill-amber-500 text-amber-500" : "text-gray-400"}`}>
+                        <div className={`${showFeaturedOnly ? "db-fill-amber" : "db-fill-gray"}`}>
                             <Star size={18} />
                         </div>
                         <span className="text-sm font-semibold">{t("movies_library.featured")}</span>
@@ -161,12 +159,10 @@ export default function Movies() {
                     {/* Restricted Toggle Button */}
                     <button
                         onClick={() => setIsRestricted(!isRestricted)}
-                        className={`flex items-center gap-2 px-4 py-2 rounded-full border transition-all cursor-pointer ${isRestricted
-                            ? "bg-red-100 border-red-400 text-red-700 shadow-inner"
-                            : "bg-white border-gray-200 text-gray-600 hover:bg-gray-50"
-                            }`}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-full border transition-all cursor-pointer 
+                            ${isRestricted ? "db-badge-red shadow-inner" : "db-badge-white"}`}
                     >
-                        <div className={`${isRestricted ? "fill-red-500 text-red-500" : "text-gray-400"}`}>
+                        <div className={`${isRestricted ? "db-fill-red" : "db-fill-gray"}`}>
                             <OctagonMinus size={18} />
                         </div>
                         <span className="text-sm font-semibold">{t("movies_library.restricted")}</span>
@@ -177,12 +173,12 @@ export default function Movies() {
                         <select
                             value={selectedStatus}
                             onChange={(e) => setSelectedStatus(e.target.value)}
-                            className="text-gray-600 p-2 px-6 rounded-full border border-gray-200 text-sm font-medium focus:ring-2 focus:ring-blue-400 appearance-none outline-none bg-white cursor-pointer"
+                            className="db-text-dropdown db-input border db-border p-2 px-6 rounded-full text-sm font-medium db-focus-ring appearance-none outline-none cursor-pointer"
                         >
                             <option value="all">{t("movies_library.all_statuses")}</option>
                             {statuses.map(s => (<option key={s.id} value={s.id}>{isEnglish ? s.name_en : s.name_ar}</option>))}
                         </select>
-                        <div className={`absolute ${isEnglish ? "right-2" : "left-2"} pointer-events-none`}>
+                        <div className={`absolute ${isEnglish ? "right-2" : "left-2"} pointer-events-none db-text-secondary`}>
                             <ChevronDown size={18} />
                         </div>
                     </div>
@@ -192,12 +188,12 @@ export default function Movies() {
                         <select
                             value={selectedLanguage}
                             onChange={(e) => setSelectedLanguage(e.target.value)}
-                            className="text-gray-600 p-2 px-6 rounded-full border border-gray-200 text-sm font-medium focus:ring-2 focus:ring-blue-400 appearance-none outline-none bg-white cursor-pointer"
+                            className="db-text-dropdown db-input border db-border p-2 px-6 rounded-full text-sm font-medium db-focus-ring appearance-none outline-none cursor-pointer"
                         >
                             <option value="all">{t("movies_library.all_languages")}</option>
                             {languages.map(l => (<option key={l.id} value={l.id}>{isEnglish ? l.name_en : l.name_ar}</option>))}
                         </select>
-                        <div className={`absolute ${isEnglish ? "right-2" : "left-2"} pointer-events-none`}>
+                        <div className={`absolute ${isEnglish ? "right-2" : "left-2"} pointer-events-none db-text-secondary`}>
                             <ChevronDown size={18} />
                         </div>
                     </div>
@@ -232,7 +228,7 @@ export default function Movies() {
                         <div
                             key={movie.id}
                             onClick={() => handleViewMovie(movie.id)}
-                            className={`flex flex-col h-full transition-all duration-200 hover:shadow-xl rounded-xl ${movie.is_featured ? "ring-2 db-featuredRing" : "hover:ring-2 hover:ring-blue-400"} cursor-pointer hover:scale-105`}
+                            className={`flex flex-col h-full transition-all hover:shadow-xl rounded-xl ${movie.is_featured ? "ring-2 db-featuredRing" : "hover:ring-2 hover:ring-blue-400"} cursor-pointer hover:scale-105`}
                         >
                             {movie.poster_full_url ? (
                                 <img src={movie.poster_full_url} alt={movie.name_en} className="aspect-[2/3] w-full rounded-t-xl object-cover" />

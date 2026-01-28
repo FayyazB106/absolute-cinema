@@ -1,62 +1,485 @@
 @import "tailwindcss";
 @variant dark (&:where(.dark, .dark *));
 
-/* Light/Dark mode Colors (I'm not an artist pls send help)*/
-@utility dark-duration {
-  @apply duration-300;
-}
+/* Light/Dark mode Colors (I'm not an artist pls send help) */
 @utility dark-transition {
-  @apply transition-colors dark-duration;
+  @apply transition-colors duration-400;
 }
 
+/* Header - Primary brand color */
 @utility db-header {
   @apply bg-blue-600 dark:bg-slate-900 dark-transition;
 }
 
+/* Navigation Bar - Slightly lighter than background */
 @utility db-navBar {
   @apply bg-white dark:bg-slate-800 dark-transition;
 }
 
+/* Inactive navigation buttons */
 @utility db-navInactiveButton {
-  @apply bg-gray-200 dark:bg-slate-700 dark:text-white dark-transition;
+  @apply bg-gray-200 dark:bg-slate-700 dark:text-gray-300 dark:hover:bg-slate-600 dark-transition;
 }
 
+/* Main background - Primary surface */
 @utility db-mainBG {
-  @apply dark:bg-slate-600 dark:text-white dark-transition;
+  @apply bg-gray-100 dark:bg-slate-950 dark:text-gray-100 dark-transition;
 }
 
+/* Movie card background */
 @utility db-movieBG {
-  @apply bg-white dark:bg-slate-900 dark-transition;
+  @apply bg-white dark:bg-slate-800 dark-transition;
 }
 
+/* Featured ring accent */
 @utility db-featuredRing {
-  @apply ring-amber-400 dark:ring-amber-600 dark-transition;
+  @apply ring-amber-400 dark:ring-amber-500 dark-transition;
 }
 
+/* No poster placeholder */
 @utility db-noPoster {
-  @apply bg-gray-200 dark:bg-gray-800 dark-transition;
+  @apply bg-gray-200 dark:bg-slate-700 dark-transition;
 }
 
+/* Quick add form */
 @utility db-quickAdd {
-  @apply bg-blue-50 border border-blue-100 dark:bg-slate-700 dark:border-slate-700 dark-transition;
+  @apply bg-blue-50 border border-blue-100 dark:bg-slate-700 dark:border-slate-600 dark-transition;
 }
 
+/* Delete button */
 @utility db-deleteButton {
-  @apply text-red-500 hover:bg-red-50 dark:hover:bg-red-900 dark-transition;
+  @apply text-red-500 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/30 dark-transition;
 }
 
+/* Table background */
 @utility db-tableBG {
-  @apply bg-white dark:bg-slate-700 dark-transition;
+  @apply bg-white dark:bg-slate-800 dark-transition;
 }
 
+/* Table header */
 @utility db-tableHeader {
   @apply bg-gray-50 dark:bg-slate-700 dark-transition;
 }
 
+/* Table rows hover */
 @utility db-tableRows {
-  @apply hover:bg-gray-50 dark:hover:bg-slate-800 dark-transition;
+  @apply hover:bg-gray-100 dark:hover:bg-slate-800 dark-transition;
 }
 
+/* Table search bar */
 @utility db-tableSearchBar {
-  @apply bg-white dark:bg-slate-800 dark-transition;
+  @apply bg-white dark:bg-slate-800 dark:text-gray-100 dark-transition;
+}
+
+/* Additional utilities for comprehensive dark mode support */
+@utility db-input {
+  @apply bg-white dark:bg-slate-800 dark:text-gray-100 dark:border-slate-600 dark-transition;
+}
+
+@utility db-select {
+  @apply bg-white dark:bg-slate-800 dark:text-gray-100 dark:border-slate-600 dark-transition;
+}
+
+@utility db-textarea {
+  @apply bg-white dark:bg-slate-800 dark:text-gray-100 dark:border-slate-600 dark-transition;
+}
+
+@utility db-button-primary {
+  @apply bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600 dark:text-white dark-transition;
+}
+
+@utility db-button-secondary {
+  @apply bg-gray-200 dark:bg-slate-700 dark:text-gray-300 dark:hover:bg-slate-600 dark-transition;
+}
+
+@utility db-label {
+  @apply text-gray-900 dark:text-gray-200 dark-transition;
+}
+
+@utility db-text {
+  @apply text-gray-900 dark:text-gray-100 dark-transition;
+}
+
+@utility db-text-secondary {
+  @apply text-gray-600 dark:text-gray-400 dark-transition;
+}
+
+@utility db-text-dropdown {
+  @apply text-gray-900 dark:text-gray-400 dark-transition;
+}
+
+@utility db-border {
+  @apply border-gray-300 dark:border-slate-600 dark-transition;
+}
+
+@utility db-divider {
+  @apply bg-gray-50 dark:bg-slate-700 dark-transition;
+}
+
+@utility db-hover {
+  @apply hover:bg-gray-50 dark:hover:bg-slate-700 dark-transition;
+}
+
+@utility db-badge-success {
+  @apply bg-green-600 dark:bg-green-700 text-white dark-transition;
+}
+
+@utility db-badge-warning {
+  @apply bg-amber-500 dark:bg-amber-600 text-white dark-transition;
+}
+
+@utility db-badge-error {
+  @apply bg-red-600 dark:bg-red-700 text-white dark-transition;
+}
+
+@utility db-badge-info {
+  @apply bg-blue-600 dark:bg-blue-700 text-white dark-transition;
+}
+
+/* Checkbox accent colors */
+@utility db-checkbox {
+  @apply accent-blue-600 dark:accent-blue-500 dark-transition;
+}
+
+/* Action button colors */
+@utility db-action-success {
+  @apply text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/30 dark-transition;
+}
+
+@utility db-action-warning {
+  @apply text-amber-500 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/30 dark-transition;
+}
+
+@utility db-action-danger {
+  @apply text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 dark-transition;
+}
+
+/* Error text */
+@utility db-error {
+  @apply text-red-500 dark:text-red-400 dark-transition;
+}
+
+/* Success text */
+@utility db-success {
+  @apply text-green-600 dark:text-green-400 dark-transition;
+}
+
+/* Card badge styles */
+@utility db-badge-green {
+  @apply bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-300 dark-transition;
+}
+
+@utility db-badge-purple {
+  @apply bg-purple-100 dark:bg-purple-900/40 text-purple-800 dark:text-purple-300 dark-transition;
+}
+
+@utility db-badge-blue {
+  @apply bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-300 dark-transition;
+}
+
+/* Featured/amber accent */
+@utility db-accent-amber {
+  @apply text-amber-300 dark:text-amber-400 dark-transition;
+}
+
+/* Info box styles */
+@utility db-info-box {
+  @apply bg-purple-50 dark:bg-purple-900/30 border border-purple-200 dark:border-purple-700 dark-transition;
+}
+
+@utility db-success-box {
+  @apply bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-700 dark-transition;
+}
+
+/* Button primary - Purple variant for special actions */
+@utility db-button-purple {
+  @apply bg-purple-600 dark:bg-purple-700 text-white hover:bg-purple-700 dark:hover:bg-purple-800 dark-transition;
+}
+
+/* Info box styles - Blue variant */
+@utility db-info-box-blue {
+  @apply bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-700 dark-transition;
+}
+
+/* Info box styles - Orange variant */
+@utility db-info-box-orange {
+  @apply bg-orange-50 dark:bg-orange-900/30 border border-orange-200 dark:border-orange-700 dark-transition;
+}
+
+/* Sidebar navigation - Active state */
+@utility db-nav-active {
+  @apply bg-blue-600 dark:bg-blue-700 text-white shadow-md dark-transition;
+}
+
+/* Sidebar navigation - Inactive state */
+@utility db-nav-inactive {
+  @apply text-gray-600 dark:text-gray-400 hover:bg-blue-50 dark:hover:bg-slate-700 hover:text-blue-600 dark:hover:text-blue-400 dark-transition;
+}
+
+/* Tab active state */
+@utility db-tab-active {
+  @apply bg-blue-600 dark:bg-blue-700 text-white dark-transition;
+}
+
+/* Tab inactive state */
+@utility db-tab-inactive {
+  @apply bg-gray-200 dark:bg-slate-700 dark:text-gray-300 dark:hover:bg-slate-600 dark-transition;
+}
+
+/* Delete batch button */
+@utility db-delete-batch {
+  @apply bg-red-600 dark:bg-red-700 text-white rounded-full hover:bg-red-700 dark:hover:bg-red-600 transition dark-transition;
+}
+
+/* Delete batch button - smaller variant */
+@utility db-delete-batch-small {
+  @apply bg-red-500 dark:bg-red-600 text-white rounded-full hover:bg-red-600 dark:hover:bg-red-700 transition dark-transition;
+}
+
+/* Clear/reset button link */
+@utility db-link-reset {
+  @apply text-blue-500 dark:text-blue-400 hover:underline dark-transition;
+}
+
+/* Loading spinner */
+@utility db-spinner {
+  @apply border-slate-300 dark:border-slate-600 border-t-blue-500 dark:border-t-blue-500 dark-transition;
+}
+
+/* Input focus ring */
+@utility db-focus-ring {
+  @apply focus:ring-2 focus:ring-blue-400 dark:focus:ring-blue-500;
+}
+
+/* Input focus border */
+@utility db-focus-border {
+  @apply focus:border-blue-400 dark:focus:border-blue-500;
+}
+
+/* Preview image overlay button */
+@utility db-overlay-button {
+  @apply hover:bg-white/10 dark:hover:bg-white/10 dark-transition;
+}
+
+/* Pulse loading animation */
+@utility db-pulse {
+  @apply bg-slate-300 dark:bg-slate-600 dark-transition;
+}
+
+/* Action button - Delete */
+@utility db-btn-delete {
+  @apply bg-red-600 dark:bg-red-700 text-white rounded-full hover:bg-red-700 dark:hover:bg-red-600 dark-transition;
+}
+
+/* Action button - Edit */
+@utility db-btn-edit {
+  @apply bg-amber-600 dark:bg-amber-700 text-white rounded-full hover:bg-amber-700 dark:hover:bg-amber-600 dark-transition;
+}
+
+/* Plus button */
+@utility db-btn-plus {
+  @apply bg-blue-600 hover:bg-blue-700 text-white dark-transition;
+}
+
+/* Selected/active item indicator */
+@utility db-indicator {
+  @apply bg-blue-500 dark-transition;
+}
+
+/* Info box - Blue text color inside */
+@utility db-info-blue-text {
+  @apply text-blue-700 dark:text-blue-400 dark-transition;
+}
+
+/* Info box - Purple text color inside */
+@utility db-info-purple-text {
+  @apply text-purple-700 dark:text-purple-400 dark-transition;
+}
+
+/* Info box - Green text color inside */
+@utility db-info-green-text {
+  @apply text-green-700 dark:text-green-400 dark-transition;
+}
+
+/* Info box - Orange text color inside */
+@utility db-info-orange-text {
+  @apply text-orange-700 dark:text-orange-400 dark-transition;
+}
+
+/* Hover background - light gray */
+@utility db-hover-light {
+  @apply hover:bg-gray-50 dark:hover:bg-slate-700 dark-transition;
+}
+
+/* Select field hover */
+@utility db-hover-slate {
+  @apply hover:bg-slate-200 dark:hover:bg-slate-700 dark-transition;
+}
+
+/* MultiSelect badge */
+@utility db-badge-select {
+  @apply bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-300 dark-transition;
+}
+
+/* MultiSelect badge hover */
+@utility db-badge-select-hover {
+  @apply hover:bg-blue-200 dark:hover:bg-blue-800/40 dark-transition;
+}
+
+/* MovieForm subtitle style */
+@utility db-subtitle {
+  @apply text-xl font-bold text-blue-700 dark:text-blue-400 text-center;
+}
+
+/* Green success text */
+@utility db-text-green {
+  @apply text-green-600 dark:text-green-400;
+}
+
+/* Gray muted text */
+@utility db-text-muted {
+  @apply text-gray-500 dark:text-gray-400;
+}
+
+/* List item backgrounds */
+@utility db-list-item {
+  @apply bg-gray-50 dark:bg-slate-700 dark-transition;
+}
+
+/* Blue link color */
+@utility db-link-blue {
+  @apply text-blue-600 dark:text-blue-400 dark-transition;
+}
+
+/* Blue link hover */
+@utility db-link-blue-hover {
+  @apply hover:text-blue-800 dark:hover:text-blue-300 dark-transition;
+}
+
+/* Amber badge */
+@utility db-badge-amber {
+  @apply bg-amber-100 dark:bg-amber-900/40 border-amber-400 dark:border-amber-600 text-amber-700 dark:text-amber-400 dark-transition;
+}
+
+/* Red badge */
+@utility db-badge-red {
+  @apply bg-red-100 dark:bg-red-900/40 border-red-400 dark:border-red-600 text-red-700 dark:text-red-400 dark-transition;
+}
+
+/* White badge */
+@utility db-badge-white {
+  @apply bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-600 text-gray-600 dark:text-gray-400 dark-transition;
+}
+
+/* Amber icon/text fill */
+@utility db-fill-amber {
+  @apply fill-amber-500 dark:fill-amber-400 text-amber-500 dark:text-amber-400 dark-transition;
+}
+
+/* Gray icon/text fill */
+@utility db-fill-gray {
+  @apply text-gray-400 dark:text-gray-500 dark-transition;
+}
+
+/* Red icon/text fill */
+@utility db-fill-red {
+  @apply fill-red-500 dark:fill-red-400 text-red-500 dark:text-red-400 dark-transition;
+}
+
+/* Select all button background */
+@utility db-select-all {
+  @apply bg-gray-50 dark:bg-slate-800 hover:bg-gray-100 dark:hover:bg-slate-700 dark-transition;
+}
+
+/* Export button */
+@utility db-btn-export {
+  @apply bg-blue-500 dark:bg-blue-600 text-white hover:bg-blue-600 dark:hover:bg-blue-700 disabled:bg-gray-400 dark:disabled:bg-gray-600 dark-transition;
+}
+
+/* Export description text */
+@utility db-text-info {
+  @apply text-blue-900 dark:text-blue-300 dark-transition;
+}
+
+/* Focus ring for purple (for LanguageStyler) */
+@utility db-focus-ring-purple {
+  @apply focus:ring-2 focus:ring-purple-400 dark:focus:ring-purple-500;
+}
+
+/* Focus border for purple */
+@utility db-focus-border-purple {
+  @apply focus:border-purple-400 dark:focus:border-purple-500;
+}
+
+/* Purple icon/text */
+@utility db-text-purple {
+  @apply text-purple-600 dark:text-purple-400 dark-transition;
+}
+
+/* Purple icon/text light */
+@utility db-text-purple-light {
+  @apply text-purple-900 dark:text-purple-300 dark-transition;
+}
+
+/* Close button in modals */
+@utility db-btn-close {
+  @apply hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full p-2 cursor-pointer transition;
+}
+
+/* Action button colors for Ratings */
+@utility db-action-success-inline {
+  @apply text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/30 p-2 rounded-full cursor-pointer dark-transition;
+}
+
+@utility db-action-warning-inline {
+  @apply text-amber-500 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/30 p-2 rounded-full transition cursor-pointer dark-transition;
+}
+
+@utility db-action-danger-inline {
+  @apply text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 p-2 rounded-full transition cursor-pointer dark-transition;
+}
+
+/* Edit button hover in Ratings */
+@utility db-btn-edit-secondary {
+  @apply hover:bg-slate-200 dark:hover:bg-slate-700 p-2 rounded-full cursor-pointer dark-transition;
+}
+
+/* Upload section hover */
+@utility db-upload-hover {
+  @apply hover:bg-gray-50 dark:hover:bg-slate-700 transition;
+}
+
+/* Checkbox spinner */
+@utility db-spinner-blue {
+  @apply border-slate-300 dark:border-slate-600 border-t-blue-600 dark:border-t-blue-500 dark-transition;
+}
+
+/* Loading spinner - small */
+@utility db-spinner-border-blue {
+  @apply border-b-blue-600 dark:border-b-blue-500;
+}
+
+/* Select dropdown option hover */
+@utility db-option-hover {
+  @apply hover:bg-gray-50 dark:hover:bg-slate-800 db-border dark-transition;
+}
+
+/* Loading spinner border-bottom blue */
+@utility db-spinner-border {
+  @apply border-b-2 border-blue-600 dark:border-blue-500;
+}
+
+/* Select opacity hover */
+@utility db-select-opacity {
+  @apply hover:opacity-90 dark:hover:opacity-80;
+}
+
+/* Calendar icon in date input */
+@utility db-calendar {
+  @apply [color-scheme:light] dark:[color-scheme:dark];
+}
+
+/* View Movie modal header */
+@utility db-view-header {
+  @apply bg-blue-600 dark:bg-blue-800;
 }

@@ -99,21 +99,21 @@ export default function AddMovie({ isOpen, onClose, onSuccess }: AddMovieProps) 
 
     return (
         <div className="fixed inset-0 flex items-center justify-center z-50 p-4 overflow-y-auto no-scrollbar">
-            <div ref={modalRef} className="bg-white rounded-xl shadow-2xl max-w-5xl w-full my-8 max-h-[90vh] overflow-y-auto no-scrollbar">
-                <div className="sticky top-0 bg-white border-b px-8 py-4 flex justify-between items-center z-10">
-                    <h1 className="text-2xl font-extrabold">{t("movie_form.add_movie")}</h1>
-                    <button onClick={onClose} className="hover:bg-gray-200 rounded-full p-2 cursor-pointer">
+            <div ref={modalRef} className="db-movieBG rounded-xl shadow-2xl max-w-5xl w-full my-8 max-h-[90vh] overflow-y-auto no-scrollbar">
+                <div className="sticky top-0 db-movieBG border-b db-border px-8 py-4 flex justify-between items-center z-10">
+                    <h1 className="text-2xl font-extrabold db-text">{t("movie_form.add_movie")}</h1>
+                    <button onClick={onClose} className="db-btn-close db-text">
                         <X size={24} />
                     </button>
                 </div>
 
                 {isOptionsLoading ? (
                     <div className="p-20 text-center flex flex-col items-center justify-center">
-                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-700 mb-4" />
+                        <div className="animate-spin rounded-full h-12 w-12 db-spinner-border mb-4" />
                     </div>
                 ) : !options ? (
                     <div className="p-20 text-center flex flex-col items-center justify-center">
-                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-700 mb-4" />
+                        <div className="animate-spin rounded-full h-12 w-12 db-spinner-border mb-4" />
                     </div>
                 ) : (
                     <div className="p-8">

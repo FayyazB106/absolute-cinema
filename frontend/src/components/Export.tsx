@@ -209,26 +209,26 @@ export default function Export() {
     };
 
     return (
-        <div className="p-8">
+        <div className="p-8 db-mainBG min-h-screen dark-transition">
             <div className="flex justify-between items-center mb-8">
                 <Title text={t("titles.export")} />
             </div>
 
             <div className='max-w-2xl mx-auto'>
-                <div className="rounded-xl shadow-md border border-black p-6">
-                    <h2 className="text-lg font-bold mb-6">{t("export.subheading")}</h2>
+                <div className="rounded-xl shadow-md border db-border db-movieBG p-6 dark-transition">
+                    <h2 className="text-lg font-bold mb-6 db-text">{t("export.subheading")}</h2>
 
                     <div className="space-y-4 mb-6">
                         {/* Select All Option */}
-                        <div onClick={selectAll} className="flex items-center p-3 bg-gray-50 rounded-lg border border-gray-200 cursor-pointer hover:bg-gray-100 transition shadow-sm">
+                        <div onClick={selectAll} className="flex items-center p-3 db-select-all rounded-lg border db-border cursor-pointer transition shadow-sm dark-transition">
                             <input
                                 type="checkbox"
                                 id="select-all"
                                 checked={selectedTables.size === tableOptions.length}
                                 onChange={(e) => e.stopPropagation()}
-                                className="w-5 h-5 cursor-pointer"
+                                className="w-5 h-5 cursor-pointer db-checkbox"
                             />
-                            <label htmlFor="select-all" className="mx-3 cursor-pointer font-semibold text-gray-700 flex-grow" onClick={(e) => e.preventDefault()}>
+                            <label htmlFor="select-all" className="mx-3 cursor-pointer font-semibold db-text flex-grow" onClick={(e) => e.preventDefault()}>
                                 {t("export.select_all")} ({selectedTables.size}/{tableOptions.length})
                             </label>
                         </div>
@@ -239,16 +239,20 @@ export default function Export() {
                                 <div
                                     key={table.id}
                                     onClick={() => toggleTable(table.id)}
-                                    className={`flex items-center p-3 border rounded-lg transition cursor-pointer ${selectedTables.has(table.id) ? 'bg-blue-50 border-blue-200' : 'hover:bg-gray-50'}`}
+                                    className={`flex items-center p-3 border rounded-lg transition cursor-pointer ${
+                                        selectedTables.has(table.id)
+                                            ? 'db-info-box-blue'
+                                            : 'db-option-hover'
+                                    }`}
                                 >
                                     <input
                                         type="checkbox"
                                         id={table.id}
                                         checked={selectedTables.has(table.id)}
                                         onChange={(e) => e.stopPropagation()}
-                                        className="w-4 h-4 cursor-pointer"
+                                        className="w-4 h-4 cursor-pointer db-checkbox"
                                     />
-                                    <label htmlFor={table.id} className="mx-3 cursor-pointer text-gray-700 flex-grow" onClick={(e) => e.preventDefault()}>
+                                    <label htmlFor={table.id} className="mx-3 cursor-pointer db-text flex-grow" onClick={(e) => e.preventDefault()}>
                                         {table.name}
                                     </label>
                                 </div>
@@ -260,16 +264,16 @@ export default function Export() {
                     <button
                         onClick={handleExport}
                         disabled={isExporting || selectedTables.size === 0}
-                        className="w-full px-6 py-3 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed transition"
+                        className="w-full px-6 py-3 db-btn-export font-semibold rounded-lg disabled:cursor-not-allowed transition dark-transition"
                     >
                         {isExporting ? t(("export.exporting")) : t('export.button_label', { count: selectedTables.size })}
                     </button>
                 </div>
 
                 {/* Info Section */}
-                <div className="mt-6 bg-blue-50 border border-blue-200 rounded-xl p-4">
-                    <h3 className="font-semibold text-blue-900 mb-2">{t("export.info")}</h3>
-                    <ul className="text-md text-blue-800 space-y-1 list-disc list-inside">
+                <div className="mt-6 db-info-box-blue rounded-xl p-4 dark-transition">
+                    <h3 className="font-semibold db-text-info mb-2">{t("export.info")}</h3>
+                    <ul className="text-md db-text-info space-y-1 list-disc list-inside">
                         <li>{t("export.info_point1")}</li>
                         <li>{t("export.info_point2")}</li>
                     </ul>
