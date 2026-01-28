@@ -57,7 +57,10 @@ export default function FeaturedCarousel() {
                             sx={{
                                 width: '100%',
                                 height: '100%',
-                                backgroundImage: `url(${movie.featured_full_url})`,
+                                backgroundImage: {
+                                    xs: `url(${movie.poster_full_url || ''})`,
+                                    md: `url(${movie.featured_full_url || ''})`
+                                },
                                 backgroundSize: 'cover',
                                 backgroundPosition: 'center',
                                 display: 'flex',

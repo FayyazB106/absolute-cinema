@@ -214,5 +214,10 @@
     "validation_error": "Validation Error: Please check the form for errors",
     "update_error": "Error updating movie",
     "add_error": "Error creating movie"
+  },
+  "home": {
+    "book_now": "Book Now",
+    "whats_on": "What's On",
+    "coming_soon": "Coming Soon"
   }
 }

@@ -1,6 +1,39 @@
 @import "tailwindcss";
 @variant dark (&:where(.dark, .dark *));
 
+/* Custom scroll bar for main website */
+:where(.client-root)::-webkit-scrollbar {
+  width: 10px;
+}
+
+:where(.client-root)::-webkit-scrollbar-track {
+  background: #000000;
+}
+
+:where(.client-root)::-webkit-scrollbar-thumb {
+  background: #222222;
+  border-radius: 10px;
+  border: 2px solid #000000;
+}
+
+:where(.client-root)::-webkit-scrollbar-thumb:hover {
+  background: #444444;
+}
+
+/* For elements INSIDE the client root that might have overflow */
+.client-root *::-webkit-scrollbar {
+  width: 8px;
+}
+
+.client-root *::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.client-root *::-webkit-scrollbar-thumb {
+  background: #333;
+  border-radius: 10px;
+}
+
 /* Light/Dark mode Colors (I'm not an artist pls send help) */
 @utility dark-transition {
   @apply transition-colors duration-400;
