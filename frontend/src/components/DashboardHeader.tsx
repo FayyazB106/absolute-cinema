@@ -10,35 +10,46 @@ export default function DashboardHeader() {
     });
 
     useEffect(() => {
+        const html = document.documentElement;
+        // Add transition class before changing theme
+        html.classList.add('dark-transition');
+        
         if (isDark) {
-            document.documentElement.classList.add('dark');
+            html.classList.add('dark');
             localStorage.setItem('theme', 'dark');
         } else {
-            document.documentElement.classList.remove('dark');
+            html.classList.remove('dark');
             localStorage.setItem('theme', 'light');
         }
+        
+        // Remove transition class after transition completes (300ms)
+        const timer = setTimeout(() => {
+            html.classList.remove('dark-transition');
+        }, 400);
+        
+        return () => clearTimeout(timer);
     }, [isDark]);
 
     return (
-        <nav className="db-header shadow-lg sticky top-0 z-50 transition-colors dark-duration">
+        <nav className="db-header shadow-lg sticky top-0 z-50 dark-transition">
             <div className="w-full px-8 flex flex-row justify-between items-center py-4 gap-4">
                 <p className='text-white font-bold text-2xl'>{t("dashboard_header.title")}</p>
                 {/* Dark Mode Toggle */}
                 <div className="flex items-center gap-2">
                     <button
                         onClick={() => setIsDark(!isDark)}
-                        className={`relative w-20 h-12 flex items-center rounded-full p-1 cursor-pointer transition-colors dark-duration shadow-inner
+                        className={`relative w-20 h-12 flex items-center rounded-full p-1 cursor-pointer dark-transition shadow-inner
                             ${isDark ? 'bg-slate-700' : 'bg-blue-400'}`}
                         title={t("dashboard_header.dark_mode")}
                         dir="ltr"
                     >
                         <div
-                            className={`flex items-center justify-center bg-white w-10 h-10 rounded-full shadow-lg transform transition-transform dark-duration ease-in-out
+                            className={`flex items-center justify-center bg-white w-10 h-10 rounded-full shadow-lg transform transition-transform dark-transition ease-in-out
                                 ${isDark ? 'translate-x-8 rotate-[360deg]' : 'translate-x-0 rotate-0'}`}
                         >
                             {isDark
-                                ? (<Moon className="text-slate-700 animate-in fade-in zoom-in dark-duration flex-shrink-0" />)
-                                : (<Sun className="text-yellow-500 animate-in fade-in zoom-in dark-duration flex-shrink-0" />)
+                                ? (<Moon className="text-slate-700 animate-in dark-transition fade-in zoom-in flex-shrink-0" />)
+                                : (<Sun className="text-yellow-500 animate-in dark-transition fade-in zoom-in flex-shrink-0" />)
                             }
                         </div>
                     </button>

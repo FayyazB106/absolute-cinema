@@ -70,34 +70,34 @@ export default function MultiSelect({ label, options, selected, onChange, placeh
 
     return (
         <div className="flex flex-col">
-            <label className="font-bold text-md mb-2">{label} {required && <Asterisk />}</label>
+            <label className="font-bold text-md mb-2 db-label">{label} {required && <Asterisk />}</label>
 
             <div className='relative' ref={containerRef}>
                 {/* Dropdown Trigger */}
                 <button
                     type="button"
                     onClick={() => setIsOpen(!isOpen)}
-                    className={`border ${error ? 'border-red-500' : ''} rounded p-3 flex justify-between items-center bg-white hover:bg-gray-50 transition w-full`}
+                    className={`db-input border ${error ? 'border-red-500' : 'db-border'} rounded p-3 flex justify-between items-center hover:opacity-90 transition w-full`}
                 >
-                    <span>{getDisplayText()}</span>
-                    {isOpen ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                    <span className="db-text">{getDisplayText()}</span>
+                    {isOpen ? <ChevronUp size={20} className="db-text-secondary" /> : <ChevronDown size={20} className="db-text-secondary" />}
                 </button>
 
                 {/* Dropdown Menu */}
                 {isOpen && (
-                    <div className="absolute top-full left-0 right-0 mt-1 bg-white border rounded shadow-lg z-50 max-h-72 flex flex-col">
+                    <div className="absolute top-full left-0 right-0 mt-1 db-movieBG border db-border rounded shadow-lg z-50 max-h-72 flex flex-col">
                         {/* Search Bar */}
-                        <div className="p-3 border-b sticky top-0 bg-white rounded">
+                        <div className="p-3 border-b db-divider sticky top-0 db-movieBG">
                             <div className="relative">
                                 <div className={`absolute ${isEnglish ? "right-3" : "left-3"} top-2.5 flex items-center`}>
                                     {search ? (
                                         // Close/Clear Button (Visible when text exists)
-                                        <button onClick={() => { setSearch("") }} className="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer">
+                                        <button onClick={() => { setSearch("") }} className="db-text-secondary hover:db-text cursor-pointer">
                                             <X size={18} />
                                         </button>
                                     ) : (
                                         // Search Icon (Visible when empty)
-                                        <div className="text-gray-400">
+                                        <div className="db-text-secondary">
                                             <Search size={18} />
                                         </div>
                                     )}
@@ -107,7 +107,7 @@ export default function MultiSelect({ label, options, selected, onChange, placeh
                                     placeholder={t("movie_form.search_placeholder")}
                                     value={search}
                                     onChange={e => setSearch(e.target.value)}
-                                    className="w-full p-2 border rounded focus:outline-none focus:border-blue-400"
+                                    className="w-full p-2 db-input border db-border rounded focus:outline-none db-focus-border"
                                     onClick={e => e.stopPropagation()}
                                 />
                             </div>
@@ -116,17 +116,17 @@ export default function MultiSelect({ label, options, selected, onChange, placeh
                         {/* Options List */}
                         <div className="overflow-y-auto flex-1 no-scrollbar">
                             {filteredOptions.length === 0 ? (
-                                <div className="p-4 text-center text-gray-500">{t("movie_form.no_options")}</div>
+                                <div className="p-4 text-center db-text-secondary">{t("movie_form.no_options")}</div>
                             ) : (
                                 filteredOptions.sort((a, b) => a.name_en.localeCompare(b.name_en)).map(option => (
-                                    <label key={option.id} className="flex items-center gap-3 p-3 hover:bg-blue-50 cursor-pointer transition">
+                                    <label key={option.id} className="flex items-center gap-3 p-3 cursor-pointer transition db-hover-light">
                                         <input
                                             type="checkbox"
                                             checked={selected.includes(option.id.toString())}
                                             onChange={() => handleToggle(option.id.toString())}
-                                            className="w-4 h-4 text-blue-600 rounded cursor-pointer"
+                                            className="w-4 h-4 rounded cursor-pointer db-checkbox"
                                         />
-                                        <span className="flex-1 text-gray-900">{isEnglish ? option.name_en : option.name_ar}</span>
+                                        <span className="flex-1 db-text">{isEnglish ? option.name_en : option.name_ar}</span>
                                     </label>
                                 ))
                             )}
@@ -141,9 +141,9 @@ export default function MultiSelect({ label, options, selected, onChange, placeh
                             const item = options.find(o => o.id.toString() === id);
                             if (!item) return null;
                             return (
-                                <span key={id} className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm flex items-center gap-2">
+                                <span key={id} className="db-badge-select px-3 py-1 rounded-full text-sm flex items-center gap-2">
                                     {isEnglish ? item.name_en : item.name_ar}
-                                    <button type="button" onClick={() => handleToggle(id)} className="hover:bg-blue-200 rounded-full cursor-pointer"><X size={14} /></button>
+                                    <button type="button" onClick={() => handleToggle(id)} className="db-badge-select-hover rounded-full cursor-pointer"><X size={14} /></button>
                                 </span>
                             );
                         })}

@@ -17,8 +17,7 @@ import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-
 
 export default function Dashboard() {
     const [activeModule, setActiveModule] = useState('movies');
-    // const [activeSection, setActiveSection] = useState('library');
-    const [isCollapsed, setIsCollapsed] = useState(false);
+    const [isCollapsed, setIsCollapsed] = useState(true);
     const { t, i18n } = useTranslation();
     const isEnglish = i18n.language === "en";
     const navigate = useNavigate();
@@ -31,7 +30,7 @@ export default function Dashboard() {
 
     const sidebarNavItems = [
         { id: 'library', label: t('nav.library'), icon: <Library size={20} /> },
-        { id: 'showtimes', label: t('nav.showtimes'), icon: <Film size={20} />}
+        { id: 'showtimes', label: t('nav.showtimes'), icon: <Film size={20} /> }
     ];
 
     const libraryItems = [
@@ -57,26 +56,29 @@ export default function Dashboard() {
     }, []);
 
     return (
-        <div className="flex flex-col h-screen bg-gray-100">
+        <div className="flex flex-col h-screen db-mainBG">
             <Toast />
             <DashboardHeader />
 
             <div className="flex flex-1 overflow-hidden">
                 {/* Sidebar */}
-                <aside className={`db-navBar shadow-xl transition-all dark-duration flex flex-col sticky top-0 h-full ${isCollapsed ? 'w-19' : 'w-45'}`}>
+                <aside className={`db-navBar shadow-xl dark-transition transition-all flex flex-col sticky top-0 h-full ${isCollapsed ? 'w-19' : 'w-45'}`}>
                     {/* Toggle Button */}
-                    <button onClick={() => setIsCollapsed(!isCollapsed)} className="p-6 flex justify-start text-gray-500 hover:text-blue-600 cursor-pointer">
-                        {isCollapsed ? (isEnglish ? <ChevronRight /> : <ChevronLeft />) : (isEnglish ? <ChevronLeft /> : <ChevronRight />)}
+                    <button onClick={() => setIsCollapsed(!isCollapsed)} className="p-6 flex w-19 justify-start db-text-secondary hover:db-text cursor-pointer">
+                        <div className={`transition-transform dark-transition ${isCollapsed ? (isEnglish ? 'rotate-180' : '-rotate-180') : 'rotate-0'}`}>
+                            {isEnglish ? <ChevronLeft /> : <ChevronRight />}
+                        </div>
                     </button>
 
+                    {/* List */}
                     <nav className="flex-1 px-4 space-y-2">
                         {sidebarNavItems.map((item) => (
                             <button
                                 key={item.id}
                                 onClick={() => handleSectionChange(item.id)}
                                 title={isCollapsed ? item.label : ''}
-                                className={`w-full flex items-center p-3 rounded-lg transition-colors cursor-pointer h-11
-                                    ${activeSection === item.id ? 'bg-blue-600 text-white shadow-md' : 'text-gray-600 hover:bg-blue-50 hover:text-blue-600'} 
+                                className={`w-full flex items-center p-3 rounded-lg cursor-pointer h-11
+                                    ${activeSection === item.id ? 'db-nav-active' : 'db-nav-inactive'} 
                                     ${isCollapsed ? 'justify-start' : 'space-x-4'}`}
                             >
                                 <span className="flex-shrink-0">{item.icon}</span>
@@ -91,14 +93,14 @@ export default function Dashboard() {
                         {/* Library */}
                         <Route path="library" element={
                             <>
-                                <nav className="db-navBar shadow-lg">
+                                <nav className="db-navBar shadow-lg db-border border-b">
                                     <div className="w-full px-8">
                                         <div className="flex space-x-4 py-4">
                                             {libraryItems.map((item) => (
                                                 <button
                                                     key={item.id}
                                                     onClick={() => setActiveModule(item.id)}
-                                                    className={`px-4 py-2 rounded cursor-pointer transition-colors ${activeModule === item.id ? 'bg-blue-600 text-white' : 'db-navInactiveButton'}`}
+                                                    className={`px-4 py-2 rounded cursor-pointer ${activeModule === item.id ? 'db-tab-active' : 'db-tab-inactive'}`}
                                                 >
                                                     {item.label}
                                                 </button>
@@ -113,7 +115,7 @@ export default function Dashboard() {
                         } />
 
                         {/* For future sections */}
-                        <Route path="showtimes" element={<div className='flex justify-center items-center h-full text-7xl'>{t("common.stay_tuned")}</div>} />
+                        <Route path="showtimes" element={<div className='flex justify-center items-center h-full text-7xl db-text'>{t("common.stay_tuned")}</div>} />
 
                         {/* Default Redirect */}
                         <Route path="*" element={<Navigate to="library" replace />} />

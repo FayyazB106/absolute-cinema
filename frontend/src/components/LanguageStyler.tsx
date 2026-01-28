@@ -122,7 +122,7 @@ export default function LanguageStyler() {
     if (loading) {
         return (
             <div className="flex flex-col items-center justify-center min-h-[400px] w-full p-10 space-y-4">
-                <div className="w-12 h-12 border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin" />
+                <div className="w-12 h-12 border-4 db-spinner-blue rounded-full animate-spin" />
             </div>
         );
     }
@@ -151,7 +151,7 @@ export default function LanguageStyler() {
         return (
             <div className="flex items-center gap-6">
                 <div className="flex-1">
-                    <label className="block text-xl font-semibold mb-3">{label}</label>
+                    <label className="block text-xl font-semibold mb-3 db-text">{label}</label>
                     <div className="flex items-center gap-4">
                         {/* The Visual Color Picker */}
                         <input type="color" value={currentHex} onChange={(e) => updateColor(field, e.target.value)} className="w-24 h-24 rounded-lg cursor-pointer" />
@@ -164,9 +164,9 @@ export default function LanguageStyler() {
                                 maxLength={6}
                                 onChange={(e) => updateColor(field, e.target.value)}
                                 placeholder={placeholder}
-                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-400 focus:border-purple-400 outline-none transition-all font-mono uppercase"
+                                className="w-full p-3 db-input border db-border rounded-lg db-focus-ring-purple db-focus-border-purple outline-none transition-all font-mono uppercase dark-transition"
                             />
-                            <p className="text-xs text-gray-500 mt-1.5">{t("language_styler.hex_hint")}</p>
+                            <p className="text-xs db-text-secondary mt-1.5">{t("language_styler.hex_hint")}</p>
                         </div>
                     </div>
                 </div>
@@ -175,7 +175,7 @@ export default function LanguageStyler() {
     };
 
     return (
-        <div className="p-8">
+        <div className="p-8 db-mainBG min-h-screen dark-transition">
             {/* Header */}
             <div className="flex justify-between items-center mb-8">
                 <Title text={t("titles.playground")} />
@@ -183,7 +183,7 @@ export default function LanguageStyler() {
                     <button
                         onClick={handleReset}
                         disabled={saving}
-                        className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-100 font-medium transition-all disabled:opacity-50 flex items-center gap-2 cursor-pointer"
+                        className="px-6 py-2 border db-border db-input rounded-lg db-hover-light font-medium transition-all disabled:opacity-50 flex items-center gap-2 cursor-pointer dark-transition"
                     >
                         <RefreshCw size={18} />
                         {t("language_styler.reset")}
@@ -191,7 +191,7 @@ export default function LanguageStyler() {
                     <button
                         onClick={handleSave}
                         disabled={saving}
-                        className="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 font-medium transition-all disabled:opacity-50 flex items-center gap-2 cursor-pointer"
+                        className="px-6 py-2 db-button-purple rounded-lg font-medium transition-all disabled:opacity-50 flex items-center gap-2 cursor-pointer dark-transition"
                     >
                         <Save size={18} />
                         {saving ? t("language_styler.saving") : t("language_styler.save")}
@@ -200,19 +200,19 @@ export default function LanguageStyler() {
             </div>
 
             {/* Info Banner */}
-            <div className="bg-purple-50 border border-purple-200 rounded-lg p-4 mb-6 flex items-start gap-3">
-                <Palette className="text-purple-600 mt-0.5" size={20} />
-                <p className="text-purple-900 font-medium mb-1">{t("language_styler.customize")}</p>
+            <div className="db-info-box rounded-lg p-4 mb-6 flex items-start gap-3 dark-transition">
+                <Palette className="db-text-purple mt-0.5" size={20} />
+                <p className="db-text-purple-light font-medium mb-1">{t("language_styler.customize")}</p>
             </div>
 
             {/* Language Selection Dropdown */}
             <div className="mb-8">
-                <label className="block text-sm font-semibold text-gray-700 mb-3">{t("language_styler.select")}</label>
+                <label className="block text-sm font-semibold db-text mb-3">{t("language_styler.select")}</label>
                 <div className="relative max-w-md">
                     <select
                         value={selectedLanguageId || ''}
                         onChange={(e) => setSelectedLanguageId(Number(e.target.value))}
-                        className="w-full p-4 pr-10 border text-lg cursor-pointer bg-white appearance-none"
+                        className="w-full p-4 pr-10 db-select border db-border text-lg cursor-pointer appearance-none dark-transition"
                     >
                         {languages.map(lang => (
                             <option key={lang.id} value={lang.id}>
@@ -223,13 +223,13 @@ export default function LanguageStyler() {
                             </option>
                         ))}
                     </select>
-                    <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={20} />
+                    <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 db-text-secondary pointer-events-none dark-transition" size={20} />
                 </div>
             </div>
 
             {/* Styling Card */}
-            <div className="border rounded-xl p-8 bg-white shadow-lg">
-                <div dir="ltr" className="flex items-center justify-between mb-8 pb-6 border-b text-3xl font-bold text-black">
+            <div className="border db-border rounded-xl p-8 db-movieBG shadow-lg dark-transition">
+                <div dir="ltr" className="flex items-center justify-between mb-8 pb-6 border-b db-border text-3xl font-bold db-text dark-transition">
                     <p>{editedLanguage.name_en}</p>
                     <p>{editedLanguage.name_ar}</p>
                 </div>

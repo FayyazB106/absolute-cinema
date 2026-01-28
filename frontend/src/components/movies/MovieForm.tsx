@@ -24,10 +24,10 @@ export default function MovieForm({
     const { t, i18n } = useTranslation();
     const isEnglish = i18n.language === "en";
     const modalRef = useRef<HTMLDivElement>(null);
-    const subTitleStyle = "text-xl font-bold text-blue-700 text-center"
-    const labelStyle = "font-bold text-md"
-    const errorStyle = "text-red-500 mt-1"
-    const fileStyle = "mt-2 text-sm text-green-600 font-medium truncate max-w-[200px]"
+    const subTitleStyle = "db-subtitle"
+    const labelStyle = "font-bold text-md db-label"
+    const errorStyle = "db-error mt-1"
+    const fileStyle = "mt-2 text-sm db-text-green font-medium truncate max-w-[200px]"
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         let { name, value } = e.target;
@@ -52,7 +52,7 @@ export default function MovieForm({
                             name="name_en"
                             type="text"
                             placeholder="Name"
-                            className={`border rounded p-3 text-left ${errors.name_en ? 'border-red-500' : ''}`}
+                            className={`db-input border db-border rounded p-3 text-left ${errors.name_en ? 'border-red-500' : ''}`}
                             value={formData.name_en}
                             onChange={handleChange}
                             required
@@ -65,7 +65,7 @@ export default function MovieForm({
                             name="name_ar"
                             type="text"
                             placeholder="الاسم"
-                            className={`border rounded p-3 text-right ${errors.name_ar ? 'border-red-500' : ''}`}
+                            className={`db-input border db-border rounded p-3 text-right ${errors.name_ar ? 'border-red-500' : ''}`}
                             value={formData.name_ar}
                             onChange={handleChange}
                             required
@@ -77,7 +77,7 @@ export default function MovieForm({
                         <textarea
                             name="desc_en"
                             placeholder="Description"
-                            className={`border rounded p-3 h-24 text-left ${errors.desc_en ? 'border-red-500' : ''}`}
+                            className={`db-textarea border db-border rounded p-3 h-24 text-left ${errors.desc_en ? 'border-red-500' : ''}`}
                             value={formData.desc_en}
                             onChange={handleChange}
                             required
@@ -89,7 +89,7 @@ export default function MovieForm({
                         <textarea
                             name="desc_ar"
                             placeholder="الوصف"
-                            className={`border rounded p-3 h-24 ${errors.desc_ar ? 'border-red-500' : ''}`}
+                            className={`db-textarea border db-border rounded p-3 h-24 ${errors.desc_ar ? 'border-red-500' : ''}`}
                             value={formData.desc_ar}
                             onChange={handleChange}
                             required
@@ -107,7 +107,7 @@ export default function MovieForm({
                         <input
                             name="release_date"
                             type="date"
-                            className={`border rounded p-2 h-[51px] ${errors.release_date ? 'border-red-500' : ''}`}
+                            className={`db-input border db-border rounded p-2 h-[51px] db-calendar ${errors.release_date ? 'border-red-500' : ''}`}
                             value={formData.release_date}
                             onChange={handleChange}
                             required
@@ -120,7 +120,7 @@ export default function MovieForm({
                             name="imdb_url"
                             type="url"
                             placeholder="https://imdb.com/title/tt..."
-                            className={`border rounded p-2 h-[51px] ${errors.imdb_url ? 'border-red-500' : ''}`}
+                            className={`db-input border db-border rounded p-2 h-[51px] ${errors.imdb_url ? 'border-red-500' : ''}`}
                             value={formData.imdb_url}
                             onChange={handleChange}
                         />
@@ -135,7 +135,7 @@ export default function MovieForm({
                             step="1"
                             onKeyDown={(e) => { if (['-', '.', ',', 'e', 'E'].includes(e.key)) { e.preventDefault(); } }}
                             placeholder="120"
-                            className={`border rounded p-2 h-[51px] ${errors.duration ? 'border-red-500' : ''}`}
+                            className={`db-input border db-border rounded p-2 h-[51px] ${errors.duration ? 'border-red-500' : ''}`}
                             value={formData.duration}
                             onChange={handleChange}
                         />
@@ -146,7 +146,7 @@ export default function MovieForm({
                         <div className="relative flex items-center h-full">
                             <select
                                 name="maturity_id"
-                                className={`border rounded p-2 hover:bg-gray-50 appearance-none outline-none w-full h-full ${errors.maturity_id ? 'border-red-500' : ''}`}
+                                className={`db-select border db-border rounded p-2 db-select-opacity appearance-none outline-none w-full h-full ${errors.maturity_id ? 'border-red-500' : ''}`}
                                 value={formData.maturity_id}
                                 onChange={handleChange}
                                 required
@@ -156,7 +156,7 @@ export default function MovieForm({
                                     <option key={m.id} value={m.id}>{m.maturity_rating}</option>
                                 )}
                             </select>
-                            <div className={`absolute ${isEnglish ? "right-2" : "left-2"} pointer-events-none`}>
+                            <div className={`absolute ${isEnglish ? "right-2" : "left-2"} pointer-events-none db-text-secondary`}>
                                 <ChevronDown size={18} />
                             </div>
                         </div>
@@ -167,7 +167,7 @@ export default function MovieForm({
                         <div className="relative flex items-center h-full">
                             <select
                                 name="status_id"
-                                className={`border rounded p-2 hover:bg-gray-50 appearance-none outline-none w-full h-full ${errors.status_id ? 'border-red-500' : ''}`}
+                                className={`db-select border db-border rounded p-2 db-select-opacity appearance-none outline-none w-full h-full ${errors.status_id ? 'border-red-500' : ''}`}
                                 value={formData.status_id}
                                 onChange={handleChange}
                                 required
@@ -177,7 +177,7 @@ export default function MovieForm({
                                     <option key={s.id} value={s.id}>{isEnglish ? s.name_en : s.name_ar}</option>
                                 )}
                             </select>
-                            <div className={`absolute ${isEnglish ? "right-2" : "left-2"} pointer-events-none`}>
+                            <div className={`absolute ${isEnglish ? "right-2" : "left-2"} pointer-events-none db-text-secondary`}>
                                 <ChevronDown size={18} />
                             </div>
                         </div>
@@ -245,12 +245,12 @@ export default function MovieForm({
                 <h2 className={subTitleStyle}>{t("movie_form.media")}</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     {/* Main Poster Upload */}
-                    <div className="flex flex-col items-center p-4 border-2 border-dashed rounded-xl hover:bg-gray-50">
+                    <div className="flex flex-col items-center p-4 border-2 border-dashed rounded-xl db-upload-hover dark-transition">
                         <label className="cursor-pointer text-center w-full flex flex-col gap-1">
-                            <Upload className="mx-auto text-gray-400" size={32} />
+                            <Upload className="mx-auto db-text-muted" size={32} />
                             <p className="font-bold">{t("movie_form.main_poster")}</p>
-                            <p className="text-xs text-gray-500">{t("movie_form.requirements")}</p>
-                            <p className="text-xs text-gray-500">{t("movie_form.poster_size")}</p>
+                            <p className="text-xs db-text-muted">{t("movie_form.requirements")}</p>
+                            <p className="text-xs db-text-muted">{t("movie_form.poster_size")}</p>
                             <input
                                 type="file"
                                 className="hidden"
@@ -295,12 +295,12 @@ export default function MovieForm({
                     </div>
 
                     {/* Featured Poster Upload */}
-                    <div className="flex flex-col items-center p-4 border-2 border-dashed rounded-xl hover:bg-gray-50">
+                    <div className="flex flex-col items-center p-4 border-2 border-dashed rounded-xl db-upload-hover dark-transition">
                         <label className="cursor-pointer text-center w-full flex flex-col gap-1">
-                            <Upload className="mx-auto text-gray-400" size={32} />
+                            <Upload className="mx-auto db-text-muted" size={32} />
                             <p className="font-bold">{t("movie_form.featured_banner")}</p>
-                            <p className="text-xs text-gray-500">{t("movie_form.requirements")}</p>
-                            <p className="text-xs text-gray-500">{t("movie_form.banner_size")}</p>
+                            <p className="text-xs db-text-muted">{t("movie_form.requirements")}</p>
+                            <p className="text-xs db-text-muted">{t("movie_form.banner_size")}</p>
                             <input
                                 type="file"
                                 className="hidden"
@@ -358,7 +358,7 @@ export default function MovieForm({
                             }
                         }}
                         disabled={!existingFeaturedPoster && !featuredFile && !formData.is_featured}
-                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${formData.is_featured ? 'bg-blue-600' : 'bg-gray-300'} ${!existingFeaturedPoster && !featuredFile && !formData.is_featured ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        className={`relative inline-flex h-6 w-11 items-center rounded-full dark-transition ${formData.is_featured ? 'bg-blue-600' : 'bg-gray-300'} ${!existingFeaturedPoster && !featuredFile && !formData.is_featured ? 'opacity-50 cursor-not-allowed' : ''}`}
                     >
                         <span className={
                             `inline-block h-4 w-4 transform rounded-full bg-white transition 
