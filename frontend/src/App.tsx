@@ -4,14 +4,18 @@ import AbsoluteCinema from './pages/AbsoluteCinema';
 import Dashboard from './pages/Dashboard';
 import Home from './pages/Home';
 import MainLayout from './layouts/MainLayout';
+import MovieDetails from './components/movies/MovieDetails';
+import ScrollToTop from './components/utils/ScrollToTop';
 
 function App() {
   return (
     <BrowserRouter>
+    <ScrollToTop />
       <Routes>
         {/* Material UI */}
         <Route element={<MainLayout />}>
           <Route path="/" element={<Home />} />
+          <Route path="/movie/:movieId" element={<MovieDetails />} />
         </Route>
 
         {/* Traditional React UI */}

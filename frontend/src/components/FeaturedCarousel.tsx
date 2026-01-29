@@ -1,4 +1,3 @@
-// src/components/FeaturedCarousel.tsx
 import { useEffect, useState } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay, Navigation, Pagination, EffectFade } from 'swiper/modules';

@@ -46,9 +46,16 @@ export default function Home() {
         <Box sx={{ bgcolor: 'background.default', minHeight: '100vh', pb: 8 }}>
             <FeaturedCarousel />
 
-            <Container maxWidth="lg" disableGutters sx={{ mt: 6 }}>
+            <Container maxWidth={"xl" as any} disableGutters sx={{ mt: 6 }}>
                 <Box px={2} sx={{ borderBottom: 1, borderColor: 'rgba(255,255,255,0.1)', mb: 6 }}>
-                    <Tabs value={tabValue} onChange={(_, v) => setTabValue(v)} sx={{ '& .MuiTabs-indicator': { backgroundColor: '#fff' } }}>
+                    <Tabs
+                        value={tabValue}
+                        onChange={(_, v) => setTabValue(v)}
+                        sx={{
+                            '& .MuiTabs-flexContainer': { justifyContent: { xs: 'center', sm: 'flex-start' } },
+                            '& .MuiTabs-indicator': { backgroundColor: '#fff' }
+                        }}
+                    >
                         <Tab label={t('home.whats_on')} sx={{ color: '#666', '&.Mui-selected': { color: '#fff' } }} />
                         <Tab label={t('home.coming_soon')} sx={{ color: '#666', '&.Mui-selected': { color: '#fff' } }} />
                     </Tabs>

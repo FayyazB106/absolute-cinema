@@ -34,6 +34,12 @@
   border-radius: 10px;
 }
 
+/* Text shimmer effect for MovieCard */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
 /* Light/Dark mode Colors (I'm not an artist pls send help) */
 @utility dark-transition {
   @apply transition-colors duration-400;

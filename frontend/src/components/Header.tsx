@@ -1,6 +1,7 @@
 import { AppBar, Toolbar, Typography, IconButton, Button, Box } from '@mui/material';
 import { Language, Menu } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 
 interface HeaderProps {
     onOpenDrawer: () => void;
@@ -8,6 +9,7 @@ interface HeaderProps {
 
 export default function Header({ onOpenDrawer }: HeaderProps) {
     const { t, i18n } = useTranslation();
+    const navigate = useNavigate();
 
     const toggleLanguage = () => {
         const newLang = i18n.language === 'en' ? 'ar' : 'en';
@@ -24,7 +26,19 @@ export default function Header({ onOpenDrawer }: HeaderProps) {
                 </IconButton>
 
                 {/* Title */}
-                <Typography variant="h4" sx={{ fontWeight: 'bold', textAlign: 'center', fontSize: { xs: 'h6.fontSize', md: 'h4.fontSize' } }}>
+                <Typography
+                    variant="h4"
+                    onClick={() => navigate(`/`)}
+                    sx={{
+                        fontWeight: 'bold',
+                        textAlign: 'center',
+                        fontSize: { xs: 'h6.fontSize', md: 'h4.fontSize' },
+                        cursor: 'pointer',
+                        userSelect: 'none',
+                        WebkitUserSelect: 'none', // Safari support
+                        msUserSelect: 'none', // Internet Explorer/Edge support
+                    }}
+                >
                     {t("header.title")}
                 </Typography>
 
