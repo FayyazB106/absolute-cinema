@@ -119,9 +119,9 @@ export default function Movies() {
     return (
         <div className="p-8">
             <div className="flex justify-between items-center mb-8">
-                <Title text={t("titles.movies")} />
+                <Title text={t("titles.movies")} className='whitespace-nowrap' />
 
-                <div className='flex flex-row gap-5'>
+                <div className='flex flex-row 2xl:gap-5 gap-2'>
                     {/* Search bar */}
                     <div className="relative w-full max-w-md mx-4">
                         <input
@@ -213,12 +213,14 @@ export default function Movies() {
                             {t("movies_library.clear_all")}
                         </button>
                     )}
+
+                    <PlusButton title={t("movies_library.add_new_movie")} onClick={() => setIsAddModalOpen(true)} />
                 </div>
 
-                <PlusButton title={t("movies_library.add_new_movie")} onClick={() => setIsAddModalOpen(true)} />
+                
             </div>
 
-            <div className="grid grid-cols-6 gap-6">
+            <div className="grid 2xl:grid-cols-6 grid-cols-4 gap-6">
                 {filteredItems.map(movie => {
                     const statusLabel = getStatusName(movie.status_id);
                     const ratingLabel = getRatingName(movie.maturity_id);

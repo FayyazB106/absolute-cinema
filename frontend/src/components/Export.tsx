@@ -239,11 +239,7 @@ export default function Export() {
                                 <div
                                     key={table.id}
                                     onClick={() => toggleTable(table.id)}
-                                    className={`flex items-center p-3 border rounded-lg transition cursor-pointer ${
-                                        selectedTables.has(table.id)
-                                            ? 'db-info-box-blue'
-                                            : 'db-option-hover'
-                                    }`}
+                                    className={`flex items-center p-3 border rounded-lg transition cursor-pointer ${selectedTables.has(table.id) ? 'db-info-box-blue' : 'db-option-hover'}`}
                                 >
                                     <input
                                         type="checkbox"

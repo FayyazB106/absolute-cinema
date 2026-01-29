@@ -464,7 +464,7 @@ export default function Ratings() {
                                     />
                                 </th>
                                 <th className="px-6 py-4 font-bold text-center">{t("table.ranking")}</th>
-                                <th className="px-6 py-4 font-bold text-center">{t("table.rating")}</th>
+                                <th className="px-6 py-4 font-bold text-center whitespace-nowrap">{t("table.rating")}</th>
                                 <th className="px-6 py-4 font-bold">Name</th>
                                 <th className="px-6 py-4 font-bold text-right">الاسم</th>
                                 <th className="px-6 py-4 font-bold text-center w-32">{t("table.actions")}</th>

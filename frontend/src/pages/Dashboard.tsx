@@ -12,7 +12,7 @@ import Toast from '../components/shared/Toast';
 import { useTranslation } from "react-i18next";
 import DashboardHeader from '../components/shared/DashboardHeader';
 import { ChevronLeft, ChevronRight, Film, Library } from 'lucide-react';
-import { showMobileWarning } from '../components/shared/SweetAlert';
+import { showMobileWarning, showScreenSizeWarning } from '../components/shared/SweetAlert';
 import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 
 export default function Dashboard() {
@@ -47,7 +47,9 @@ export default function Dashboard() {
 
     useEffect(() => {
         const checkScreenSize = () => {
-            if (window.innerWidth < 768) { showMobileWarning(); }
+            const width = window.innerWidth;
+            if (width < 768) { showMobileWarning(); }
+            if (width >= 768 && width < 1280) { showScreenSizeWarning(); }
         };
 
         checkScreenSize();
@@ -100,7 +102,7 @@ export default function Dashboard() {
                                                 <button
                                                     key={item.id}
                                                     onClick={() => setActiveModule(item.id)}
-                                                    className={`px-4 py-2 rounded cursor-pointer ${activeModule === item.id ? 'db-tab-active' : 'db-tab-inactive'}`}
+                                                    className={`px-4 py-2 rounded cursor-pointer whitespace-nowrap ${activeModule === item.id ? 'db-tab-active' : 'db-tab-inactive'}`}
                                                 >
                                                     {item.label}
                                                 </button>

@@ -105,7 +105,9 @@
     "confirm_button_movie": "Yes, delete movie",
     "movie_added_title": "Movie added successfully!",
     "mobile_warning_title": "Desktop Recommended",
-    "mobile_warning_text": "This dashboard is not optimized for mobile screens."
+    "mobile_warning_text": "This dashboard is not optimized for mobile screens.",
+    "screen_warning_title": "Large Screen Required",
+    "screen_warning_text": "This dashboard is designed for high-resolution displays. Please use a screen wider than 1280px for the best experience."
   },
   "language_styler": {
     "submitting": "Submitting",

@@ -127,21 +127,15 @@ export default function LanguageStyler() {
         );
     }
 
-    if (!editedLanguage) {
-        return <div className="p-10 text-center text-xl">{t("language_styler.empty")}</div>;
-    }
+    if (!editedLanguage) { return <div className="p-10 text-center text-xl">{t("language_styler.empty")}</div>; }
 
     const bgHex = normalizeHex(editedLanguage.bg_color, DEFAULT_BG_COLOR);
     const textHex = normalizeHex(editedLanguage.text_color, DEFAULT_TEXT_COLOR);
     const ringHex = normalizeHex(editedLanguage.ring_color, DEFAULT_RING_COLOR);
 
     // Preview styles using inline CSS for accurate color display
-    const previewStyle = {
-        backgroundColor: bgHex,
-        color: textHex,
-        boxShadow: `0 0 0 8px ${ringHex}`
-    };
-    const previewClass = "px-27 py-9 rounded-full text-3xl font-bold uppercase shadow-md text-center"
+    const previewStyle = { backgroundColor: bgHex, color: textHex, boxShadow: `0 0 0 8px ${ringHex}` };
+    const previewClass = "2xl:px-27 px-18 2xl:py-9 py-6 rounded-full 2xl:text-3xl text-xl font-bold uppercase shadow-md text-center"
 
     const renderColorPicker = (label: string, field: 'bg_color' | 'text_color' | 'ring_color') => {
         // Determine the current hex based on the field
@@ -164,9 +158,9 @@ export default function LanguageStyler() {
                                 maxLength={6}
                                 onChange={(e) => updateColor(field, e.target.value)}
                                 placeholder={placeholder}
-                                className="w-full p-3 db-input border db-border rounded-lg db-focus-ring-purple db-focus-border-purple outline-none transition-all font-mono uppercase dark-transition"
+                                className="2xl:w-full w-[80%] p-3 db-input border db-border rounded-lg db-focus-ring-purple db-focus-border-purple outline-none transition-all font-mono uppercase dark-transition"
                             />
-                            <p className="text-xs db-text-secondary mt-1.5">{t("language_styler.hex_hint")}</p>
+                            <p className="text-xs db-text-secondary mt-1.5 2xl:w-full w-[80%]">{t("language_styler.hex_hint")}</p>
                         </div>
                     </div>
                 </div>
@@ -216,10 +210,7 @@ export default function LanguageStyler() {
                     >
                         {languages.map(lang => (
                             <option key={lang.id} value={lang.id}>
-                                {isEnglish
-                                    ? `${lang.name_en} (${lang.name_ar})`
-                                    : `${lang.name_ar} (${lang.name_en})`
-                                }
+                                {isEnglish ? `${lang.name_en} (${lang.name_ar})` : `${lang.name_ar} (${lang.name_en})`}
                             </option>
                         ))}
                     </select>
@@ -229,7 +220,7 @@ export default function LanguageStyler() {
 
             {/* Styling Card */}
             <div className="border db-border rounded-xl p-8 db-movieBG shadow-lg dark-transition">
-                <div dir="ltr" className="flex items-center justify-between mb-8 pb-6 border-b db-border text-3xl font-bold db-text dark-transition">
+                <div dir="ltr" className="flex items-center justify-between mb-8 pb-6 border-b db-border 2xl:text-3xl text-2xl font-bold db-text dark-transition">
                     <p>{editedLanguage.name_en}</p>
                     <p>{editedLanguage.name_ar}</p>
                 </div>
@@ -254,7 +245,7 @@ export default function LanguageStyler() {
 
             <div className='mt-10'>
                 <Title text={t("language_styler.all")} />
-                <div className='grid grid-cols-4 gap-y-5 mt-5'>
+                <div className='grid 2xl:grid-cols-4 grid-cols-3 gap-y-5 mt-5'>
                     {languages.map(lang => (
                         <div key={lang.id}>
                             <p className='text-center text-2xl font-bold mb-5'>{isEnglish ? lang.name_en : lang.name_ar}</p>
