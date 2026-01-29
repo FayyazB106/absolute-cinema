@@ -1,73 +1,90 @@
-# React + TypeScript + Vite
+# Absolute Cinema Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+The modern, responsive frontend for the Absolute Cinema cinema website, built with React and TypeScript. This application provides both a public-facing website for browsing movies and a powerful admin dashboard for content management.
 
-Currently, two official plugins are available:
+## Overview
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+The frontend is a unified React application serving two distinct experiences:
 
-## React Compiler
+### 🎬 Main Website
+A public-facing movie discovery and browsing platform where users can:
+- Browse and search the movie database
+- View detailed movie information
+- Check maturity ratings
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+**Design Philosophy**: Material UI
 
-## Expanding the ESLint configuration
+### 📊 Dashboard
+A comprehensive administrative interface for managing platform content:
+- CRUD operations for movies, actors, directors, and more.
+- Content management and curation
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+**Design Philosophy**: Traditional React UI.
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## Tech Stack
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+- **Framework**: React 18+ with TypeScript
+- **Build Tool**: Vite
+- **Internationalization**: i18n for multi-language support
+- **UI Components**: Custom component library and Tailwind CSS for dashboard and Material UI main website
+- **Routing**: React Router for navigation
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Project Structure
+
+```
+src/
+├── api/              # API integration layer
+├── assets/           # Static assets (images, icons, etc.)
+├── components/       # Reusable React components
+├── constants/        # Application constants
+├── layouts/          # Layout components
+├── locales/          # Internationalization files
+├── pages/            # Page components for different routes
+├── services/         # Business logic services
+├── theme.ts          # Theme configuration
+├── i18n.ts           # i18n setup
+├── types/            # TypeScript type definitions
+├── utils/            # Utility functions
+├── App.tsx           # Main App component
+├── main.tsx          # Application entry point
+└── index.css         # Global styles
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Installation
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+1. **Install dependencies**:
+   ```bash
+   npm install
+   ```
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+2. **Configure API endpoint** (if needed):
+   Update the API base URL in your environment or API configuration file.
+
+3. **Start the development server**:
+   ```bash
+   npm run dev
+   ```
+
+The application will be available at `http://localhost:5173`
+
+## Available Scripts
+
+```bash
+# Start development server with hot module replacement
+npm run dev
+
+# Build for production
+npm run build
+
+# Preview production build locally
+npm run preview
+
+# Run ESLint to check code quality
+npm run lint
 ```
+
+## API Integration
+
+The frontend communicates with the backend API through the services layer in `src/services/` and API integration layer in `src/api/`. Ensure the backend server is running before using the application.
+
+**Backend URL**: http://localhost:8000 (default)
