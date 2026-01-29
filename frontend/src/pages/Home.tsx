@@ -6,6 +6,7 @@ import MovieCard from '../components/movies/MovieCard';
 import { movieService } from '../services/movieService';
 import type { Movie, Status, Rating } from '../types/movie';
 import { useTranslation } from 'react-i18next';
+import SpinningWheel from '../components/shared/SpinningWheel';
 
 export default function Home() {
     const { t } = useTranslation();
@@ -41,6 +42,8 @@ export default function Home() {
             return movie.status_id === targetId;
         });
     }, [movies, statuses, tabValue]);
+
+    if (loading) return <SpinningWheel />;
 
     return (
         <Box sx={{ bgcolor: 'background.default', minHeight: '100vh', pb: 8 }}>

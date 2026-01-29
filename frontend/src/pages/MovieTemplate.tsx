@@ -1,11 +1,12 @@
 import { useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { Box, Container, Typography, Grid, Chip, Button, CircularProgress, Link, Divider, Stack } from '@mui/material';
+import { Box, Container, Typography, Grid, Chip, Button, Link, Divider, Stack } from '@mui/material';
 import { AccessTime, CalendarMonth, Language, ClosedCaption, Link as LinkIcon, Person, MovieFilter } from '@mui/icons-material';
-import { movieService } from '../../services/movieService';
-import type { MovieDetails } from '../../types/movie';
+import { movieService } from '../services/movieService';
+import type { MovieDetails } from '../types/movie';
 import { useTranslation } from 'react-i18next';
-import reel from '../../assets/reel.png'
+import reel from './../assets/reel.png'
+import SpinningWheel from '../components/shared/SpinningWheel';
 
 export default function MovieDetails() {
     const { movieId } = useParams();
@@ -24,13 +25,7 @@ export default function MovieDetails() {
         fetchMovie();
     }, [movieId]);
 
-    if (!movie) {
-        return (
-            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', bgcolor: '#000' }}>
-                <CircularProgress size={60} sx={{ color: '#fff' }} />
-            </Box>
-        );
-    }
+    if (!movie) return <SpinningWheel />;
 
     return (
         <Box sx={{ minHeight: '100vh', bgcolor: '#000', color: '#fff', pb: 10 }}>

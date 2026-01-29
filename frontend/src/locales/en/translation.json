@@ -13,7 +13,8 @@
     "export": "Export",
     "playground": "Playground",
     "library": "Library",
-    "showtimes": "Showtimes"
+    "showtimes": "Showtimes",
+    "home": "Home"
   },
   "dashboard_header": {
     "title": "ABSOLUTE DASHBOARD",
