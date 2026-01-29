@@ -10,7 +10,7 @@ import Export from '../components/Export';
 import LanguageStyler from '../components/LanguageStyler';
 import Toast from '../components/shared/Toast';
 import { useTranslation } from "react-i18next";
-import DashboardHeader from '../components/DashboardHeader';
+import DashboardHeader from '../components/shared/DashboardHeader';
 import { ChevronLeft, ChevronRight, Film, Library } from 'lucide-react';
 import { showMobileWarning } from '../components/shared/SweetAlert';
 import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';

@@ -46,6 +46,7 @@ export interface Movie {
     release_date: string;
     audio_languages: Language[];
     poster_full_url: string | null;
+    featured_full_url: string | null;
     is_featured: boolean;
     maturity_id: number;
     status_id: number;
