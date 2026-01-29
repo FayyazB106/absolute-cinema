@@ -4,9 +4,10 @@ import AbsoluteCinema from './pages/AbsoluteCinema';
 import Dashboard from './pages/Dashboard';
 import Home from './pages/Home';
 import MainLayout from './layouts/MainLayout';
-import MovieDetails from './pages/MovieTemplate';
+import MovieTemplate from './pages/MovieTemplate';
 import ScrollToTop from './components/utils/ScrollToTop';
 import MaturityRatings from './pages/MaturityRatings';
+import MoviesPage from './pages/MoviesPage';
 
 function App() {
   return (
@@ -16,8 +17,9 @@ function App() {
         {/* Material UI */}
         <Route element={<MainLayout />}>
           <Route path="/" element={<Home />} />
-          <Route path="/movie/:movieId" element={<MovieDetails />} />
+          <Route path="/movie/:movieId" element={<MovieTemplate />} />
           <Route path="/maturity-ratings" element={<MaturityRatings />} />
+          <Route path="/movies" element={<MoviesPage />} />
         </Route>
 
         {/* Traditional React UI */}

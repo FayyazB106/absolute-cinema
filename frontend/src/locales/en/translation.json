@@ -220,5 +220,10 @@
     "book_now": "Book Now",
     "whats_on": "What's On",
     "coming_soon": "Coming Soon"
+  },
+  "warning": {
+    "age_restricted_title": "Age Restricted Content",
+    "id_requirement_desc": "This movie is rated R. You will be required to present a valid physical ID at the cinema entrance to verify your age before watching.",
+    "acknowledge": "I Understand"
   }
 }

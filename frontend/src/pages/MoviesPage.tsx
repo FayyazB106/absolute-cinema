@@ -1,11 +1,9 @@
 import { Box } from '@mui/material';
-import FeaturedCarousel from '../components/FeaturedCarousel';
 import MovieGrid from '../components/movies/MovieGrid';
 
-export default function Home() {
+export default function MoviesPage() {
     return (
         <Box sx={{ bgcolor: 'background.default', minHeight: '100vh', pb: 8 }}>
-            <FeaturedCarousel />
             <MovieGrid />
         </Box>
     );

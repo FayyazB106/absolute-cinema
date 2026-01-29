@@ -7,12 +7,14 @@ import type { MovieDetails } from '../types/movie';
 import { useTranslation } from 'react-i18next';
 import reel from './../assets/reel.png'
 import SpinningWheel from '../components/shared/SpinningWheel';
+import AgeWarning from '../components/AgeWarning';
 
-export default function MovieDetails() {
+export default function MovieTemplate() {
     const { movieId } = useParams();
     const { t, i18n } = useTranslation();
-    const [movie, setMovie] = useState<MovieDetails | null>(null);
     const isEnglish = i18n.language.startsWith('en');
+    const [movie, setMovie] = useState<MovieDetails | null>(null);
+    const [showWarning, setShowWarning] = useState(false);
     const fullDate = movie?.release_date ? new Intl.DateTimeFormat(i18n.language, { dateStyle: 'long' }).format(new Date(movie.release_date)) : '';
 
     useEffect(() => {
@@ -20,6 +22,10 @@ export default function MovieDetails() {
             if (movieId) {
                 const data = await movieService.getMovieById(Number(movieId));
                 setMovie(data);
+
+                if (data.maturity_ratings?.maturity_rating?.toUpperCase().startsWith('R')) {
+                    setShowWarning(true);
+                }
             }
         };
         fetchMovie();
@@ -29,6 +35,8 @@ export default function MovieDetails() {
 
     return (
         <Box sx={{ minHeight: '100vh', bgcolor: '#000', color: '#fff', pb: 10 }}>
+            <AgeWarning open={showWarning} onClose={() => setShowWarning(false)} />
+
             {/* Hero Section */}
             <Box sx={{
                 display: { xs: 'none', md: 'block' },

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { ThemeProvider, CssBaseline, Box, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText } from '@mui/material';
+import MovieIcon from '@mui/icons-material/Movie';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import Header from '../components/shared/Header';
 import { absoluteCinemaTheme } from '../theme';
@@ -15,6 +16,7 @@ export default function MainLayout() {
 
     const menuItems = [
         { text: t('nav.home'), icon: <Home />, path: '/' },
+        { text: t('nav.movies'), icon: <MovieIcon />, path: '/movies' },
         { text: t('nav.ratings'), icon: <VerifiedUser />, path: '/maturity-ratings' },
     ];
 
@@ -51,7 +53,7 @@ export default function MainLayout() {
                                             }}
                                         >
                                             <ListItemIcon sx={{ color: isActive ? 'primary.main' : '#fff', minWidth: 40 }}>{item.icon}</ListItemIcon>
-                                            <ListItemText primary={item.text} sx={{textAlign: 'start'}} />
+                                            <ListItemText primary={item.text} sx={{ textAlign: 'start' }} />
                                         </ListItemButton>
                                     </ListItem>
                                 )
